@@ -1,15 +1,16 @@
 var Dustbin = require('./Dustbin'),
-    Item = require('./Item');
+    Toolbox = require('./Toolbox');
 
 var Container = React.createClass({
     render: function() {
         return (
-            <div>
-                <Dustbin />
-                <div>
-                    <Item name='Glass' />
-                    <Item name='Paper' />
-                    <Item name='Banana' />
+            <div className="row">
+                <div className="eight columns">
+                    <h5>Pallet</h5>
+                    <Dustbin />
+                </div>
+                <div className="four columns">
+                    <Toolbox />
                 </div>
             </div>
         )

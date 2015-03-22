@@ -14,27 +14,22 @@ var Dustbin = React.createClass({
         }
     },
     render: function() {
-        var style = {
-            height: '12rem',
-            width: '12rem',
-            color: 'white',
-            padding: '2rem',
-            textAlign: 'center'
-        };
+        var style = {};
 
         var dropState = this.getDropState(ItemTypes.ITEM),
-            backgroundColor = '#222';
+            backgroundColor;
 
         if (dropState.isHovering) {
-            backgroundColor = 'darkgreen';
+            backgroundColor = '#CAD2C5';
         } else if (dropState.isDragging) {
-            backgroundColor = 'darkkhaki';
+            backgroundColor = '#52796F';
         }
         style.backgroundColor = backgroundColor;
 
         return (
             <div {...this.dropTargetFor(ItemTypes.ITEM)}
-                style={style}>
+                style={style}
+                className='dropzone'>
             {dropState.isHovering ? 'Release to drop' : 'Drag item here'}
             </div>
         )

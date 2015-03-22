@@ -8,17 +8,18 @@ React.render(AppComponent(), document.getElementById('app'));
 
 },{"./components/Application":2}],2:[function(require,module,exports){
 var Dustbin = require('./Dustbin'),
-    Item = require('./Item');
+    Toolbox = require('./Toolbox');
 
 var Container = React.createClass({displayName: "Container",
     render: function() {
         return (
-            React.createElement("div", null, 
-                React.createElement(Dustbin, null), 
-                React.createElement("div", null, 
-                    React.createElement(Item, {name: "Glass"}), 
-                    React.createElement(Item, {name: "Paper"}), 
-                    React.createElement(Item, {name: "Banana"})
+            React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "eight columns"}, 
+                    React.createElement("h5", null, "Pallet"), 
+                    React.createElement(Dustbin, null)
+                ), 
+                React.createElement("div", {className: "four columns"}, 
+                    React.createElement(Toolbox, null)
                 )
             )
         )
@@ -28,7 +29,7 @@ var Container = React.createClass({displayName: "Container",
 module.exports = Container;
 
 
-},{"./Dustbin":3,"./Item":4}],3:[function(require,module,exports){
+},{"./Dustbin":3,"./Toolbox":6}],3:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
 var Dustbin = React.createClass({displayName: "Dustbin",
@@ -45,27 +46,22 @@ var Dustbin = React.createClass({displayName: "Dustbin",
         }
     },
     render: function() {
-        var style = {
-            height: '12rem',
-            width: '12rem',
-            color: 'white',
-            padding: '2rem',
-            textAlign: 'center'
-        };
+        var style = {};
 
         var dropState = this.getDropState(ItemTypes.ITEM),
-            backgroundColor = '#222';
+            backgroundColor;
 
         if (dropState.isHovering) {
-            backgroundColor = 'darkgreen';
+            backgroundColor = '#CAD2C5';
         } else if (dropState.isDragging) {
-            backgroundColor = 'darkkhaki';
+            backgroundColor = '#52796F';
         }
         style.backgroundColor = backgroundColor;
 
         return (
             React.createElement("div", React.__spread({},  this.dropTargetFor(ItemTypes.ITEM), 
-                {style: style}), 
+                {style: style, 
+                className: "dropzone"}), 
             dropState.isHovering ? 'Release to drop' : 'Drag item here'
             )
         )
@@ -78,7 +74,7 @@ module.exports = Dustbin;
 },{"./ItemTypes.js":5}],4:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
-var Item = React.createClass({displayName: "Item",
+var Block = React.createClass({displayName: "Block",
     mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function(register) {
@@ -99,28 +95,21 @@ var Item = React.createClass({displayName: "Item",
         name: React.PropTypes.string.isRequired
     },
     render: function() {
-        var style = {
-            border: '1px dashed gray',
-            backgroundColor: 'white',
-            padding: '0.5rem',
-            margin: '0.5rem',
-            maxWidth: 80
-        };
+        var style = {};
 
-        //var isDragging = this.getDragState(ItemTypes.ITEM).isDragging;
         var isDragging = this.getDragState(ItemTypes.ITEM).isDragging;
         style.opacity = isDragging ? 0.4 : 1;
 
         return (
             React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.ITEM), 
-                {style: style}), 
+                {style: style, className: "block"}), 
             this.props.name
             )
         )
     }
 });
 
-module.exports = Item;
+module.exports = Block;
 
 
 },{"./ItemTypes.js":5}],5:[function(require,module,exports){
@@ -131,4 +120,21 @@ var ItemTypes = {
 module.exports = ItemTypes;
 
 
-},{}]},{},[1]);
+},{}],6:[function(require,module,exports){
+var Block = require('./Item');
+
+var Toolbox = React.createClass({displayName: "Toolbox",
+    render: function() {
+        return (
+            React.createElement("div", {className: "toolbox"}, 
+                React.createElement("h5", null, "ToolBox"), 
+                React.createElement(Block, {name: "Block #212"})
+            )
+        )
+    }
+});
+
+module.exports = Toolbox;
+
+
+},{"./Item":4}]},{},[1]);
