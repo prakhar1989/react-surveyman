@@ -29,7 +29,7 @@ var Application = React.createClass({displayName: "Application",
 module.exports = Application;
 
 
-},{"../data":12,"./Pallet":8,"./Toolbox":11}],3:[function(require,module,exports){
+},{"../data":13,"./Pallet":9,"./Toolbox":12}],3:[function(require,module,exports){
 var Question = require('./Question');
 
 var Block = React.createClass({displayName: "Block",
@@ -66,33 +66,25 @@ var Block = React.createClass({displayName: "Block",
 module.exports = Block;
 
 
-},{"./Question":9}],4:[function(require,module,exports){
+},{"./Question":10}],4:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
 var DraggableBlock = React.createClass({displayName: "DraggableBlock",
     mixins: [ReactDND.DragDropMixin],
-    getDefaultProps: function() {
-        return {
-            itemId: 0
-        }
-    },
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.BLOCK, {
                 dragSource: {
                     beginDrag: function(component) {
+                        // TODO: use this to transfer data
                         return {
                             item: {
-                                itemId: component.props.itemId
                             }
                         };
                     }
                 }
             });
         }
-    },
-    propTypes: {
-        itemId: React.PropTypes.number
     },
     render: function() {
         var style = {};
@@ -102,7 +94,7 @@ var DraggableBlock = React.createClass({displayName: "DraggableBlock",
 
         return (
             React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.BLOCK), 
-                {style: style, className: "draggable-block"}), 
+                {style: style, className: "draggable"}), 
                 "Block"
             )
         )
@@ -112,7 +104,44 @@ var DraggableBlock = React.createClass({displayName: "DraggableBlock",
 module.exports = DraggableBlock;
 
 
-},{"./ItemTypes.js":6}],5:[function(require,module,exports){
+},{"./ItemTypes.js":7}],5:[function(require,module,exports){
+var ItemTypes = require('./ItemTypes');
+
+var DraggableQuestion = React.createClass({displayName: "DraggableQuestion",
+    mixins: [ReactDND.DragDropMixin],
+    statics: {
+        configureDragDrop: function(register) {
+            register(ItemTypes.QUESTION, {
+                dragSource: {
+                    beginDrag: function(component) {
+                        // TODO: use this to transfer data
+                        return {
+                            item: {
+                            }
+                        };
+                    }
+                }
+            });
+        }
+    },
+    render: function() {
+        var style = {};
+        var isDragging = this.getDragState(ItemTypes.QUESTION).isDragging;
+        style.opacity = isDragging ? 0.4 : 1;
+
+        return (
+            React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.QUESTION), 
+                {style: style, className: "draggable"}), 
+                "Question"
+            )
+        )
+    }
+});
+
+module.exports = DraggableQuestion;
+
+
+},{"./ItemTypes":7}],6:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
 var Dropzone = React.createClass({displayName: "Dropzone",
@@ -130,30 +159,47 @@ var Dropzone = React.createClass({displayName: "Dropzone",
                         component.handleBlockDrop();
                     }
                 }
+            });
+
+            register(ItemTypes.QUESTION, {
+                dropTarget: {
+                    acceptDrop: function(component, item) {
+                        component.handleQuestionDrop();
+                    }
+                }
             })
         }
     },
     handleBlockDrop: function() {
         this.props.onBlockDropped();
     },
+    handleQuestionDrop: function() {
+        this.props.onQuestionDropped();
+    },
     render: function() {
-        var style = {};
-
-        var dropState = this.getDropState(ItemTypes.BLOCK),
+        var style = {},
+            blockDropState = this.getDropState(ItemTypes.BLOCK),
+            questionDropState = this.getDropState(ItemTypes.QUESTION),
+            isHovering = blockDropState.isHovering || questionDropState.isHovering,
+            isDragging = blockDropState.isDragging || questionDropState.isDragging,
             backgroundColor;
 
-        if (dropState.isHovering) {
+
+        if (isHovering) {
             backgroundColor = '#CAD2C5';
-        } else if (dropState.isDragging) {
+        } else if (isDragging) {
             backgroundColor = '#52796F';
         }
         style.backgroundColor = backgroundColor;
 
+        // define a set of item types it accepts
+        var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION];
+
         return (
-            React.createElement("div", React.__spread({},  this.dropTargetFor(ItemTypes.BLOCK), 
+            React.createElement("div", React.__spread({},  this.dropTargetFor.apply(this, accepts), 
                 {style: style, 
                 className: "dropzone"}), 
-            dropState.isHovering ? 'Release to drop' : 'Drag item here'
+            isHovering ? 'Release to drop' : 'Drag item here'
             )
         )
     }
@@ -162,7 +208,7 @@ var Dropzone = React.createClass({displayName: "Dropzone",
 module.exports = Dropzone;
 
 
-},{"./ItemTypes.js":6}],6:[function(require,module,exports){
+},{"./ItemTypes.js":7}],7:[function(require,module,exports){
 var ItemTypes = {
     BLOCK: 'block',
     QUESTION: 'question',
@@ -172,7 +218,7 @@ var ItemTypes = {
 module.exports = ItemTypes;
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Option = React.createClass({displayName: "Option",
     propTypes: {
         id: React.PropTypes.number,
@@ -196,7 +242,7 @@ var Option = React.createClass({displayName: "Option",
 module.exports = Option;
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Dropzone = require('./Dropzone'),
     Survey = require('./Survey');
 
@@ -236,12 +282,19 @@ var Pallet = React.createClass({displayName: "Pallet",
             survey: newSurvey,
             nextBlockId: newId
         });
+
+        // TODO: better alerts
+        console.log("new block added");
+    },
+    handleQuestionDrop: function() {
+        console.log("I can sense a new question");
     },
     render: function() {
         return (
             React.createElement("div", null, 
                 React.createElement("h5", null, "Pallet"), 
-                React.createElement(Dropzone, {onBlockDropped: this.handleBlockDrop}), 
+                React.createElement(Dropzone, {onBlockDropped: this.handleBlockDrop, 
+                          onQuestionDropped: this.handleQuestionDrop}), 
                 React.createElement("hr", null), 
 
                 React.createElement("h5", null, "Survey"), 
@@ -256,7 +309,7 @@ var Pallet = React.createClass({displayName: "Pallet",
 module.exports = Pallet;
 
 
-},{"./Dropzone":5,"./Survey":10}],9:[function(require,module,exports){
+},{"./Dropzone":6,"./Survey":11}],10:[function(require,module,exports){
 var Option = require('./Option');
 
 var Question = React.createClass({displayName: "Question",
@@ -291,7 +344,7 @@ var Question = React.createClass({displayName: "Question",
 module.exports = Question;
 
 
-},{"./Option":7}],10:[function(require,module,exports){
+},{"./Option":8}],11:[function(require,module,exports){
 var Block = require('./Block');
 
 var Survey = React.createClass({displayName: "Survey",
@@ -317,8 +370,9 @@ var Survey = React.createClass({displayName: "Survey",
 module.exports = Survey;
 
 
-},{"./Block":3}],11:[function(require,module,exports){
-var DraggableBlock = require('./DraggableBlock');
+},{"./Block":3}],12:[function(require,module,exports){
+var DraggableBlock = require('./DraggableBlock'),
+    DraggableQuestion = require('./DraggableQuestion');
 
 var Toolbox = React.createClass({displayName: "Toolbox",
     render: function() {
@@ -327,7 +381,8 @@ var Toolbox = React.createClass({displayName: "Toolbox",
                 React.createElement("h5", null, "ToolBox"), 
                 React.createElement("small", null, "Drag new elements from here"), 
                 React.createElement("div", {className: "widgets-area"}, 
-                    React.createElement(DraggableBlock, null)
+                    React.createElement(DraggableBlock, null), 
+                    React.createElement(DraggableQuestion, null)
                 )
             )
         )
@@ -337,7 +392,7 @@ var Toolbox = React.createClass({displayName: "Toolbox",
 module.exports = Toolbox;
 
 
-},{"./DraggableBlock":4}],12:[function(require,module,exports){
+},{"./DraggableBlock":4,"./DraggableQuestion":5}],13:[function(require,module,exports){
 /* Test data to work with */
 var data = [
     {   // first block

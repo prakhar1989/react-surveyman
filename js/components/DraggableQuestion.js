@@ -1,10 +1,10 @@
-var ItemTypes = require('./ItemTypes.js');
+var ItemTypes = require('./ItemTypes');
 
-var DraggableBlock = React.createClass({
+var DraggableQuestion = React.createClass({
     mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function(register) {
-            register(ItemTypes.BLOCK, {
+            register(ItemTypes.QUESTION, {
                 dragSource: {
                     beginDrag: function(component) {
                         // TODO: use this to transfer data
@@ -19,17 +19,16 @@ var DraggableBlock = React.createClass({
     },
     render: function() {
         var style = {};
-
-        var isDragging = this.getDragState(ItemTypes.BLOCK).isDragging;
+        var isDragging = this.getDragState(ItemTypes.QUESTION).isDragging;
         style.opacity = isDragging ? 0.4 : 1;
 
         return (
-            <div {...this.dragSourceFor(ItemTypes.BLOCK)}
+            <div {...this.dragSourceFor(ItemTypes.QUESTION)}
                 style={style} className="draggable">
-                Block
+                Question
             </div>
         )
     }
 });
 
-module.exports = DraggableBlock;
+module.exports = DraggableQuestion;

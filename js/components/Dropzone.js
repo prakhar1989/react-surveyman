@@ -15,30 +15,47 @@ var Dropzone = React.createClass({
                         component.handleBlockDrop();
                     }
                 }
+            });
+
+            register(ItemTypes.QUESTION, {
+                dropTarget: {
+                    acceptDrop: function(component, item) {
+                        component.handleQuestionDrop();
+                    }
+                }
             })
         }
     },
     handleBlockDrop: function() {
         this.props.onBlockDropped();
     },
+    handleQuestionDrop: function() {
+        this.props.onQuestionDropped();
+    },
     render: function() {
-        var style = {};
-
-        var dropState = this.getDropState(ItemTypes.BLOCK),
+        var style = {},
+            blockDropState = this.getDropState(ItemTypes.BLOCK),
+            questionDropState = this.getDropState(ItemTypes.QUESTION),
+            isHovering = blockDropState.isHovering || questionDropState.isHovering,
+            isDragging = blockDropState.isDragging || questionDropState.isDragging,
             backgroundColor;
 
-        if (dropState.isHovering) {
+
+        if (isHovering) {
             backgroundColor = '#CAD2C5';
-        } else if (dropState.isDragging) {
+        } else if (isDragging) {
             backgroundColor = '#52796F';
         }
         style.backgroundColor = backgroundColor;
 
+        // define a set of item types it accepts
+        var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION];
+
         return (
-            <div {...this.dropTargetFor(ItemTypes.BLOCK)}
+            <div {...this.dropTargetFor.apply(this, accepts)}
                 style={style}
                 className='dropzone'>
-            {dropState.isHovering ? 'Release to drop' : 'Drag item here'}
+            {isHovering ? 'Release to drop' : 'Drag item here'}
             </div>
         )
     }

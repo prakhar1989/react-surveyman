@@ -37,12 +37,19 @@ var Pallet = React.createClass({
             survey: newSurvey,
             nextBlockId: newId
         });
+
+        // TODO: better alerts
+        console.log("new block added");
+    },
+    handleQuestionDrop: function() {
+        console.log("I can sense a new question");
     },
     render: function() {
         return (
             <div>
                 <h5>Pallet</h5>
-                <Dropzone onBlockDropped={this.handleBlockDrop} />
+                <Dropzone onBlockDropped={this.handleBlockDrop}
+                          onQuestionDropped={this.handleQuestionDrop}/>
                 <hr/>
 
                 <h5>Survey</h5>
