@@ -43,7 +43,6 @@ var Pallet = React.createClass({
             <div>
                 <h5>Pallet</h5>
                 <Dropzone onBlockDropped={this.handleBlockDrop} />
-                {this.state.nextBlockId}
                 <hr/>
 
                 <h5>Survey</h5>

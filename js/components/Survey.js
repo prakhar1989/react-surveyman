@@ -2,15 +2,10 @@ var Block = require('./Block');
 
 var Survey = React.createClass({
     propTypes: {
-        survey: React.PropTypes.array
-    },
-    getInitialState: function() {
-        return {
-            survey: this.props.survey
-        }
+        survey: React.PropTypes.array.isRequired
     },
     render: function() {
-        var survey = this.state.survey;
+        var survey = this.props.survey;
         return (
             <div>
             {survey.map(function(block) {

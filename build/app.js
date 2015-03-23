@@ -242,7 +242,6 @@ var Pallet = React.createClass({displayName: "Pallet",
             React.createElement("div", null, 
                 React.createElement("h5", null, "Pallet"), 
                 React.createElement(Dropzone, {onBlockDropped: this.handleBlockDrop}), 
-                this.state.nextBlockId, 
                 React.createElement("hr", null), 
 
                 React.createElement("h5", null, "Survey"), 
@@ -297,15 +296,10 @@ var Block = require('./Block');
 
 var Survey = React.createClass({displayName: "Survey",
     propTypes: {
-        survey: React.PropTypes.array
-    },
-    getInitialState: function() {
-        return {
-            survey: this.props.survey
-        }
+        survey: React.PropTypes.array.isRequired
     },
     render: function() {
-        var survey = this.state.survey;
+        var survey = this.props.survey;
         return (
             React.createElement("div", null, 
             survey.map(function(block) {
