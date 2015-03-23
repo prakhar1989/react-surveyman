@@ -1,29 +1,25 @@
 var ItemTypes = require('./ItemTypes.js');
 
 var Dropzone = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
-    getInitialState: function() {
-        return {
-            survey: [],
-            newBlockId: 1
-        }
+    propTypes: {
+        onBlockDropped: React.PropTypes.func,
+        onQuestionDropped: React.PropTypes.func,
+        onOptionDropped: React.PropTypes.func
     },
+    mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.BLOCK, {
                 dropTarget: {
                     acceptDrop: function(component, item) {
-                        component.incrementBlockId();
+                        component.handleBlockDrop();
                     }
                 }
             })
         }
     },
-    incrementBlockId: function() {
-        console.log("i'm being called");
-        this.setState({
-            newBlockId: this.state.newBlockId + 1
-        });
+    handleBlockDrop: function() {
+        this.props.onBlockDropped();
     },
     render: function() {
         var style = {};

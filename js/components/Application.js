@@ -2,7 +2,7 @@ var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
     surveyData = require('../data');
 
-var Container = React.createClass({
+var Application = React.createClass({
     render: function() {
         return (
             <div className="row">
@@ -17,4 +17,4 @@ var Container = React.createClass({
     }
 });
 
-module.exports = Container;
+module.exports = Application;

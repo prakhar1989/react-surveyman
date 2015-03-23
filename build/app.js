@@ -11,7 +11,7 @@ var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
     surveyData = require('../data');
 
-var Container = React.createClass({displayName: "Container",
+var Application = React.createClass({displayName: "Application",
     render: function() {
         return (
             React.createElement("div", {className: "row"}, 
@@ -26,7 +26,7 @@ var Container = React.createClass({displayName: "Container",
     }
 });
 
-module.exports = Container;
+module.exports = Application;
 
 
 },{"../data":12,"./Pallet":8,"./Toolbox":11}],3:[function(require,module,exports){
@@ -116,29 +116,25 @@ module.exports = DraggableBlock;
 var ItemTypes = require('./ItemTypes.js');
 
 var Dropzone = React.createClass({displayName: "Dropzone",
-    mixins: [ReactDND.DragDropMixin],
-    getInitialState: function() {
-        return {
-            survey: [],
-            newBlockId: 1
-        }
+    propTypes: {
+        onBlockDropped: React.PropTypes.func,
+        onQuestionDropped: React.PropTypes.func,
+        onOptionDropped: React.PropTypes.func
     },
+    mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.BLOCK, {
                 dropTarget: {
                     acceptDrop: function(component, item) {
-                        component.incrementBlockId();
+                        component.handleBlockDrop();
                     }
                 }
             })
         }
     },
-    incrementBlockId: function() {
-        console.log("i'm being called");
-        this.setState({
-            newBlockId: this.state.newBlockId + 1
-        });
+    handleBlockDrop: function() {
+        this.props.onBlockDropped();
     },
     render: function() {
         var style = {};
@@ -213,17 +209,45 @@ var Pallet = React.createClass({displayName: "Pallet",
             survey: []
         }
     },
+    getInitialState: function() {
+        return {
+            survey: this.props.survey,
+            nextBlockId: this.props.survey.length
+        }
+    },
+    getNewBlock: function(block) {
+        // generates a block JS object
+        return {
+            id: block.id,
+            questions: [],
+            subblocks: []
+        }
+    },
+    handleBlockDrop: function() {
+        // this is where the new block is added
+        var survey = this.state.survey,
+            newId = this.state.nextBlockId + 1;
+
+        var newBlock = this.getNewBlock({id: newId});
+        var newSurvey = survey.concat(newBlock);
+
+        //  and state is updated with new block
+        this.setState({
+            survey: newSurvey,
+            nextBlockId: newId
+        });
+    },
     render: function() {
-        var surveyObj = this.props.survey;
         return (
             React.createElement("div", null, 
                 React.createElement("h5", null, "Pallet"), 
-                React.createElement(Dropzone, null), 
+                React.createElement(Dropzone, {onBlockDropped: this.handleBlockDrop}), 
+                this.state.nextBlockId, 
                 React.createElement("hr", null), 
 
                 React.createElement("h5", null, "Survey"), 
                 React.createElement("div", {className: "survey-area"}, 
-                    React.createElement(Survey, {survey: surveyObj})
+                    React.createElement(Survey, {survey: this.state.survey})
                 )
             )
         )
