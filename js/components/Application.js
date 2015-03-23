@@ -1,4 +1,4 @@
-var Dustbin = require('./Dustbin'),
+var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox');
 
 var Container = React.createClass({
@@ -6,8 +6,7 @@ var Container = React.createClass({
         return (
             <div className="row">
                 <div className="eight columns">
-                    <h5>Pallet</h5>
-                    <Dustbin />
+                    <Pallet />
                 </div>
                 <div className="four columns">
                     <Toolbox />

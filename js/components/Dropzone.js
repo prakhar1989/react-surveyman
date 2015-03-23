@@ -1,22 +1,34 @@
 var ItemTypes = require('./ItemTypes.js');
 
-var Dustbin = React.createClass({
+var Dropzone = React.createClass({
     mixins: [ReactDND.DragDropMixin],
+    getInitialState: function() {
+        return {
+            survey: [],
+            newBlockId: 1
+        }
+    },
     statics: {
         configureDragDrop: function(register) {
-            register(ItemTypes.ITEM, {
+            register(ItemTypes.BLOCK, {
                 dropTarget: {
                     acceptDrop: function(component, item) {
-                        window.alert('You dropped ' + item.name + '!');
+                        component.incrementBlockId();
                     }
                 }
             })
         }
     },
+    incrementBlockId: function() {
+        console.log("i'm being called");
+        this.setState({
+            newBlockId: this.state.newBlockId + 1
+        });
+    },
     render: function() {
         var style = {};
 
-        var dropState = this.getDropState(ItemTypes.ITEM),
+        var dropState = this.getDropState(ItemTypes.BLOCK),
             backgroundColor;
 
         if (dropState.isHovering) {
@@ -27,7 +39,7 @@ var Dustbin = React.createClass({
         style.backgroundColor = backgroundColor;
 
         return (
-            <div {...this.dropTargetFor(ItemTypes.ITEM)}
+            <div {...this.dropTargetFor(ItemTypes.BLOCK)}
                 style={style}
                 className='dropzone'>
             {dropState.isHovering ? 'Release to drop' : 'Drag item here'}
@@ -36,4 +48,4 @@ var Dustbin = React.createClass({
     }
 });
 
-module.exports = Dustbin;
+module.exports = Dropzone;

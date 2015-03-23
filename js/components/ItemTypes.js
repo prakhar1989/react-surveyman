@@ -1,5 +1,7 @@
 var ItemTypes = {
-    ITEM: 'item'
+    BLOCK: 'block',
+    QUESTION: 'question',
+    OPTION: 'option'
 };
 
 module.exports = ItemTypes;

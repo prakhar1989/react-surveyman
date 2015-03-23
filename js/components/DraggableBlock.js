@@ -1,15 +1,20 @@
 var ItemTypes = require('./ItemTypes.js');
 
-var Block = React.createClass({
+var DraggableBlock = React.createClass({
     mixins: [ReactDND.DragDropMixin],
+    getDefaultProps: function() {
+        return {
+            itemId: 0
+        }
+    },
     statics: {
         configureDragDrop: function(register) {
-            register(ItemTypes.ITEM, {
+            register(ItemTypes.BLOCK, {
                 dragSource: {
                     beginDrag: function(component) {
                         return {
                             item: {
-                                name: component.props.name
+                                itemId: component.props.itemId
                             }
                         };
                     }
@@ -18,21 +23,21 @@ var Block = React.createClass({
         }
     },
     propTypes: {
-        name: React.PropTypes.string.isRequired
+        itemId: React.PropTypes.number
     },
     render: function() {
         var style = {};
 
-        var isDragging = this.getDragState(ItemTypes.ITEM).isDragging;
+        var isDragging = this.getDragState(ItemTypes.BLOCK).isDragging;
         style.opacity = isDragging ? 0.4 : 1;
 
         return (
-            <div {...this.dragSourceFor(ItemTypes.ITEM)}
+            <div {...this.dragSourceFor(ItemTypes.BLOCK)}
                 style={style} className="block">
-            {this.props.name}
+                Block
             </div>
         )
     }
 });
 
-module.exports = Block;
+module.exports = DraggableBlock;
