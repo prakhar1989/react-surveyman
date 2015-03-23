@@ -11,7 +11,7 @@ var Option = React.createClass({
     },
     render: function() {
         return (
-            <div className="item">
+            <div className="item option">
                 {this.props.otext}
             </div>
         )

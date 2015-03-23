@@ -16,13 +16,14 @@ var Question = React.createClass({
     render: function() {
         var options = this.props.options;
         return (
-            <div className="item">{this.props.qtext}
-            {options.map(function(item) {
-                return (
-                    <Option key={item.id} otext={item.otext} />
-                )
-            })}
-
+            <div className="item question">{this.props.qtext}
+                <div>
+                {options.map(function(item) {
+                    return (
+                        <Option key={item.id} otext={item.otext} />
+                    )
+                })}
+                </div>
             </div>
         )
     }

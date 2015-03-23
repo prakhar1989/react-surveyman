@@ -16,7 +16,7 @@ var Block = React.createClass({
     render: function() {
         var questions = this.props.questions;
         return (
-            <div className="item">
+            <div className="item block">
                 <span className="item-id">Block {this.props.id}</span>
             {questions.map(function(q) {
                 return (

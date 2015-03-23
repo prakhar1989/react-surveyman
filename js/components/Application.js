@@ -1,12 +1,13 @@
 var Pallet = require('./Pallet'),
-    Toolbox = require('./Toolbox');
+    Toolbox = require('./Toolbox'),
+    surveyData = require('../data');
 
 var Container = React.createClass({
     render: function() {
         return (
             <div className="row">
                 <div className="eight columns">
-                    <Pallet />
+                    <Pallet survey={surveyData} />
                 </div>
                 <div className="four columns">
                     <Toolbox />

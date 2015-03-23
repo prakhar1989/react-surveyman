@@ -5,7 +5,10 @@ var Toolbox = React.createClass({
         return (
             <div className="toolbox">
                 <h5>ToolBox</h5>
-                <DraggableBlock />
+                <small>Drag new elements from here</small>
+                <div className="widgets-area">
+                    <DraggableBlock />
+                </div>
             </div>
         )
     }

@@ -15,7 +15,7 @@
             box-shadow: rgba(0, 0, 0, 0.03) 0 0 0 1px;
             padding: 20px;
         }
-        div.toolbox {
+        div.widgets-area {
             background-color: #E0EEF8;
             padding: 10px;
         }
@@ -26,14 +26,38 @@
             text-align: center;
             border: 1px dashed black;
         }
-        div.block {
-            background: #6888A5;
+        div.draggable-block {
+            border: 1px dashed black;
             width: 80px;
-            color: white;
             padding: 10px;
-            height: 40px;
             margin: 10px 0px;
-            border: 1px solid #E0EEF8;
+            cursor: move;
+        }
+        div.survey-area {
+            margin-top: 20px;
+            border: 1px dotted #eeeeee;
+        }
+
+        div.item {
+            padding: 10px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        div.item.block {
+            border: 2px solid #EFAA1F;
+            margin-bottom: 10px;
+            color: #EFAA1F;
+        }
+        div.item.question {
+            background: #EBF8B8;
+            margin-bottom: 5px;
+        }
+        div.item.option {
+            background: #D1D0A3;
+            margin-right: 2px;
+            max-width: 50px;
+            display: inline-block;
         }
     </style>
 </head>
