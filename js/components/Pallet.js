@@ -36,6 +36,13 @@ var Pallet = React.createClass({
             qtext: question.qtext
         }
     },
+    getNewOption: function(option) {
+        var id = this.getNewQuestionId();
+        return {
+            id: id,
+            otext: option.otext
+        }
+    },
     handleBlockDrop: function() {
         // this is where the new block is added
         var survey = this.state.survey,
@@ -71,7 +78,22 @@ var Pallet = React.createClass({
         console.log("New question added");
     },
     handleOptionDrop: function() {
-        console.log('New option added');
+        var survey = this.state.survey,
+            blockId = survey.length - 1,
+            questions = survey[blockId].questions,
+            questionId = questions.length - 1;
+
+        var otext = prompt("Enter option text");
+        if (otext == undefined) {
+            return;
+        }
+        var newOption = this.getNewOption({otext: otext});
+        var question = questions[questionId];
+        question.options = question.options.concat(newOption);
+        this.setState({
+            survey: survey
+        });
+        console.log("new option added");
     },
     render: function() {
         return (

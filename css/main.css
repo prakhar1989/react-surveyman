@@ -49,6 +49,6 @@ div.item.question {
 div.item.option {
   background: #D1D0A3;
   margin-right: 2px;
-  max-width: 50px;
+  max-width: 100px;
   display: inline-block;
 }
