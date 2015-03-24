@@ -22,21 +22,6 @@ var data = [
                 ]
             }
         ]
-    },
-    {   // second block
-        id: 2,
-        questions: [
-            {
-                id: 143,
-                qtext: "Which of the following is a 5 letter word?",
-                options: [
-                    { id: 14, otext: "Orange" },
-                    { id: 24, otext: "Banana" },
-                    { id: 99, otext: "Apple"},
-                    { id: 93, otext: "Peach"}
-                ]
-            }
-        ]
     }
 ];
 

@@ -29,7 +29,7 @@ var Application = React.createClass({displayName: "Application",
 module.exports = Application;
 
 
-},{"../data":13,"./Pallet":9,"./Toolbox":12}],3:[function(require,module,exports){
+},{"../data":14,"./Pallet":10,"./Toolbox":13}],3:[function(require,module,exports){
 var Question = require('./Question');
 
 var Block = React.createClass({displayName: "Block",
@@ -66,7 +66,7 @@ var Block = React.createClass({displayName: "Block",
 module.exports = Block;
 
 
-},{"./Question":10}],4:[function(require,module,exports){
+},{"./Question":11}],4:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
 var DraggableBlock = React.createClass({displayName: "DraggableBlock",
@@ -95,7 +95,7 @@ var DraggableBlock = React.createClass({displayName: "DraggableBlock",
         return (
             React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.BLOCK), 
                 {style: style, className: "draggable"}), 
-                "Block"
+                React.createElement("i", {className: "ion-plus-circled"}), " Block"
             )
         )
     }
@@ -104,7 +104,45 @@ var DraggableBlock = React.createClass({displayName: "DraggableBlock",
 module.exports = DraggableBlock;
 
 
-},{"./ItemTypes.js":7}],5:[function(require,module,exports){
+},{"./ItemTypes.js":8}],5:[function(require,module,exports){
+var ItemTypes = require('./ItemTypes');
+
+var DraggableOption = React.createClass({displayName: "DraggableOption",
+    mixins: [ReactDND.DragDropMixin],
+    statics: {
+        configureDragDrop: function(register){
+            register(ItemTypes.OPTION, {
+                dragSource: {
+                    beginDrag: function(component){
+                        // TODO: use this to transfer data
+                        return {
+                            item: {
+
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    },
+    render: function() {
+        var style = {};
+        var isDragging = this.getDragState(ItemTypes.OPTION).isDragging;
+        style.opacity = isDragging ? 0.4 :1;
+
+        return (
+            React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.OPTION), 
+                {style: style, className: "draggable"}), 
+                React.createElement("i", {className: "ion-plus-circled"}), " Option"
+            )
+        )
+    }
+});
+
+module.exports = DraggableOption;
+
+
+},{"./ItemTypes":8}],6:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes');
 
 var DraggableQuestion = React.createClass({displayName: "DraggableQuestion",
@@ -132,7 +170,7 @@ var DraggableQuestion = React.createClass({displayName: "DraggableQuestion",
         return (
             React.createElement("div", React.__spread({},  this.dragSourceFor(ItemTypes.QUESTION), 
                 {style: style, className: "draggable"}), 
-                "Question"
+                React.createElement("i", {className: "ion-plus-circled"}), " Question"
             )
         )
     }
@@ -141,7 +179,7 @@ var DraggableQuestion = React.createClass({displayName: "DraggableQuestion",
 module.exports = DraggableQuestion;
 
 
-},{"./ItemTypes":7}],6:[function(require,module,exports){
+},{"./ItemTypes":8}],7:[function(require,module,exports){
 var ItemTypes = require('./ItemTypes.js');
 
 var Dropzone = React.createClass({displayName: "Dropzone",
@@ -207,7 +245,7 @@ var Dropzone = React.createClass({displayName: "Dropzone",
 module.exports = Dropzone;
 
 
-},{"./ItemTypes.js":7}],7:[function(require,module,exports){
+},{"./ItemTypes.js":8}],8:[function(require,module,exports){
 var ItemTypes = {
     BLOCK: 'block',
     QUESTION: 'question',
@@ -217,7 +255,7 @@ var ItemTypes = {
 module.exports = ItemTypes;
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Option = React.createClass({displayName: "Option",
     propTypes: {
         id: React.PropTypes.number,
@@ -241,7 +279,7 @@ var Option = React.createClass({displayName: "Option",
 module.exports = Option;
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var Dropzone = require('./Dropzone'),
     Survey = require('./Survey');
 
@@ -334,7 +372,7 @@ var Pallet = React.createClass({displayName: "Pallet",
 module.exports = Pallet;
 
 
-},{"./Dropzone":6,"./Survey":11}],10:[function(require,module,exports){
+},{"./Dropzone":7,"./Survey":12}],11:[function(require,module,exports){
 var Option = require('./Option');
 
 var Question = React.createClass({displayName: "Question",
@@ -369,7 +407,7 @@ var Question = React.createClass({displayName: "Question",
 module.exports = Question;
 
 
-},{"./Option":8}],11:[function(require,module,exports){
+},{"./Option":9}],12:[function(require,module,exports){
 var Block = require('./Block');
 
 var Survey = React.createClass({displayName: "Survey",
@@ -395,8 +433,9 @@ var Survey = React.createClass({displayName: "Survey",
 module.exports = Survey;
 
 
-},{"./Block":3}],12:[function(require,module,exports){
+},{"./Block":3}],13:[function(require,module,exports){
 var DraggableBlock = require('./DraggableBlock'),
+    DraggableOption = require('./DraggableOption'),
     DraggableQuestion = require('./DraggableQuestion');
 
 var Toolbox = React.createClass({displayName: "Toolbox",
@@ -404,10 +443,10 @@ var Toolbox = React.createClass({displayName: "Toolbox",
         return (
             React.createElement("div", {className: "toolbox"}, 
                 React.createElement("h5", null, "ToolBox"), 
-                React.createElement("small", null, "Drag new elements from here"), 
                 React.createElement("div", {className: "widgets-area"}, 
                     React.createElement(DraggableBlock, null), 
-                    React.createElement(DraggableQuestion, null)
+                    React.createElement(DraggableQuestion, null), 
+                    React.createElement(DraggableOption, null)
                 )
             )
         )
@@ -417,7 +456,7 @@ var Toolbox = React.createClass({displayName: "Toolbox",
 module.exports = Toolbox;
 
 
-},{"./DraggableBlock":4,"./DraggableQuestion":5}],13:[function(require,module,exports){
+},{"./DraggableBlock":4,"./DraggableOption":5,"./DraggableQuestion":6}],14:[function(require,module,exports){
 /* Test data to work with */
 var data = [
     {   // first block
@@ -439,21 +478,6 @@ var data = [
                     { id: 540, otext: "Male" },
                     { id: 405, otext: "Female" },
                     { id: 449, otext: "Other" }
-                ]
-            }
-        ]
-    },
-    {   // second block
-        id: 2,
-        questions: [
-            {
-                id: 143,
-                qtext: "Which of the following is a 5 letter word?",
-                options: [
-                    { id: 14, otext: "Orange" },
-                    { id: 24, otext: "Banana" },
-                    { id: 99, otext: "Apple"},
-                    { id: 93, otext: "Peach"}
                 ]
             }
         ]

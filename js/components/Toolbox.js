@@ -1,4 +1,5 @@
 var DraggableBlock = require('./DraggableBlock'),
+    DraggableOption = require('./DraggableOption'),
     DraggableQuestion = require('./DraggableQuestion');
 
 var Toolbox = React.createClass({
@@ -6,10 +7,10 @@ var Toolbox = React.createClass({
         return (
             <div className="toolbox">
                 <h5>ToolBox</h5>
-                <small>Drag new elements from here</small>
                 <div className="widgets-area">
                     <DraggableBlock />
                     <DraggableQuestion />
+                    <DraggableOption />
                 </div>
             </div>
         )

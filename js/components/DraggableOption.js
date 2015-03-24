@@ -1,17 +1,18 @@
 var ItemTypes = require('./ItemTypes');
 
-var DraggableQuestion = React.createClass({
+var DraggableOption = React.createClass({
     mixins: [ReactDND.DragDropMixin],
     statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.QUESTION, {
+        configureDragDrop: function(register){
+            register(ItemTypes.OPTION, {
                 dragSource: {
-                    beginDrag: function(component) {
+                    beginDrag: function(component){
                         // TODO: use this to transfer data
                         return {
                             item: {
+
                             }
-                        };
+                        }
                     }
                 }
             });
@@ -19,16 +20,16 @@ var DraggableQuestion = React.createClass({
     },
     render: function() {
         var style = {};
-        var isDragging = this.getDragState(ItemTypes.QUESTION).isDragging;
-        style.opacity = isDragging ? 0.4 : 1;
+        var isDragging = this.getDragState(ItemTypes.OPTION).isDragging;
+        style.opacity = isDragging ? 0.4 :1;
 
         return (
-            <div {...this.dragSourceFor(ItemTypes.QUESTION)}
+            <div {...this.dragSourceFor(ItemTypes.OPTION)}
                 style={style} className="draggable">
-                <i className="ion-plus-circled"></i> Question
+                <i className="ion-plus-circled"></i> Option
             </div>
         )
     }
 });
 
-module.exports = DraggableQuestion;
+module.exports = DraggableOption;

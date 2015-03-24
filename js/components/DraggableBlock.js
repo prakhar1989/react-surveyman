@@ -26,7 +26,7 @@ var DraggableBlock = React.createClass({
         return (
             <div {...this.dragSourceFor(ItemTypes.BLOCK)}
                 style={style} className="draggable">
-                Block
+                <i className="ion-plus-circled"></i> Block
             </div>
         )
     }
