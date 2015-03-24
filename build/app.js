@@ -205,6 +205,14 @@ var Dropzone = React.createClass({displayName: "Dropzone",
                         component.handleQuestionDrop();
                     }
                 }
+            });
+
+            register(ItemTypes.OPTION, {
+                dropTarget: {
+                    acceptDrop: function(component, item) {
+                        component.handleOptionDrop();
+                    }
+                }
             })
         }
     },
@@ -214,12 +222,18 @@ var Dropzone = React.createClass({displayName: "Dropzone",
     handleQuestionDrop: function() {
         this.props.onQuestionDropped();
     },
+    handleOptionDrop: function() {
+        this.props.onOptionDropped();
+    },
     render: function() {
         var style = {},
             blockDropState = this.getDropState(ItemTypes.BLOCK),
             questionDropState = this.getDropState(ItemTypes.QUESTION),
-            isHovering = blockDropState.isHovering || questionDropState.isHovering,
-            isDragging = blockDropState.isDragging || questionDropState.isDragging,
+            optionDropState = this.getDropState(ItemTypes.OPTION),
+            isHovering = blockDropState.isHovering ||
+                questionDropState.isHovering ||  optionDropState.isHovering,
+            isDragging = blockDropState.isDragging ||
+                questionDropState.isDragging || optionDropState.isDragging,
             backgroundColor;
 
         if (isHovering) {
@@ -230,7 +244,7 @@ var Dropzone = React.createClass({displayName: "Dropzone",
         style.backgroundColor = backgroundColor;
 
         // define a set of item types the dropzone accepts
-        var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION];
+        var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION, ItemTypes.OPTION];
 
         return (
             React.createElement("div", React.__spread({},  this.dropTargetFor.apply(this, accepts), 
@@ -352,12 +366,16 @@ var Pallet = React.createClass({displayName: "Pallet",
         });
         console.log("New question added");
     },
+    handleOptionDrop: function() {
+        console.log('New option added');
+    },
     render: function() {
         return (
             React.createElement("div", null, 
                 React.createElement("h5", null, "Pallet"), 
                 React.createElement(Dropzone, {onBlockDropped: this.handleBlockDrop, 
-                          onQuestionDropped: this.handleQuestionDrop}), 
+                          onQuestionDropped: this.handleQuestionDrop, 
+                          onOptionDropped: this.handleOptionDrop}), 
                 React.createElement("hr", null), 
 
                 React.createElement("h5", null, "Survey"), 

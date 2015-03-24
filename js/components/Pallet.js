@@ -70,12 +70,16 @@ var Pallet = React.createClass({
         });
         console.log("New question added");
     },
+    handleOptionDrop: function() {
+        console.log('New option added');
+    },
     render: function() {
         return (
             <div>
                 <h5>Pallet</h5>
                 <Dropzone onBlockDropped={this.handleBlockDrop}
-                          onQuestionDropped={this.handleQuestionDrop}/>
+                          onQuestionDropped={this.handleQuestionDrop}
+                          onOptionDropped={this.handleOptionDrop} />
                 <hr/>
 
                 <h5>Survey</h5>
