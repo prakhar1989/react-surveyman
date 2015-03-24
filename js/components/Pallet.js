@@ -24,13 +24,24 @@ var Pallet = React.createClass({
             subblocks: []
         }
     },
+    getNewQuestionId: function() {
+        // TODO: Refer to java code for ID generation
+        return Math.floor((Math.random() * 1000) + 1);
+    },
+    getNewQuestion: function(question) {
+        var id = this.getNewQuestionId();
+        return {
+            id: id,
+            options: [],
+            qtext: question.qtext
+        }
+    },
     handleBlockDrop: function() {
         // this is where the new block is added
         var survey = this.state.survey,
-            newId = this.state.nextBlockId + 1;
-
-        var newBlock = this.getNewBlock({id: newId});
-        var newSurvey = survey.concat(newBlock);
+            newId = this.state.nextBlockId + 1,
+            newBlock = this.getNewBlock({id: newId}),
+            newSurvey = survey.concat(newBlock);
 
         //  and state is updated with new block
         this.setState({
@@ -42,7 +53,22 @@ var Pallet = React.createClass({
         console.log("new block added");
     },
     handleQuestionDrop: function() {
-        console.log("I can sense a new question");
+        // for now, we just add the question to the last block
+        var survey = this.state.survey,
+            block = survey[survey.length - 1];
+
+        var qtext = prompt("Enter question text");
+        if (qtext == undefined) {
+            return;
+        }
+        var newQuestion = this.getNewQuestion({qtext: qtext});
+        block.questions = block.questions.concat(newQuestion);
+
+        survey[survey.length - 1] = block;
+        this.setState({
+            survey: survey
+        });
+        console.log("New question added");
     },
     render: function() {
         return (

@@ -40,7 +40,6 @@ var Dropzone = React.createClass({
             isDragging = blockDropState.isDragging || questionDropState.isDragging,
             backgroundColor;
 
-
         if (isHovering) {
             backgroundColor = '#CAD2C5';
         } else if (isDragging) {
@@ -48,7 +47,7 @@ var Dropzone = React.createClass({
         }
         style.backgroundColor = backgroundColor;
 
-        // define a set of item types it accepts
+        // define a set of item types the dropzone accepts
         var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION];
 
         return (

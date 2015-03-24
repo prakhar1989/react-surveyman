@@ -184,7 +184,6 @@ var Dropzone = React.createClass({displayName: "Dropzone",
             isDragging = blockDropState.isDragging || questionDropState.isDragging,
             backgroundColor;
 
-
         if (isHovering) {
             backgroundColor = '#CAD2C5';
         } else if (isDragging) {
@@ -192,7 +191,7 @@ var Dropzone = React.createClass({displayName: "Dropzone",
         }
         style.backgroundColor = backgroundColor;
 
-        // define a set of item types it accepts
+        // define a set of item types the dropzone accepts
         var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION];
 
         return (
@@ -269,13 +268,24 @@ var Pallet = React.createClass({displayName: "Pallet",
             subblocks: []
         }
     },
+    getNewQuestionId: function() {
+        // TODO: Refer to java code for ID generation
+        return Math.floor((Math.random() * 1000) + 1);
+    },
+    getNewQuestion: function(question) {
+        var id = this.getNewQuestionId();
+        return {
+            id: id,
+            options: [],
+            qtext: question.qtext
+        }
+    },
     handleBlockDrop: function() {
         // this is where the new block is added
         var survey = this.state.survey,
-            newId = this.state.nextBlockId + 1;
-
-        var newBlock = this.getNewBlock({id: newId});
-        var newSurvey = survey.concat(newBlock);
+            newId = this.state.nextBlockId + 1,
+            newBlock = this.getNewBlock({id: newId}),
+            newSurvey = survey.concat(newBlock);
 
         //  and state is updated with new block
         this.setState({
@@ -287,7 +297,22 @@ var Pallet = React.createClass({displayName: "Pallet",
         console.log("new block added");
     },
     handleQuestionDrop: function() {
-        console.log("I can sense a new question");
+        // for now, we just add the question to the last block
+        var survey = this.state.survey,
+            block = survey[survey.length - 1];
+
+        var qtext = prompt("Enter question text");
+        if (qtext == undefined) {
+            return;
+        }
+        var newQuestion = this.getNewQuestion({qtext: qtext});
+        block.questions = block.questions.concat(newQuestion);
+
+        survey[survey.length - 1] = block;
+        this.setState({
+            survey: survey
+        });
+        console.log("New question added");
     },
     render: function() {
         return (
