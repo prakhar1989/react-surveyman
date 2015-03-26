@@ -83,10 +83,16 @@ var Pallet = React.createClass({
             questions = survey[blockId].questions,
             questionId = questions.length - 1;
 
+        if (questions.length === 0) {
+            alert("Options can only be added to Questions");
+            return;
+        }
+
         var otext = prompt("Enter option text");
         if (otext == undefined) {
             return;
         }
+
         var newOption = this.getNewOption({otext: otext});
         var question = questions[questionId];
         question.options = question.options.concat(newOption);
