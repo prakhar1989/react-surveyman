@@ -1,3 +1,5 @@
+var React = require('react');
+
 var Option = require('./Option');
 
 var Question = React.createClass({

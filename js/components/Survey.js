@@ -1,3 +1,4 @@
+var React = require('react');
 var Block = require('./Block');
 
 var Survey = React.createClass({

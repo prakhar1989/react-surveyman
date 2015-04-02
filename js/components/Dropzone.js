@@ -1,3 +1,6 @@
+var React = require('react'),
+    ReactDND = require('react-dnd');
+
 var ItemTypes = require('./ItemTypes.js');
 
 var Dropzone = React.createClass({

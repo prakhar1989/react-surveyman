@@ -6,10 +6,10 @@ Building SurveyMan in React.
 ### Build
 ```
 $ npm install 
-$ gulp build
+$ npm run build
 ```
 
 ### Run
 ```
-$ gulp
+$ npm run watch
 ```

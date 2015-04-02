@@ -1,3 +1,5 @@
+var React = require('react');
+
 var Dropzone = require('./Dropzone'),
     Survey = require('./Survey');
 

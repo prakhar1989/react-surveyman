@@ -1,3 +1,5 @@
+var React = require('react');
+
 var Option = React.createClass({
     propTypes: {
         id: React.PropTypes.number,

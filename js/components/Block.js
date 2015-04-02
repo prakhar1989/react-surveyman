@@ -1,3 +1,4 @@
+var React = require('react');
 var Question = require('./Question');
 
 var Block = React.createClass({

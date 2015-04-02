@@ -1,3 +1,5 @@
+var React = require('react');
+
 var DraggableBlock = require('./DraggableBlock'),
     DraggableOption = require('./DraggableOption'),
     DraggableQuestion = require('./DraggableQuestion');

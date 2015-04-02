@@ -1,3 +1,5 @@
+var React = require('react');
+
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
     surveyData = require('../data');

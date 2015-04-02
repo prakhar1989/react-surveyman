@@ -1,10 +1,6 @@
-var gulp = require('gulp');
-    browserify = require('browserify'),
-    reactify = require('reactify'),
-    source = require('vinyl-source-stream'),
-    buffer = require('vinyl-buffer'),
-    webserver = require('gulp-webserver'),
+var gulp = require('gulp'),
     concat = require('gulp-concat'),
+    webserver = require('gulp-webserver'),
     minifyCSS = require('gulp-minify-css'),
     rename = require('gulp-rename');
 
@@ -22,15 +18,6 @@ gulp.task('css', function() {
         .pipe(gulp.dest('build'))
 });
 
-gulp.task('browserify', function() {
-    return browserify('./js/app.js')
-        .transform(reactify)
-        .bundle()
-        .pipe(source('app.js'))
-        .pipe(buffer())
-        .pipe(gulp.dest('./build/'));
-});
-
 gulp.task('webserver', function() {
   gulp.src('.')
     .pipe(webserver({
@@ -41,9 +28,8 @@ gulp.task('webserver', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('./js/**/*.js', ['browserify']);
+  gulp.watch('./css/**/*.css', ['css']);
 });
 
-gulp.task('build', ['browserify', 'css']);
-gulp.task('dev', ['watch', 'browserify']);
+gulp.task('build', ['css']);
 gulp.task('default', ['webserver']);
