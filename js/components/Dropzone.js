@@ -33,16 +33,13 @@ var Dropzone = React.createClass({
             })
         }
     },
-    handleBlockDrop: function() {
-        //this.props.onBlockDropped();
+    handleBlockDrop() {
         SurveyActions.blockDropped();
     },
-    handleQuestionDrop: function() {
-        //this.props.onQuestionDropped();
+    handleQuestionDrop() {
         SurveyActions.questionDropped();
     },
-    handleOptionDrop: function() {
-        //this.props.onOptionDropped();
+    handleOptionDrop() {
         SurveyActions.optionDropped();
     },
     render: function() {

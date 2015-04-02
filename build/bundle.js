@@ -282,15 +282,12 @@ var Dropzone = React.createClass({
         }
     },
     handleBlockDrop: function handleBlockDrop() {
-        //this.props.onBlockDropped();
         SurveyActions.blockDropped();
     },
     handleQuestionDrop: function handleQuestionDrop() {
-        //this.props.onQuestionDropped();
         SurveyActions.questionDropped();
     },
     handleOptionDrop: function handleOptionDrop() {
-        //this.props.onOptionDropped();
         SurveyActions.optionDropped();
     },
     render: function render() {
