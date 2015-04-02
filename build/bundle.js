@@ -3,7 +3,10 @@
 
 var Reflux = require("reflux");
 
-var SurveyActions = Reflux.createActions(["load" // initial data load
+var SurveyActions = Reflux.createActions(["load", // initial data load
+"blockDropped", // when block is dropped on dropzone
+"questionDropped", // when question is dropped in dropzone
+"optionDropped" // when option is dropped in dropzone
 ]);
 
 module.exports = SurveyActions;
@@ -22,16 +25,17 @@ React.render(AppComponent(), document.getElementById("app"));
 "use strict";
 
 var React = require("react");
+var Reflux = require("reflux");
 
 var Pallet = require("./Pallet"),
     Toolbox = require("./Toolbox"),
-    surveyData = require("../data"),
     SurveyActions = require("../actions/SurveyActions"),
     SurveyStore = require("../stores/SurveyStore");
 
 var Application = React.createClass({
     displayName: "Application",
 
+    mixins: [Reflux.connect(SurveyStore)],
     componentDidMount: function componentDidMount() {
         SurveyActions.load();
     },
@@ -42,7 +46,7 @@ var Application = React.createClass({
             React.createElement(
                 "div",
                 { className: "eight columns" },
-                React.createElement(Pallet, { survey: surveyData })
+                React.createElement(Pallet, { survey: this.state.surveyData })
             ),
             React.createElement(
                 "div",
@@ -55,7 +59,7 @@ var Application = React.createClass({
 
 module.exports = Application;
 
-},{"../actions/SurveyActions":1,"../data":15,"../stores/SurveyStore":16,"./Pallet":11,"./Toolbox":14,"react":246}],4:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"../stores/SurveyStore":16,"./Pallet":11,"./Toolbox":14,"react":246,"reflux":247}],4:[function(require,module,exports){
 "use strict";
 
 var React = require("react");
@@ -244,15 +248,11 @@ var React = require("react"),
     ReactDND = require("react-dnd");
 
 var ItemTypes = require("./ItemTypes.js");
+var SurveyActions = require("../actions/SurveyActions");
 
 var Dropzone = React.createClass({
     displayName: "Dropzone",
 
-    propTypes: {
-        onBlockDropped: React.PropTypes.func,
-        onQuestionDropped: React.PropTypes.func,
-        onOptionDropped: React.PropTypes.func
-    },
     mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function configureDragDrop(register) {
@@ -282,13 +282,16 @@ var Dropzone = React.createClass({
         }
     },
     handleBlockDrop: function handleBlockDrop() {
-        this.props.onBlockDropped();
+        //this.props.onBlockDropped();
+        SurveyActions.blockDropped();
     },
     handleQuestionDrop: function handleQuestionDrop() {
-        this.props.onQuestionDropped();
+        //this.props.onQuestionDropped();
+        SurveyActions.questionDropped();
     },
     handleOptionDrop: function handleOptionDrop() {
-        this.props.onOptionDropped();
+        //this.props.onOptionDropped();
+        SurveyActions.optionDropped();
     },
     render: function render() {
         var style = {},
@@ -321,7 +324,7 @@ var Dropzone = React.createClass({
 
 module.exports = Dropzone;
 
-},{"./ItemTypes.js":9,"react":246,"react-dnd":28}],9:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"./ItemTypes.js":9,"react":246,"react-dnd":28}],9:[function(require,module,exports){
 "use strict";
 
 var ItemTypes = {
@@ -380,97 +383,6 @@ var Pallet = React.createClass({
             survey: []
         };
     },
-    getInitialState: function getInitialState() {
-        return {
-            survey: this.props.survey,
-            nextBlockId: this.props.survey.length
-        };
-    },
-    getNewBlock: function getNewBlock(block) {
-        // generates a block JS object
-        return {
-            id: block.id,
-            questions: [],
-            subblocks: []
-        };
-    },
-    getNewQuestionId: function getNewQuestionId() {
-        // TODO: Refer to java code for ID generation
-        return Math.floor(Math.random() * 1000 + 1);
-    },
-    getNewQuestion: function getNewQuestion(question) {
-        var id = this.getNewQuestionId();
-        return {
-            id: id,
-            options: [],
-            qtext: question.qtext
-        };
-    },
-    getNewOption: function getNewOption(option) {
-        var id = this.getNewQuestionId();
-        return {
-            id: id,
-            otext: option.otext
-        };
-    },
-    handleBlockDrop: function handleBlockDrop() {
-        // this is where the new block is added
-        var survey = this.state.survey,
-            newId = this.state.nextBlockId + 1,
-            newBlock = this.getNewBlock({ id: newId }),
-            newSurvey = survey.concat(newBlock);
-
-        //  and state is updated with new block
-        this.setState({
-            survey: newSurvey,
-            nextBlockId: newId
-        });
-
-        // TODO: better alerts
-        console.log("new block added");
-    },
-    handleQuestionDrop: function handleQuestionDrop() {
-        // for now, we just add the question to the last block
-        var survey = this.state.survey,
-            block = survey[survey.length - 1];
-
-        var qtext = prompt("Enter question text");
-        if (qtext == undefined) {
-            return;
-        }
-        var newQuestion = this.getNewQuestion({ qtext: qtext });
-        block.questions = block.questions.concat(newQuestion);
-
-        survey[survey.length - 1] = block;
-        this.setState({
-            survey: survey
-        });
-        console.log("New question added");
-    },
-    handleOptionDrop: function handleOptionDrop() {
-        var survey = this.state.survey,
-            blockId = survey.length - 1,
-            questions = survey[blockId].questions,
-            questionId = questions.length - 1;
-
-        if (questions.length === 0) {
-            alert("Options can only be added to Questions");
-            return;
-        }
-
-        var otext = prompt("Enter option text");
-        if (otext == undefined) {
-            return;
-        }
-
-        var newOption = this.getNewOption({ otext: otext });
-        var question = questions[questionId];
-        question.options = question.options.concat(newOption);
-        this.setState({
-            survey: survey
-        });
-        console.log("new option added");
-    },
     render: function render() {
         return React.createElement(
             "div",
@@ -480,9 +392,7 @@ var Pallet = React.createClass({
                 null,
                 "Pallet"
             ),
-            React.createElement(Dropzone, { onBlockDropped: this.handleBlockDrop,
-                onQuestionDropped: this.handleQuestionDrop,
-                onOptionDropped: this.handleOptionDrop }),
+            React.createElement(Dropzone, null),
             React.createElement("hr", null),
             React.createElement(
                 "h5",
@@ -492,7 +402,7 @@ var Pallet = React.createClass({
             React.createElement(
                 "div",
                 { className: "survey-area" },
-                React.createElement(Survey, { survey: this.state.survey })
+                React.createElement(Survey, { survey: this.props.survey })
             )
         );
     }
@@ -632,13 +542,101 @@ var SurveyActions = require("../actions/SurveyActions");
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
+    data: {
+        surveyData: []
+    },
     init: function init() {
         this.listenTo(SurveyActions.load, this.fetchData);
     },
-    getInitialState: function getInitialState() {},
     fetchData: function fetchData() {
-        // loading the data temporarily from file
-        console.log(SurveyData);
+        this.updateData(SurveyData);
+    },
+    updateData: function updateData(data) {
+        this.data.surveyData = data;
+        this.trigger(this.data);
+    },
+    getInitialState: function getInitialState() {
+        return {
+            surveyData: this.data.surveyData
+        };
+    },
+    getNewBlock: function getNewBlock(block) {
+        // generates a block JS object
+        return {
+            id: block.id,
+            questions: [],
+            subblocks: []
+        };
+    },
+    getNewQuestionId: function getNewQuestionId() {
+        // TODO: Refer to java code for ID generation
+        return Math.floor(Math.random() * 1000 + 1);
+    },
+    getNewQuestion: function getNewQuestion(question) {
+        var id = this.getNewQuestionId();
+        return {
+            id: id,
+            options: [],
+            qtext: question.qtext
+        };
+    },
+    getNewOption: function getNewOption(option) {
+        var id = this.getNewQuestionId();
+        return {
+            id: id,
+            otext: option.otext
+        };
+    },
+    onBlockDropped: function onBlockDropped() {
+        // this is where the new block is added
+        var survey = this.data.surveyData;
+        var newId = survey.length + 1,
+            newBlock = this.getNewBlock({ id: newId }),
+            newSurvey = survey.concat(newBlock);
+
+        //  and state is updated with new block
+        this.updateData(newSurvey);
+        console.log("new block added");
+    },
+    onQuestionDropped: function onQuestionDropped() {
+        // for now, we just add the question to the last block
+        var survey = this.data.surveyData,
+            block = survey[survey.length - 1];
+
+        var qtext = prompt("Enter question text");
+        if (qtext == undefined) {
+            return;
+        }
+        var newQuestion = this.getNewQuestion({ qtext: qtext });
+        block.questions = block.questions.concat(newQuestion);
+
+        survey[survey.length - 1] = block;
+
+        this.updateData(survey);
+        console.log("New question added");
+    },
+    onOptionDropped: function onOptionDropped() {
+        var survey = this.data.surveyData,
+            blockId = survey.length - 1,
+            questions = survey[blockId].questions,
+            questionId = questions.length - 1;
+
+        if (questions.length === 0) {
+            alert("Options can only be added to Questions");
+            return;
+        }
+
+        var otext = prompt("Enter option text");
+        if (otext == undefined) {
+            return;
+        }
+
+        var newOption = this.getNewOption({ otext: otext });
+        var question = questions[questionId];
+        question.options = question.options.concat(newOption);
+
+        this.updateData(survey);
+        console.log("new option added");
     }
 });
 

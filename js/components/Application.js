@@ -1,12 +1,13 @@
 var React = require('react');
+var Reflux = require('reflux');
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
-    surveyData = require('../data'),
     SurveyActions = require('../actions/SurveyActions'),
     SurveyStore = require('../stores/SurveyStore');
 
 var Application = React.createClass({
+    mixins: [Reflux.connect(SurveyStore)],
     componentDidMount: function() {
         SurveyActions.load();
     },
@@ -14,7 +15,7 @@ var Application = React.createClass({
         return (
             <div className="row">
                 <div className="eight columns">
-                    <Pallet survey={surveyData} />
+                    <Pallet survey={this.state.surveyData} />
                 </div>
                 <div className="four columns">
                     <Toolbox />

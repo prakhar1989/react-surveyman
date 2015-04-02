@@ -2,13 +2,9 @@ var React = require('react'),
     ReactDND = require('react-dnd');
 
 var ItemTypes = require('./ItemTypes.js');
+var SurveyActions = require('../actions/SurveyActions');
 
 var Dropzone = React.createClass({
-    propTypes: {
-        onBlockDropped: React.PropTypes.func,
-        onQuestionDropped: React.PropTypes.func,
-        onOptionDropped: React.PropTypes.func
-    },
     mixins: [ReactDND.DragDropMixin],
     statics: {
         configureDragDrop: function(register) {
@@ -38,13 +34,16 @@ var Dropzone = React.createClass({
         }
     },
     handleBlockDrop: function() {
-        this.props.onBlockDropped();
+        //this.props.onBlockDropped();
+        SurveyActions.blockDropped();
     },
     handleQuestionDrop: function() {
-        this.props.onQuestionDropped();
+        //this.props.onQuestionDropped();
+        SurveyActions.questionDropped();
     },
     handleOptionDrop: function() {
-        this.props.onOptionDropped();
+        //this.props.onOptionDropped();
+        SurveyActions.optionDropped();
     },
     render: function() {
         var style = {},
