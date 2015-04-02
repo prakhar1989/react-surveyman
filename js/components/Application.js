@@ -2,9 +2,14 @@ var React = require('react');
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
-    surveyData = require('../data');
+    surveyData = require('../data'),
+    SurveyActions = require('../actions/SurveyActions'),
+    SurveyStore = require('../stores/SurveyStore');
 
 var Application = React.createClass({
+    componentDidMount: function() {
+        SurveyActions.load();
+    },
     render: function() {
         return (
             <div className="row">
