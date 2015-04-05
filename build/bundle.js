@@ -62,12 +62,30 @@ module.exports = Application;
 },{"../actions/SurveyActions":1,"../stores/SurveyStore":16,"./Pallet":11,"./Toolbox":14,"react":246,"reflux":247}],4:[function(require,module,exports){
 "use strict";
 
-var React = require("react");
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var React = require("react"),
+    ReactDND = require("react-dnd");
+
+var ItemTypes = require("./ItemTypes");
 var Question = require("./Question");
+var SurveyActions = require("../actions/SurveyActions");
 
 var Block = React.createClass({
     displayName: "Block",
 
+    mixins: [ReactDND.DragDropMixin],
+    statics: {
+        configureDragDrop: function configureDragDrop(register) {
+            register(ItemTypes.QUESTION, {
+                dropTarget: {
+                    acceptDrop: function acceptDrop(component, item) {
+                        component.handleQuestionDrop();
+                    }
+                }
+            });
+        }
+    },
     propTypes: {
         id: React.PropTypes.number,
         questions: React.PropTypes.array,
@@ -80,11 +98,30 @@ var Block = React.createClass({
             subblocks: []
         };
     },
+    handleQuestionDrop: function handleQuestionDrop() {
+        SurveyActions.questionDropped(this.props.id);
+    },
     render: function render() {
         var questions = this.props.questions;
+
+        var questionDropState = this.getDropState(ItemTypes.QUESTION);
+        var isHovering = questionDropState.isHovering;
+        var isDragging = questionDropState.isDragging;
+        var borderColor,
+            style = {};
+
+        if (isHovering) {
+            borderColor = "#CAD2C5";
+        } else if (isDragging) {
+            borderColor = "#52796F";
+        }
+        style.borderColor = borderColor;
+
         return React.createElement(
             "div",
-            { className: "item block" },
+            _extends({ className: "item block"
+            }, this.dropTargetFor(ItemTypes.QUESTION), {
+                style: style }),
             React.createElement(
                 "span",
                 { className: "item-id" },
@@ -103,7 +140,7 @@ var Block = React.createClass({
 
 module.exports = Block;
 
-},{"./Question":12,"react":246}],5:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"./ItemTypes":9,"./Question":12,"react":246,"react-dnd":28}],5:[function(require,module,exports){
 "use strict";
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -517,15 +554,8 @@ module.exports = Toolbox;
 var data = [{ // first block
     id: 1,
     randomizable: true,
-    questions: [{
-        id: 143,
-        qtext: "Do you live in the US?",
-        options: [{ id: 124, otext: "Yes" }, { id: 224, otext: "No" }]
-    }, {
-        id: 413,
-        qtext: "Gender?",
-        options: [{ id: 540, otext: "Male" }, { id: 405, otext: "Female" }, { id: 449, otext: "Other" }]
-    }]
+    questions: [],
+    subblocks: []
 }];
 
 module.exports = data;
@@ -595,19 +625,27 @@ var SurveyStore = Reflux.createStore({
         this.updateData(newSurvey);
         console.log("new block added");
     },
-    onQuestionDropped: function onQuestionDropped() {
-        // for now, we just add the question to the last block
+    /**
+     * Run when the questionDropped action is called by the view.
+     * Adds a question to the block who's id is provided as param
+     * @param blockId (int) of the block to which the question will be added.
+     */
+    onQuestionDropped: function onQuestionDropped(blockId) {
         var survey = this.data.surveyData,
-            block = survey[survey.length - 1];
+            position = blockId - 1,
+            block = survey[position];
+
+        if (!block) {
+            throw new Error("block does not exist");
+        }
 
         var qtext = prompt("Enter question text");
         if (qtext == undefined) {
             return;
         }
+
         var newQuestion = this.getNewQuestion({ qtext: qtext });
         block.questions = block.questions.concat(newQuestion);
-
-        survey[survey.length - 1] = block;
 
         this.updateData(survey);
         console.log("New question added");

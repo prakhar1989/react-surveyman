@@ -60,19 +60,27 @@ var SurveyStore = Reflux.createStore({
         this.updateData(newSurvey);
         console.log("new block added");
     },
-    onQuestionDropped() {
-        // for now, we just add the question to the last block
+    /**
+     * Run when the questionDropped action is called by the view.
+     * Adds a question to the block who's id is provided as param
+     * @param blockId (int) of the block to which the question will be added.
+     */
+    onQuestionDropped(blockId) {
         var survey = this.data.surveyData,
-            block = survey[survey.length - 1];
+            position = blockId - 1,
+            block = survey[position];
+
+        if (!block) {
+            throw new Error("block does not exist");
+        }
 
         var qtext = prompt("Enter question text");
         if (qtext == undefined) {
             return;
         }
+
         var newQuestion = this.getNewQuestion({qtext: qtext});
         block.questions = block.questions.concat(newQuestion);
-
-        survey[survey.length - 1] = block;
 
         this.updateData(survey);
         console.log("New question added");
