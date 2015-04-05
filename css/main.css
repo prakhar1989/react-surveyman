@@ -20,11 +20,20 @@ div.dropzone {
   border: 1px dashed black;
 }
 div.draggable {
-  border: 1px dashed black;
-  width: 80px;
-  padding: 10px;
-  margin: 10px 0px;
-  cursor: move;
+    border: 1px dashed black;
+    width: 60px;
+    height: 60px;
+    margin: 10px 12px;
+    cursor: move;
+    box-sizing: border-box;
+    text-align: center;
+    display: inline-block;
+    font-size: 12px;
+    padding-top: 20px;
+    border-radius: 8px;
+    border: 0;
+    color: white;
+    background: #EFAA1F;
 }
 div.survey {
   padding: 20px;
@@ -43,12 +52,22 @@ div.item.block {
   color: #EFAA1F;
 }
 div.item.question {
-  background: #EBF8B8;
+  border: 2px solid #c4ea2d;
   margin-bottom: 5px;
 }
+
+div.item.question .qtext {
+    font-weight: 400;
+    margin-bottom: 5px;
+}
 div.item.option {
-  background: #D1D0A3;
-  margin-right: 2px;
-  max-width: 100px;
-  display: inline-block;
+    border: 1px solid #D1D0A3;
+    margin-right: 7px;
+    max-width: 100px;
+    display: inline-block;
+    color: #9d9c4f;
+    font-weight: 200;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
 }

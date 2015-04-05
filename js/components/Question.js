@@ -39,15 +39,16 @@ var Question = React.createClass({
         var dropState = this.getDropState(ItemTypes.OPTION);
         var style = {};
         if (dropState.isHovering) {
-            style.backgroundColor = 'green';
+            style.backgroundColor = '#f4fbd7';
         } else if (dropState.isDragging) {
-            style.backgroundColor = "yellow";
+            style.backgroundColor = "#eeeeee";
         }
 
         return (
             <div className="item question"
                 style={style}
-                {...this.dropTargetFor(ItemTypes.OPTION)}> {this.props.qtext}
+                {...this.dropTargetFor(ItemTypes.OPTION)}>
+                <div className="qtext"> {this.props.qtext} </div>
                 <div>
                 {options.map(function(item) {
                     return (

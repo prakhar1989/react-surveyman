@@ -40,9 +40,9 @@ var Block = React.createClass({
         var dropState = this.getDropState(ItemTypes.QUESTION);
         var style = {};
         if (dropState.isHovering) {
-            style.backgroundColor = 'green';
+            style.backgroundColor = '#f4fbd7';
         } else if (dropState.isDragging) {
-            style.backgroundColor = "yellow";
+            style.backgroundColor = "#eeeeee";
         }
 
         return (
