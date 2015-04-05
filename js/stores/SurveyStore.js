@@ -1,4 +1,5 @@
 var Reflux = require('reflux');
+var _ = require('underscore');
 var SurveyData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 
@@ -9,6 +10,11 @@ var SurveyStore = Reflux.createStore({
     },
     init() {
         this.listenTo(SurveyActions.load, this.fetchData);
+
+        // initialize question and option map which will help in
+        // faster retrieval of associated blocks and questions.
+        this.questionMap = {};      // question -> block
+        this.optionMap = {};        // option -> question
     },
     fetchData() {
         this.updateData(SurveyData);
@@ -23,7 +29,6 @@ var SurveyStore = Reflux.createStore({
         }
     },
     getNewBlock(block) {
-        // generates a block JS object
         return {
             id: block.id,
             questions: [],
@@ -50,13 +55,11 @@ var SurveyStore = Reflux.createStore({
         }
     },
     onBlockDropped() {
-        // this is where the new block is added
         var survey = this.data.surveyData;
-        var newId = survey.length + 1,
+        var newId = survey.length,
             newBlock = this.getNewBlock({id: newId}),
             newSurvey = survey.concat(newBlock);
 
-        //  and state is updated with new block
         this.updateData(newSurvey);
         console.log("new block added");
     },
@@ -67,7 +70,7 @@ var SurveyStore = Reflux.createStore({
      */
     onQuestionDropped(blockId) {
         var survey = this.data.surveyData,
-            position = blockId - 1,
+            position = blockId,
             block = survey[position];
 
         if (!block) {
@@ -82,18 +85,27 @@ var SurveyStore = Reflux.createStore({
         var newQuestion = this.getNewQuestion({qtext: qtext});
         block.questions = block.questions.concat(newQuestion);
 
+        // update question map with new question
+        this.questionMap[newQuestion.id] = blockId;
+
         this.updateData(survey);
         console.log("New question added");
     },
-    onOptionDropped() {
+    /**
+     * Run when the optionDropped action is called by the view.
+     * Adds an option to the question whose id is provided as an argument.
+     * @param questionId (int) of the question to which the option will be added.
+     */
+    onOptionDropped(questionId) {
         var survey = this.data.surveyData,
-            blockId = survey.length - 1,
-            questions = survey[blockId].questions,
-            questionId = questions.length - 1;
+            blockId = this.questionMap[questionId];
 
-        if (questions.length === 0) {
-            alert("Options can only be added to Questions");
-            return;
+        var question = _.find(survey[blockId].questions, ques => {
+            return ques.id === questionId
+        });
+
+        if (!question) {
+            throw new Error('Question not found');
         }
 
         var otext = prompt("Enter option text");
@@ -102,7 +114,6 @@ var SurveyStore = Reflux.createStore({
         }
 
         var newOption = this.getNewOption({otext: otext});
-        var question = questions[questionId];
         question.options = question.options.concat(newOption);
 
         this.updateData(survey);

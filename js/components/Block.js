@@ -37,17 +37,13 @@ var Block = React.createClass({
     render: function() {
         var questions = this.props.questions;
 
-        var questionDropState = this.getDropState(ItemTypes.QUESTION);
-        var isHovering = questionDropState.isHovering;
-        var isDragging = questionDropState.isDragging;
-        var borderColor, style={};
-
-        if (isHovering) {
-            borderColor = '#CAD2C5';
-        } else if (isDragging) {
-            borderColor = '#52796F';
+        var dropState = this.getDropState(ItemTypes.QUESTION);
+        var style = {};
+        if (dropState.isHovering) {
+            style.backgroundColor = 'green';
+        } else if (dropState.isDragging) {
+            style.backgroundColor = "yellow";
         }
-        style.borderColor = borderColor;
 
         return (
             <div className="item block"

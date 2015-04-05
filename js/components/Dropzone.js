@@ -15,43 +15,18 @@ var Dropzone = React.createClass({
                     }
                 }
             });
-
-            register(ItemTypes.QUESTION, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleQuestionDrop();
-                    }
-                }
-            });
-
-            register(ItemTypes.OPTION, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleOptionDrop();
-                    }
-                }
-            })
         }
     },
     handleBlockDrop() {
         SurveyActions.blockDropped();
     },
-    handleQuestionDrop() {
-        SurveyActions.questionDropped();
-    },
-    handleOptionDrop() {
-        SurveyActions.optionDropped();
-    },
     render: function() {
         var style = {},
             blockDropState = this.getDropState(ItemTypes.BLOCK),
-            questionDropState = this.getDropState(ItemTypes.QUESTION),
-            optionDropState = this.getDropState(ItemTypes.OPTION),
-            isHovering = blockDropState.isHovering ||
-                questionDropState.isHovering ||  optionDropState.isHovering,
-            isDragging = blockDropState.isDragging ||
-                questionDropState.isDragging || optionDropState.isDragging,
-            backgroundColor;
+            isHovering = blockDropState.isHovering,
+            isDragging = blockDropState.isDragging;
+
+        var backgroundColor;
 
         if (isHovering) {
             backgroundColor = '#CAD2C5';
@@ -61,7 +36,7 @@ var Dropzone = React.createClass({
         style.backgroundColor = backgroundColor;
 
         // define a set of item types the dropzone accepts
-        var accepts = [ItemTypes.BLOCK, ItemTypes.QUESTION, ItemTypes.OPTION];
+        var accepts = [ItemTypes.BLOCK];
 
         return (
             <div {...this.dropTargetFor.apply(this, accepts)}

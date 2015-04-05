@@ -21,6 +21,7 @@
     "react": "^0.13.1",
     "react-dnd": "^0.9.8",
     "reflux": "^0.2.7",
+    "underscore": "^1.8.3",
     "watchify": "^3.1.0"
   }
 }
