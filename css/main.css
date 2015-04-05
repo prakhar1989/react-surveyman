@@ -37,23 +37,57 @@ div.draggable {
 }
 div.survey {
   padding: 20px;
-  border: 1px dashed black;
+  border: 1px dashed #ccc;
 }
 
 div.item {
-  padding: 10px;
-  font-weight: 600;
   color: rgba(0, 0, 0, 0.5);
 }
 
 div.item.block {
   border: 2px solid #EFAA1F;
-  margin-bottom: 10px;
   color: #EFAA1F;
+  position: relative;
+  margin-bottom: 25px;
+  padding: 25px;
+  min-height: 40px;
 }
+
+div.item.block:last-child {
+    margin-bottom: 0;
+}
+
+div.item.block:after {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 200;
+    top: 0;
+    right: 0;
+    content: "block";
+    font-style: italic;
+    background: #EFAA1F;
+    padding: 0 2px 2px 5px;
+    color: white;
+}
+
+
 div.item.question {
   border: 2px solid #c4ea2d;
   margin-bottom: 5px;
+  padding: 10px;
+  position: relative;
+}
+
+div.item.question:after {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 200;
+    top: 0;
+    right: 0;
+    content: "question";
+    font-style: italic;
+    background: #c4ea2d;
+    padding: 0 2px 2px 5px;
 }
 
 div.item.question .qtext {
@@ -63,7 +97,6 @@ div.item.question .qtext {
 div.item.option {
     border: 1px solid #D1D0A3;
     margin-right: 7px;
-    max-width: 100px;
     display: inline-block;
     color: #9d9c4f;
     font-weight: 200;

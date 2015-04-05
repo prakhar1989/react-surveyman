@@ -49,7 +49,6 @@ var Block = React.createClass({
             <div className="item block"
                 {...this.dropTargetFor(ItemTypes.QUESTION)}
                 style={style}>
-                <span className="item-id">Block {this.props.id}</span>
             {questions.map(function(q) {
                 return (
                     <Question options={q.options}

@@ -117,12 +117,6 @@ var Block = React.createClass({
             _extends({ className: "item block"
             }, this.dropTargetFor(ItemTypes.QUESTION), {
                 style: style }),
-            React.createElement(
-                "span",
-                { className: "item-id" },
-                "Block ",
-                this.props.id
-            ),
             questions.map(function (q) {
                 return React.createElement(Question, { options: q.options,
                     qtext: q.qtext,
