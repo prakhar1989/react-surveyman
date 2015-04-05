@@ -1,16 +1,9 @@
 var React = require('react');
-
-var Dropzone = require('./Dropzone'),
-    Survey = require('./Survey');
+var Survey = require('./Survey');
 
 var Pallet = React.createClass({
     propTypes: {
         survey: React.PropTypes.array
-    },
-    getDefaultProps: function() {
-        return {
-            survey: []
-        }
     },
     render: function() {
         return (
