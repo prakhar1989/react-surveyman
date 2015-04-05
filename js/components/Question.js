@@ -4,6 +4,7 @@ var React = require('react'),
 var Option = require('./Option');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
+var HelpText = require('./HelpText');
 
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -34,7 +35,9 @@ var Question = React.createClass({
         SurveyActions.optionDropped(this.props.id);
     },
     render: function() {
-        var options = this.props.options;
+        var options = this.props.options.map(op => {
+            return <Option key={op.id} otext={op.otext} />
+        });
 
         var dropState = this.getDropState(ItemTypes.OPTION);
         var style = {};
@@ -50,11 +53,7 @@ var Question = React.createClass({
                 {...this.dropTargetFor(ItemTypes.OPTION)}>
                 <div className="qtext"> {this.props.qtext} </div>
                 <div>
-                {options.map(function(item) {
-                    return (
-                        <Option key={item.id} otext={item.otext} />
-                    )
-                })}
+                {options.length > 0 ? options : <HelpText itemType="Option" />}
                 </div>
             </div>
         )

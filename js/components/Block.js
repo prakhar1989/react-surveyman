@@ -4,6 +4,7 @@ var React = require('react'),
 var ItemTypes = require('./ItemTypes');
 var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
+var HelpText = require('./HelpText');
 
 var Block = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -34,8 +35,11 @@ var Block = React.createClass({
     handleQuestionDrop() {
         SurveyActions.questionDropped(this.props.id);
     },
-    render: function() {
-        var questions = this.props.questions;
+    render() {
+        var questions = this.props.questions.map(q => {
+            return <Question options={q.options} key={q.id}
+                        id={q.id} qtext={q.qtext} />
+        });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);
         var style = {};
@@ -47,16 +51,8 @@ var Block = React.createClass({
 
         return (
             <div className="item block"
-                {...this.dropTargetFor(ItemTypes.QUESTION)}
-                style={style}>
-            {questions.map(function(q) {
-                return (
-                    <Question options={q.options}
-                        qtext={q.qtext}
-                        key={q.id}
-                        id={q.id} />
-                )
-            })}
+                {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
+            {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
             </div>
         )
     }

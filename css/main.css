@@ -40,8 +40,18 @@ div.survey {
   border: 1px dashed #ccc;
 }
 
+p.help-text {
+    color: #bbb;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 0;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
 div.item {
   color: rgba(0, 0, 0, 0.5);
+  background: white;
 }
 
 div.item.block {
@@ -69,7 +79,6 @@ div.item.block:after {
     padding: 0 2px 2px 5px;
     color: white;
 }
-
 
 div.item.question {
   border: 2px solid #c4ea2d;
