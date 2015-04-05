@@ -54,6 +54,10 @@ var SurveyStore = Reflux.createStore({
             otext: option.otext
         }
     },
+    /**
+     * Runs when the blockDropped action is called by the view.
+     * Adds a new block to the end of the survey object.
+     */
     onBlockDropped() {
         var survey = this.data.surveyData;
         var newId = survey.length,
@@ -64,7 +68,7 @@ var SurveyStore = Reflux.createStore({
         console.log("new block added");
     },
     /**
-     * Run when the questionDropped action is called by the view.
+     * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
      * @param blockId (int) of the block to which the question will be added.
      */
@@ -92,7 +96,7 @@ var SurveyStore = Reflux.createStore({
         console.log("New question added");
     },
     /**
-     * Run when the optionDropped action is called by the view.
+     * Runs when the optionDropped action is called by the view.
      * Adds an option to the question whose id is provided as an argument.
      * @param questionId (int) of the question to which the option will be added.
      */
@@ -115,6 +119,9 @@ var SurveyStore = Reflux.createStore({
 
         var newOption = this.getNewOption({otext: otext});
         question.options = question.options.concat(newOption);
+
+        // update the option map
+        this.optionMap[newOption.id] = question.id;
 
         this.updateData(survey);
         console.log("new option added");
