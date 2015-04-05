@@ -1,14 +1,44 @@
-var React = require('react');
+var React = require('react'),
+    ReactDND = require('react-dnd');
+
 var Block = require('./Block');
+var SurveyActions = require('../actions/SurveyActions');
+var ItemTypes = require('./ItemTypes');
+
 
 var Survey = React.createClass({
+    mixins:[ReactDND.DragDropMixin],
+    statics: {
+        configureDragDrop: function(register) {
+            register(ItemTypes.BLOCK, {
+                dropTarget: {
+                    acceptDrop: function(component, item) {
+                        component.handleBlockDrop();
+                    }
+                }
+            })
+        }
+    },
     propTypes: {
         survey: React.PropTypes.array.isRequired
     },
+    handleBlockDrop() {
+        SurveyActions.blockDropped();
+    },
     render: function() {
         var survey = this.props.survey;
+
+        var dropState = this.getDropState(ItemTypes.BLOCK);
+        var style = {};
+        if (dropState.isHovering) {
+            style.backgroundColor = 'green';
+        } else if (dropState.isDragging) {
+            style.backgroundColor = "yellow";
+        }
+
         return (
-            <div>
+            <div style={style} className="survey"
+                 {...this.dropTargetFor(ItemTypes.BLOCK)}>
             {survey.map(function(block) {
                 return (
                     <Block key={block.id}

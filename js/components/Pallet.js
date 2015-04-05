@@ -16,10 +16,6 @@ var Pallet = React.createClass({
         return (
             <div>
                 <h5>Pallet</h5>
-                <Dropzone />
-                <hr/>
-
-                <h5>Survey</h5>
                 <div className="survey-area">
                     <Survey survey={this.props.survey} />
                 </div>

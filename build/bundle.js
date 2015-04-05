@@ -398,13 +398,6 @@ var Pallet = React.createClass({
                 null,
                 "Pallet"
             ),
-            React.createElement(Dropzone, null),
-            React.createElement("hr", null),
-            React.createElement(
-                "h5",
-                null,
-                "Survey"
-            ),
             React.createElement(
                 "div",
                 { className: "survey-area" },
@@ -492,20 +485,51 @@ module.exports = Question;
 },{"../actions/SurveyActions":1,"./ItemTypes":9,"./Option":10,"react":246,"react-dnd":28}],13:[function(require,module,exports){
 "use strict";
 
-var React = require("react");
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var React = require("react"),
+    ReactDND = require("react-dnd");
+
 var Block = require("./Block");
+var SurveyActions = require("../actions/SurveyActions");
+var ItemTypes = require("./ItemTypes");
 
 var Survey = React.createClass({
     displayName: "Survey",
 
+    mixins: [ReactDND.DragDropMixin],
+    statics: {
+        configureDragDrop: function configureDragDrop(register) {
+            register(ItemTypes.BLOCK, {
+                dropTarget: {
+                    acceptDrop: function acceptDrop(component, item) {
+                        component.handleBlockDrop();
+                    }
+                }
+            });
+        }
+    },
     propTypes: {
         survey: React.PropTypes.array.isRequired
     },
+    handleBlockDrop: function handleBlockDrop() {
+        SurveyActions.blockDropped();
+    },
     render: function render() {
         var survey = this.props.survey;
+
+        var dropState = this.getDropState(ItemTypes.BLOCK);
+        var style = {};
+        if (dropState.isHovering) {
+            style.backgroundColor = "green";
+        } else if (dropState.isDragging) {
+            style.backgroundColor = "yellow";
+        }
+
         return React.createElement(
             "div",
-            null,
+            _extends({ style: style, className: "survey"
+            }, this.dropTargetFor(ItemTypes.BLOCK)),
             survey.map(function (block) {
                 return React.createElement(Block, { key: block.id,
                     id: block.id,
@@ -517,7 +541,7 @@ var Survey = React.createClass({
 
 module.exports = Survey;
 
-},{"./Block":4,"react":246}],14:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"./Block":4,"./ItemTypes":9,"react":246,"react-dnd":28}],14:[function(require,module,exports){
 "use strict";
 
 var React = require("react");

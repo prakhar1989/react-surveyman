@@ -26,9 +26,9 @@ div.draggable {
   margin: 10px 0px;
   cursor: move;
 }
-div.survey-area {
-  margin-top: 20px;
-  border: 1px dotted #eeeeee;
+div.survey {
+  padding: 20px;
+  border: 1px dashed black;
 }
 
 div.item {
