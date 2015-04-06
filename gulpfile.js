@@ -5,8 +5,7 @@ var gulp = require('gulp'),
     rename = require('gulp-rename');
 
 var fileOrder = [
-  'css/vendor/normalize.css',
-  'css/vendor/skeleton.css',
+  'css/vendor/bootstrap.min.css',
   'css/main.css'
 ];
 

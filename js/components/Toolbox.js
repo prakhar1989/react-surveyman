@@ -8,7 +8,7 @@ var Toolbox = React.createClass({
     render: function() {
         return (
             <div className="toolbox">
-                <h5>ToolBox</h5>
+                <h3>ToolBox</h3>
                 <div className="widgets-area">
                     <DraggableBlock />
                     <DraggableQuestion />

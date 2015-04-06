@@ -14,10 +14,10 @@ var Application = React.createClass({
     render: function() {
         return (
             <div className="row">
-                <div className="eight columns">
+                <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
                 </div>
-                <div className="four columns">
+                <div className="col-sm-4">
                     <Toolbox />
                 </div>
             </div>

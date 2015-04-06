@@ -6,7 +6,8 @@ body {
 div.container {
   background: white;
   box-shadow: rgba(0, 0, 0, 0.03) 0 0 0 1px;
-  padding: 20px;
+  width: 960px;
+  min-height: 300px;
 }
 div.widgets-area {
   background-color: #E0EEF8;
@@ -100,7 +101,7 @@ div.item.question:after {
 }
 
 div.item.question .qtext {
-    font-weight: 400;
+    font-weight: 600;
     margin-bottom: 5px;
 }
 div.item.option {

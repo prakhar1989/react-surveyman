@@ -45,12 +45,12 @@ var Application = React.createClass({
             { className: "row" },
             React.createElement(
                 "div",
-                { className: "eight columns" },
+                { className: "col-sm-8" },
                 React.createElement(Pallet, { survey: this.state.surveyData })
             ),
             React.createElement(
                 "div",
-                { className: "four columns" },
+                { className: "col-sm-4" },
                 React.createElement(Toolbox, null)
             )
         );
@@ -344,7 +344,7 @@ var Pallet = React.createClass({
             "div",
             null,
             React.createElement(
-                "h5",
+                "h3",
                 null,
                 "Pallet"
             ),
@@ -514,7 +514,7 @@ var Toolbox = React.createClass({
             "div",
             { className: "toolbox" },
             React.createElement(
-                "h5",
+                "h3",
                 null,
                 "ToolBox"
             ),

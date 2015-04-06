@@ -8,7 +8,7 @@ var Pallet = React.createClass({
     render: function() {
         return (
             <div>
-                <h5>Pallet</h5>
+                <h3>Pallet</h3>
                 <div className="survey-area">
                     <Survey survey={this.props.survey} />
                 </div>
