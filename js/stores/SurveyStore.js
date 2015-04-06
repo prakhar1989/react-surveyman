@@ -2,11 +2,17 @@ var Reflux = require('reflux');
 var _ = require('underscore');
 var SurveyData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
+var ItemTypes = require('../components/ItemTypes');
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
-        surveyData: []
+        surveyData: [],
+        modalState: {
+            option: false,
+            block: false,
+            question: true
+        }
     },
     init() {
         this.listenTo(SurveyActions.load, this.fetchData);
@@ -25,7 +31,8 @@ var SurveyStore = Reflux.createStore({
     },
     getInitialState() {
         return {
-            surveyData: this.data.surveyData
+            surveyData: this.data.surveyData,
+            modalState: this.data.modalState
         }
     },
     getNewBlock(block) {
@@ -125,6 +132,17 @@ var SurveyStore = Reflux.createStore({
 
         this.updateData(survey);
         console.log("new option added");
+    },
+    onToggleModal(modalType) {
+        var modalState = this.data.modalState;
+        if (modalType === ItemTypes.QUESTION) {
+            modalState.question = !modalState.question;
+        } else if (modalType === ItemTypes.OPTION) {
+            modalState.option = !modalState.option;
+        } else {
+            modalState.block = !modalState.block;
+        }
+        this.trigger(this.data);
     }
 });
 

@@ -1,5 +1,6 @@
 var React = require('react');
 var Reflux = require('reflux');
+var QuestionModal = require('./QuestionModal');
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -12,8 +13,10 @@ var Application = React.createClass({
         SurveyActions.load();
     },
     render: function() {
+        var modalState = this.state.modalState;
         return (
             <div className="row">
+                <QuestionModal isOpen={modalState.question} />
                 <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
                 </div>
