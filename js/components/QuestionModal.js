@@ -15,9 +15,9 @@ var BaseModal = React.createClass({
     },
     handleSubmit() {
         var qtext = this.refs.qtext.getDOMNode().value;
-        var ordering = this.refs.ordering.getDOMNode().value;
-        var freetext = this.refs.freetext.getDOMNode().value;
-        var exclusive = this.refs.exclusive.getDOMNode().value;
+        var ordering = this.refs.ordering.getDOMNode().checked;
+        var freetext = this.refs.freetext.getDOMNode().checked;
+        var exclusive = this.refs.exclusive.getDOMNode().checked;
         SurveyActions.questionDropped({
             parentID: this.props.parentID,
             qtext: qtext,
@@ -40,7 +40,7 @@ var BaseModal = React.createClass({
                     <input type="text" className="form-control" id="qtext" ref="qtext" />
                 </div>
                 <div className="checkbox">
-                    <label><input type="checkbox" ref="ordering" /> Ordering </label>
+                    <label><input type="checkbox" id="ordering" ref="ordering" /> Ordering </label>
                 </div>
                 <div className="checkbox">
                     <label> <input type="checkbox" ref="exclusive" /> Exclusive </label>
