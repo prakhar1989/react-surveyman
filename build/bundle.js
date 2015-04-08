@@ -7,7 +7,7 @@ var SurveyActions = Reflux.createActions(["load", // initial data load
 "blockDropped", // when block is dropped
 "questionDropped", // when question is dropped
 "optionDropped", // when option is dropped
-"toggleModal" // when option modal is toggled
+"toggleModal" // when a modal is toggled
 ]);
 
 module.exports = SurveyActions;
@@ -46,7 +46,9 @@ var Application = React.createClass({
         return React.createElement(
             "div",
             { className: "row" },
-            React.createElement(QuestionModal, { isOpen: modalState.question }),
+            React.createElement(QuestionModal, {
+                isOpen: modalState.question,
+                parentID: this.state.dropTargetID }),
             React.createElement(
                 "div",
                 { className: "col-sm-8" },
@@ -104,7 +106,8 @@ var Block = React.createClass({
         };
     },
     handleQuestionDrop: function handleQuestionDrop() {
-        SurveyActions.questionDropped(this.props.id);
+        //SurveyActions.questionDropped(this.props.id);
+        SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     render: function render() {
         var questions = this.props.questions.map(function (q) {
@@ -452,27 +455,31 @@ var OverlayMixin = require("react-bootstrap").OverlayMixin;
 var SurveyActions = require("../actions/SurveyActions");
 var ItemTypes = require("./ItemTypes");
 
-var QuestionModal = React.createClass({
-    displayName: "QuestionModal",
+// to get around the refs issues - https://github.com/react-bootstrap/react-bootstrap/issues/223
+var BaseModal = React.createClass({
+    displayName: "BaseModal",
 
-    mixins: [OverlayMixin],
     propTypes: {
-        isOpen: React.PropTypes.bool
+        parentID: React.PropTypes.number
     },
     handleClose: function handleClose() {
         SurveyActions.toggleModal(ItemTypes.QUESTION);
     },
     handleSubmit: function handleSubmit() {
-        console.log("data submitted");
+        var qtext = this.refs.qtext.getDOMNode().value;
+        var ordering = this.refs.ordering.getDOMNode().value;
+        var freetext = this.refs.freetext.getDOMNode().value;
+        var exclusive = this.refs.exclusive.getDOMNode().value;
+        SurveyActions.questionDropped({
+            parentID: this.props.parentID,
+            qtext: qtext,
+            ordering: ordering,
+            freetext: freetext,
+            exclusive: exclusive
+        });
         this.handleClose();
     },
     render: function render() {
-        return React.createElement("div", { className: "static-modal" });
-    },
-    renderOverlay: function renderOverlay() {
-        if (!this.props.isOpen) {
-            return React.createElement("div", null);
-        }
         return React.createElement(
             Modal,
             { title: "Add Question",
@@ -484,7 +491,48 @@ var QuestionModal = React.createClass({
             React.createElement(
                 "div",
                 { className: "modal-body" },
-                " Add a Question "
+                React.createElement(
+                    "div",
+                    { className: "form-group" },
+                    React.createElement(
+                        "label",
+                        { htmlFor: "qtext" },
+                        "Question Text"
+                    ),
+                    React.createElement("input", { type: "text", className: "form-control", id: "qtext", ref: "qtext" })
+                ),
+                React.createElement(
+                    "div",
+                    { className: "checkbox" },
+                    React.createElement(
+                        "label",
+                        null,
+                        React.createElement("input", { type: "checkbox", ref: "ordering" }),
+                        " Ordering "
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "checkbox" },
+                    React.createElement(
+                        "label",
+                        null,
+                        " ",
+                        React.createElement("input", { type: "checkbox", ref: "exclusive" }),
+                        " Exclusive "
+                    )
+                ),
+                React.createElement(
+                    "div",
+                    { className: "checkbox" },
+                    React.createElement(
+                        "label",
+                        null,
+                        " ",
+                        React.createElement("input", { type: "checkbox", ref: "freetext" }),
+                        " FreeText "
+                    )
+                )
             ),
             React.createElement(
                 "div",
@@ -501,6 +549,29 @@ var QuestionModal = React.createClass({
                 )
             )
         );
+    }
+});
+
+var QuestionModal = React.createClass({
+    displayName: "QuestionModal",
+
+    mixins: [OverlayMixin],
+    propTypes: {
+        isOpen: React.PropTypes.bool,
+        parentID: React.PropTypes.number
+    },
+    render: function render() {
+        return React.createElement(
+            "div",
+            { className: "static-modal" },
+            " "
+        );
+    },
+    renderOverlay: function renderOverlay() {
+        if (!this.props.isOpen) {
+            return React.createElement("div", null);
+        }
+        return React.createElement(BaseModal, { parentID: this.props.parentID });
     }
 });
 
@@ -625,10 +696,11 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: [],
+        dropTargetID: null,
         modalState: {
             option: false,
             block: false,
-            question: true
+            question: false
         }
     },
     init: function init() {
@@ -696,7 +768,11 @@ var SurveyStore = Reflux.createStore({
      * Adds a question to the block who's id is provided as param
      * @param blockId (int) of the block to which the question will be added.
      */
-    onQuestionDropped: function onQuestionDropped(blockId) {
+    onQuestionDropped: function onQuestionDropped(questionObj) {
+
+        console.log(questionObj);
+        return;
+
         var survey = this.data.surveyData,
             position = blockId,
             block = survey[position];
@@ -750,7 +826,14 @@ var SurveyStore = Reflux.createStore({
         this.updateData(survey);
         console.log("new option added");
     },
-    onToggleModal: function onToggleModal(modalType) {
+    /**
+     * Run when the action toggleModal is called by the view
+     * @param modalType - Refer to the type of object that was dropped
+     * @param dropTargetID - Refers to the ID on which the object was dropped
+     */
+    onToggleModal: function onToggleModal(modalType, dropTargetID) {
+
+        // causes a modal popup to toggle
         var modalState = this.data.modalState;
         if (modalType === ItemTypes.QUESTION) {
             modalState.question = !modalState.question;
@@ -759,6 +842,9 @@ var SurveyStore = Reflux.createStore({
         } else {
             modalState.block = !modalState.block;
         }
+
+        // sets the correct dropTarget to pass down to component
+        this.data.dropTargetID = dropTargetID;
         this.trigger(this.data);
     }
 });

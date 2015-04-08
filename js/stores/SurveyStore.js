@@ -8,10 +8,11 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: [],
+        dropTargetID: null,
         modalState: {
             option: false,
             block: false,
-            question: true
+            question: false
         }
     },
     init() {
@@ -79,7 +80,11 @@ var SurveyStore = Reflux.createStore({
      * Adds a question to the block who's id is provided as param
      * @param blockId (int) of the block to which the question will be added.
      */
-    onQuestionDropped(blockId) {
+    onQuestionDropped(questionObj) {
+
+        console.log(questionObj);
+        return;
+
         var survey = this.data.surveyData,
             position = blockId,
             block = survey[position];
@@ -133,7 +138,14 @@ var SurveyStore = Reflux.createStore({
         this.updateData(survey);
         console.log("new option added");
     },
-    onToggleModal(modalType) {
+    /**
+     * Run when the action toggleModal is called by the view
+     * @param modalType - Refer to the type of object that was dropped
+     * @param dropTargetID - Refers to the ID on which the object was dropped
+     */
+    onToggleModal(modalType, dropTargetID) {
+
+        // causes a modal popup to toggle
         var modalState = this.data.modalState;
         if (modalType === ItemTypes.QUESTION) {
             modalState.question = !modalState.question;
@@ -142,6 +154,9 @@ var SurveyStore = Reflux.createStore({
         } else {
             modalState.block = !modalState.block;
         }
+
+        // sets the correct dropTarget to pass down to component
+        this.data.dropTargetID = dropTargetID;
         this.trigger(this.data);
     }
 });

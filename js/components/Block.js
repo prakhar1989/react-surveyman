@@ -33,7 +33,8 @@ var Block = React.createClass({
         }
     },
     handleQuestionDrop() {
-        SurveyActions.questionDropped(this.props.id);
+        //SurveyActions.questionDropped(this.props.id);
+        SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     render() {
         var questions = this.props.questions.map(q => {

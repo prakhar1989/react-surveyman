@@ -16,7 +16,9 @@ var Application = React.createClass({
         var modalState = this.state.modalState;
         return (
             <div className="row">
-                <QuestionModal isOpen={modalState.question} />
+                <QuestionModal
+                    isOpen={modalState.question}
+                    parentID={this.state.dropTargetID}/>
                 <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
                 </div>
