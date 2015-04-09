@@ -10,6 +10,10 @@ var BaseModal = React.createClass({
     propTypes: {
         parentID: React.PropTypes.number
     },
+    componentDidMount() {
+        var textInput = this.refs.qtext.getDOMNode();
+        textInput.focus();
+    },
     handleClose() {
         SurveyActions.toggleModal(ItemTypes.QUESTION);
     },
@@ -37,10 +41,10 @@ var BaseModal = React.createClass({
             <div className='modal-body'>
                 <div className="form-group">
                     <label htmlFor="qtext">Question Text</label>
-                    <input type="text" className="form-control" id="qtext" ref="qtext" />
+                    <input type="text" placeholder="What is value of 4 + 5?" className="form-control" id="qtext" ref="qtext" />
                 </div>
                 <div className="checkbox">
-                    <label><input type="checkbox" id="ordering" ref="ordering" /> Ordering </label>
+                    <label><input type="checkbox" ref="ordering" /> Ordering </label>
                 </div>
                 <div className="checkbox">
                     <label> <input type="checkbox" ref="exclusive" /> Exclusive </label>

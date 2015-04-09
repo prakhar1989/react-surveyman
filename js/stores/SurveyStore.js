@@ -82,27 +82,20 @@ var SurveyStore = Reflux.createStore({
      */
     onQuestionDropped(questionObj) {
 
-        console.log(questionObj);
-        return;
-
         var survey = this.data.surveyData,
-            position = blockId,
+            position = questionObj.parentID,
             block = survey[position];
 
         if (!block) {
             throw new Error("block does not exist");
         }
 
-        var qtext = prompt("Enter question text");
-        if (qtext == undefined) {
-            return;
-        }
-
-        var newQuestion = this.getNewQuestion({qtext: qtext});
+        // TODO: pass other params
+        var newQuestion = this.getNewQuestion({qtext: questionObj.qtext});
         block.questions = block.questions.concat(newQuestion);
 
         // update question map with new question
-        this.questionMap[newQuestion.id] = blockId;
+        this.questionMap[newQuestion.id] = questionObj.parentID;
 
         this.updateData(survey);
         console.log("New question added");

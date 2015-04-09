@@ -462,6 +462,10 @@ var BaseModal = React.createClass({
     propTypes: {
         parentID: React.PropTypes.number
     },
+    componentDidMount: function componentDidMount() {
+        var textInput = this.refs.qtext.getDOMNode();
+        textInput.focus();
+    },
     handleClose: function handleClose() {
         SurveyActions.toggleModal(ItemTypes.QUESTION);
     },
@@ -499,7 +503,7 @@ var BaseModal = React.createClass({
                         { htmlFor: "qtext" },
                         "Question Text"
                     ),
-                    React.createElement("input", { type: "text", className: "form-control", id: "qtext", ref: "qtext" })
+                    React.createElement("input", { type: "text", placeholder: "What is value of 4 + 5?", className: "form-control", id: "qtext", ref: "qtext" })
                 ),
                 React.createElement(
                     "div",
@@ -507,7 +511,7 @@ var BaseModal = React.createClass({
                     React.createElement(
                         "label",
                         null,
-                        React.createElement("input", { type: "checkbox", id: "ordering", ref: "ordering" }),
+                        React.createElement("input", { type: "checkbox", ref: "ordering" }),
                         " Ordering "
                     )
                 ),
@@ -770,27 +774,20 @@ var SurveyStore = Reflux.createStore({
      */
     onQuestionDropped: function onQuestionDropped(questionObj) {
 
-        console.log(questionObj);
-        return;
-
         var survey = this.data.surveyData,
-            position = blockId,
+            position = questionObj.parentID,
             block = survey[position];
 
         if (!block) {
             throw new Error("block does not exist");
         }
 
-        var qtext = prompt("Enter question text");
-        if (qtext == undefined) {
-            return;
-        }
-
-        var newQuestion = this.getNewQuestion({ qtext: qtext });
+        // TODO: pass other params
+        var newQuestion = this.getNewQuestion({ qtext: questionObj.qtext });
         block.questions = block.questions.concat(newQuestion);
 
         // update question map with new question
-        this.questionMap[newQuestion.id] = blockId;
+        this.questionMap[newQuestion.id] = questionObj.parentID;
 
         this.updateData(survey);
         console.log("New question added");
