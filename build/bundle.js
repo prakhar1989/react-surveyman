@@ -384,6 +384,9 @@ var ItemTypes = require("./ItemTypes");
 var SurveyActions = require("../actions/SurveyActions");
 var HelpText = require("./HelpText");
 
+var OverlayTrigger = require("react-bootstrap").OverlayTrigger,
+    Tooltip = require("react-bootstrap").Tooltip;
+
 var Question = React.createClass({
     displayName: "Question",
 
@@ -456,17 +459,41 @@ var Question = React.createClass({
                     React.createElement(
                         "li",
                         { className: this.props.ordering ? "active" : "" },
-                        React.createElement("i", { className: "ion-shuffle" })
+                        React.createElement(
+                            OverlayTrigger,
+                            { placement: "bottom", overlay: React.createElement(
+                                    Tooltip,
+                                    null,
+                                    "Toggles whether options are randomized."
+                                ) },
+                            React.createElement("i", { className: "ion-shuffle" })
+                        )
                     ),
                     React.createElement(
                         "li",
                         { className: this.props.exclusive ? "active" : "" },
-                        React.createElement("i", { className: "ion-android-radio-button-on" })
+                        React.createElement(
+                            OverlayTrigger,
+                            { placement: "bottom", overlay: React.createElement(
+                                    Tooltip,
+                                    null,
+                                    "Toggles whether options appear as radio button or checkbox."
+                                ) },
+                            React.createElement("i", { className: "ion-android-radio-button-on" })
+                        )
                     ),
                     React.createElement(
                         "li",
                         { className: this.props.freetext ? "active" : "" },
-                        React.createElement("i", { className: "ion-document-text" })
+                        React.createElement(
+                            OverlayTrigger,
+                            { placement: "bottom", overlay: React.createElement(
+                                    Tooltip,
+                                    null,
+                                    "Toggles whether free text can be entered."
+                                ) },
+                            React.createElement("i", { className: "ion-document-text" })
+                        )
                     )
                 )
             )
@@ -476,7 +503,7 @@ var Question = React.createClass({
 
 module.exports = Question;
 
-},{"../actions/SurveyActions":1,"./HelpText":8,"./ItemTypes":9,"./Option":10,"react":308,"react-dnd":89}],13:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"./HelpText":8,"./ItemTypes":9,"./Option":10,"react":308,"react-bootstrap":71,"react-dnd":89}],13:[function(require,module,exports){
 "use strict";
 
 var React = require("react");

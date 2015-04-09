@@ -6,6 +6,9 @@ var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 
+var OverlayTrigger = require('react-bootstrap').OverlayTrigger,
+    Tooltip = require('react-bootstrap').Tooltip;
+
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin],
     statics: {
@@ -61,13 +64,19 @@ var Question = React.createClass({
                 <div className="config-area">
                     <ul>
                         <li className={this.props.ordering ? 'active' : ''}>
-                            <i className="ion-shuffle"></i>
+                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
+                                <i className="ion-shuffle"></i>
+                            </OverlayTrigger>
                         </li>
                         <li className={this.props.exclusive ? 'active' : ''}>
-                            <i className="ion-android-radio-button-on"></i>
+                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options appear as radio button or checkbox.</Tooltip>}>
+                                <i className="ion-android-radio-button-on"></i>
+                            </OverlayTrigger>
                         </li>
                         <li className={this.props.freetext ? 'active' : ''}>
-                            <i className="ion-document-text"></i>
+                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether free text can be entered.</Tooltip>}>
+                                <i className="ion-document-text"></i>
+                            </OverlayTrigger>
                         </li>
                     </ul>
                 </div>

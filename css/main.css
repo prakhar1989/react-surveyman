@@ -43,8 +43,12 @@ div.draggable i {
     font-size: 15px;
 }
 
+div.config-area ul li i {
+    opacity: 0.4;
+}
+
 div.config-area ul li.active i {
-    color: #c4ea2d;
+    opacity: 1.0;
 }
 
 div.survey {
