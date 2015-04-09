@@ -28,7 +28,10 @@ var Question = React.createClass({
         return {
             options: [],
             id: 0,
-            qtext: "I'm a question"
+            qtext: "I'm a question",
+            ordering: false,
+            freetext: false,
+            exclusive: false
         }
     },
     handleOptionDrop() {
@@ -54,6 +57,13 @@ var Question = React.createClass({
                 <div className="qtext"> {this.props.qtext} </div>
                 <div>
                 {options.length > 0 ? options : <HelpText itemType="Option" />}
+                </div>
+                <div className="config-area">
+                    <ul>
+                        <li><i className="ion-shuffle"></i>{this.props.ordering}</li>
+                        <li><i className="ion-android-radio-button-on"></i></li>
+                        <li><i className="ion-document-text"></i></li>
+                    </ul>
                 </div>
             </div>
         )

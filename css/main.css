@@ -8,6 +8,7 @@ div.container {
   box-shadow: rgba(0, 0, 0, 0.03) 0 0 0 1px;
   width: 960px;
   min-height: 300px;
+  padding-bottom: 40px;
 }
 div.widgets-area {
   background-color: #E0EEF8;
@@ -45,6 +46,19 @@ div.draggable i {
 div.survey {
   padding: 20px;
   border: 1px dashed #ccc;
+}
+
+div.config-area ul {
+    list-style-type: none;
+    margin: 0;
+    text-align: right;
+}
+
+div.config-area ul li {
+    display: inline-block;
+    font-size: 20px;
+    margin: 0 10px;
+    cursor: pointer;
 }
 
 p.help-text {

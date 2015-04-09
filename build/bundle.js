@@ -403,7 +403,10 @@ var Question = React.createClass({
         return {
             options: [],
             id: 0,
-            qtext: "I'm a question"
+            qtext: "I'm a question",
+            ordering: false,
+            freetext: false,
+            exclusive: false
         };
     },
     handleOptionDrop: function handleOptionDrop() {
@@ -438,6 +441,30 @@ var Question = React.createClass({
                 "div",
                 null,
                 options.length > 0 ? options : React.createElement(HelpText, { itemType: "Option" })
+            ),
+            React.createElement(
+                "div",
+                { className: "config-area" },
+                React.createElement(
+                    "ul",
+                    null,
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement("i", { className: "ion-shuffle" }),
+                        this.props.ordering
+                    ),
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement("i", { className: "ion-android-radio-button-on" })
+                    ),
+                    React.createElement(
+                        "li",
+                        null,
+                        React.createElement("i", { className: "ion-document-text" })
+                    )
+                )
             )
         );
     }
@@ -776,7 +803,7 @@ var SurveyStore = Reflux.createStore({
      * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
      * @param questionObj A POJO containing data the for the new question.
-     * with the following keys - parentID, qtext, ordering, freetext, exclusive
+     * with the following keys - parentID, qtext, config
      */
     onQuestionDropped: function onQuestionDropped(questionObj) {
 
@@ -788,8 +815,15 @@ var SurveyStore = Reflux.createStore({
             throw new Error("block does not exist");
         }
 
-        // TODO: pass other params
-        var newQuestion = this.getNewQuestion({ qtext: questionObj.qtext });
+        // var newQuestion = this.getNewQuestion(questionObj);
+        var newQuestion = {
+            id: this.getNewQuestionId(),
+            qtext: questionObj.qtext,
+            options: [],
+            ordering: questionObj.ordering,
+            freetext: questionObj.freetext,
+            exclusive: questionObj.exclusive
+        };
         block.questions = block.questions.concat(newQuestion);
 
         // update question map with new question

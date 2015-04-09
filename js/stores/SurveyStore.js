@@ -79,7 +79,7 @@ var SurveyStore = Reflux.createStore({
      * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
      * @param questionObj A POJO containing data the for the new question.
-     * with the following keys - parentID, qtext, ordering, freetext, exclusive
+     * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
 
@@ -91,8 +91,15 @@ var SurveyStore = Reflux.createStore({
             throw new Error("block does not exist");
         }
 
-        // TODO: pass other params
-        var newQuestion = this.getNewQuestion({qtext: questionObj.qtext});
+        // var newQuestion = this.getNewQuestion(questionObj);
+        var newQuestion = {
+            id: this.getNewQuestionId(),
+            qtext: questionObj.qtext,
+            options: [],
+            ordering: questionObj.ordering,
+            freetext: questionObj.freetext,
+            exclusive: questionObj.exclusive
+        };
         block.questions = block.questions.concat(newQuestion);
 
         // update question map with new question
