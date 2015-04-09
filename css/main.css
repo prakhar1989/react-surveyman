@@ -36,6 +36,12 @@ div.draggable {
     color: white;
     background: #EFAA1F;
 }
+div.draggable i {
+    display: block;
+    margin: -5px 0 0 0;
+    font-size: 15px;
+}
+
 div.survey {
   padding: 20px;
   border: 1px dashed #ccc;

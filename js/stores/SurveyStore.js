@@ -78,7 +78,8 @@ var SurveyStore = Reflux.createStore({
     /**
      * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
-     * @param blockId (int) of the block to which the question will be added.
+     * @param questionObj A POJO containing data the for the new question.
+     * with the following keys - parentID, qtext, ordering, freetext, exclusive
      */
     onQuestionDropped(questionObj) {
 

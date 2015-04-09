@@ -20,7 +20,7 @@ var DraggableQuestion = React.createClass({
             });
         }
     },
-    render: function() {
+    render() {
         var style = {};
         var isDragging = this.getDragState(ItemTypes.QUESTION).isDragging;
         style.opacity = isDragging ? 0.4 : 1;
@@ -28,7 +28,8 @@ var DraggableQuestion = React.createClass({
         return (
             <div {...this.dragSourceFor(ItemTypes.QUESTION)}
                 style={style} className="draggable">
-                <i className="ion-plus-circled"></i> Question
+                <i className="ion-plus-circled"></i>
+                Question
             </div>
         )
     }

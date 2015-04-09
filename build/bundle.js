@@ -173,7 +173,7 @@ var DraggableBlock = React.createClass({
             _extends({}, this.dragSourceFor(ItemTypes.BLOCK), {
                 style: style, className: "draggable" }),
             React.createElement("i", { className: "ion-plus-circled" }),
-            " Block"
+            "Block"
         );
     }
 });
@@ -218,7 +218,7 @@ var DraggableOption = React.createClass({
             _extends({}, this.dragSourceFor(ItemTypes.OPTION), {
                 style: style, className: "draggable" }),
             React.createElement("i", { className: "ion-plus-circled" }),
-            " Option"
+            "Option"
         );
     }
 });
@@ -263,7 +263,7 @@ var DraggableQuestion = React.createClass({
             _extends({}, this.dragSourceFor(ItemTypes.QUESTION), {
                 style: style, className: "draggable" }),
             React.createElement("i", { className: "ion-plus-circled" }),
-            " Question"
+            "Question"
         );
     }
 });
@@ -506,13 +506,18 @@ var BaseModal = React.createClass({
                     React.createElement("input", { type: "text", placeholder: "What is value of 4 + 5?", className: "form-control", id: "qtext", ref: "qtext" })
                 ),
                 React.createElement(
+                    "h5",
+                    null,
+                    "Configuration"
+                ),
+                React.createElement(
                     "div",
                     { className: "checkbox" },
                     React.createElement(
                         "label",
                         null,
                         React.createElement("input", { type: "checkbox", ref: "ordering" }),
-                        " Ordering "
+                        " Preserve ordering of the options"
                     )
                 ),
                 React.createElement(
@@ -523,7 +528,7 @@ var BaseModal = React.createClass({
                         null,
                         " ",
                         React.createElement("input", { type: "checkbox", ref: "exclusive" }),
-                        " Exclusive "
+                        " Present options as radio-buttons (default is checkbox)"
                     )
                 ),
                 React.createElement(
@@ -534,7 +539,7 @@ var BaseModal = React.createClass({
                         null,
                         " ",
                         React.createElement("input", { type: "checkbox", ref: "freetext" }),
-                        " FreeText "
+                        " Allow free text entry"
                     )
                 )
             ),
@@ -770,7 +775,8 @@ var SurveyStore = Reflux.createStore({
     /**
      * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
-     * @param blockId (int) of the block to which the question will be added.
+     * @param questionObj A POJO containing data the for the new question.
+     * with the following keys - parentID, qtext, ordering, freetext, exclusive
      */
     onQuestionDropped: function onQuestionDropped(questionObj) {
 

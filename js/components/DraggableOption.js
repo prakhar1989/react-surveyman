@@ -21,7 +21,7 @@ var DraggableOption = React.createClass({
             });
         }
     },
-    render: function() {
+    render() {
         var style = {};
         var isDragging = this.getDragState(ItemTypes.OPTION).isDragging;
         style.opacity = isDragging ? 0.4 :1;
@@ -29,7 +29,8 @@ var DraggableOption = React.createClass({
         return (
             <div {...this.dragSourceFor(ItemTypes.OPTION)}
                 style={style} className="draggable">
-                <i className="ion-plus-circled"></i> Option
+                <i className="ion-plus-circled"></i>
+                Option
             </div>
         )
     }

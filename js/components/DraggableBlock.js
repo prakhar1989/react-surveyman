@@ -20,7 +20,7 @@ var DraggableBlock = React.createClass({
             });
         }
     },
-    render: function() {
+    render() {
         var style = {};
 
         var isDragging = this.getDragState(ItemTypes.BLOCK).isDragging;
@@ -29,7 +29,8 @@ var DraggableBlock = React.createClass({
         return (
             <div {...this.dragSourceFor(ItemTypes.BLOCK)}
                 style={style} className="draggable">
-                <i className="ion-plus-circled"></i> Block
+                <i className="ion-plus-circled"></i>
+                Block
             </div>
         )
     }

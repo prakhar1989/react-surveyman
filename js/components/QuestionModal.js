@@ -43,14 +43,15 @@ var BaseModal = React.createClass({
                     <label htmlFor="qtext">Question Text</label>
                     <input type="text" placeholder="What is value of 4 + 5?" className="form-control" id="qtext" ref="qtext" />
                 </div>
+                <h5>Configuration</h5>
                 <div className="checkbox">
-                    <label><input type="checkbox" ref="ordering" /> Ordering </label>
+                    <label><input type="checkbox" ref="ordering" /> Preserve ordering of the options</label>
                 </div>
                 <div className="checkbox">
-                    <label> <input type="checkbox" ref="exclusive" /> Exclusive </label>
+                    <label> <input type="checkbox" ref="exclusive" /> Present options as radio-buttons (default is checkbox)</label>
                 </div>
                 <div className="checkbox">
-                    <label> <input type="checkbox" ref="freetext"/> FreeText </label>
+                    <label> <input type="checkbox" ref="freetext"/> Allow free text entry</label>
                 </div>
             </div>
             <div className='modal-footer'>
