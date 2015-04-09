@@ -106,13 +106,18 @@ var Block = React.createClass({
         };
     },
     handleQuestionDrop: function handleQuestionDrop() {
-        //SurveyActions.questionDropped(this.props.id);
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     render: function render() {
         var questions = this.props.questions.map(function (q) {
-            return React.createElement(Question, { options: q.options, key: q.id,
-                id: q.id, qtext: q.qtext });
+            return React.createElement(Question, {
+                key: q.id,
+                options: q.options,
+                id: q.id,
+                qtext: q.qtext,
+                ordering: q.ordering,
+                exclusive: q.exclusive,
+                freetext: q.freetext });
         });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);
@@ -450,18 +455,17 @@ var Question = React.createClass({
                     null,
                     React.createElement(
                         "li",
-                        null,
-                        React.createElement("i", { className: "ion-shuffle" }),
-                        this.props.ordering
+                        { className: this.props.ordering ? "active" : "" },
+                        React.createElement("i", { className: "ion-shuffle" })
                     ),
                     React.createElement(
                         "li",
-                        null,
+                        { className: this.props.exclusive ? "active" : "" },
                         React.createElement("i", { className: "ion-android-radio-button-on" })
                     ),
                     React.createElement(
                         "li",
-                        null,
+                        { className: this.props.freetext ? "active" : "" },
                         React.createElement("i", { className: "ion-document-text" })
                     )
                 )

@@ -60,9 +60,15 @@ var Question = React.createClass({
                 </div>
                 <div className="config-area">
                     <ul>
-                        <li><i className="ion-shuffle"></i>{this.props.ordering}</li>
-                        <li><i className="ion-android-radio-button-on"></i></li>
-                        <li><i className="ion-document-text"></i></li>
+                        <li className={this.props.ordering ? 'active' : ''}>
+                            <i className="ion-shuffle"></i>
+                        </li>
+                        <li className={this.props.exclusive ? 'active' : ''}>
+                            <i className="ion-android-radio-button-on"></i>
+                        </li>
+                        <li className={this.props.freetext ? 'active' : ''}>
+                            <i className="ion-document-text"></i>
+                        </li>
                     </ul>
                 </div>
             </div>

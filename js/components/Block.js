@@ -33,13 +33,18 @@ var Block = React.createClass({
         }
     },
     handleQuestionDrop() {
-        //SurveyActions.questionDropped(this.props.id);
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     render() {
         var questions = this.props.questions.map(q => {
-            return <Question options={q.options} key={q.id}
-                        id={q.id} qtext={q.qtext} />
+            return <Question
+                        key={q.id}
+                        options={q.options}
+                        id={q.id}
+                        qtext={q.qtext}
+                        ordering={q.ordering}
+                        exclusive={q.exclusive}
+                        freetext={q.freetext} />
         });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);
