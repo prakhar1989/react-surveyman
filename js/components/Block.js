@@ -62,7 +62,7 @@ var Block = React.createClass({
                 {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
                 <div className="config-area">
                     <ul>
-                        <li className={this.props.ordering ? 'active' : ''}>
+                        <li className={this.props.ordered ? 'active' : ''}>
                             <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
                                 <i className="ion-shuffle"></i>
                             </OverlayTrigger>

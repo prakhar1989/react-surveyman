@@ -142,7 +142,7 @@ var Block = React.createClass({
                     null,
                     React.createElement(
                         "li",
-                        { className: this.props.ordering ? "active" : "" },
+                        { className: this.props.ordered ? "active" : "" },
                         React.createElement(
                             OverlayTrigger,
                             { placement: "bottom", overlay: React.createElement(
@@ -782,7 +782,7 @@ module.exports = Toolbox;
 var data = [{
     id: 0,
     randomizable: true,
-    ordered: true,
+    ordered: false,
     questions: [],
     subblocks: []
 }];
