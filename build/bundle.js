@@ -88,6 +88,7 @@ var Application = React.createClass({
     },
     render: function render() {
         var modalState = this.state.modalState;
+        var alertState = this.state.alertState;
         return React.createElement(
             "div",
             { className: "row" },
@@ -97,7 +98,10 @@ var Application = React.createClass({
             React.createElement(
                 "div",
                 { className: "col-sm-12" },
-                React.createElement(AlertBox, { msg: this.state.alertMsg })
+                React.createElement(AlertBox, {
+                    msg: alertState.msg,
+                    level: alertState.level,
+                    visible: alertState.visible })
             ),
             React.createElement(
                 "div",
@@ -845,7 +849,11 @@ var SurveyStore = Reflux.createStore({
             block: false,
             question: false
         },
-        alertMsg: "hello world"
+        alertState: {
+            msg: "hello world",
+            level: "warning",
+            visible: false
+        }
     },
     init: function init() {
         this.listenTo(SurveyActions.load, this.fetchData);
@@ -866,7 +874,7 @@ var SurveyStore = Reflux.createStore({
         return {
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
-            alertMsg: this.data.alertMsg
+            alertState: this.data.alertState
         };
     },
     getNewBlock: function getNewBlock(block) {

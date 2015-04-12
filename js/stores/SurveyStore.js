@@ -14,7 +14,11 @@ var SurveyStore = Reflux.createStore({
             block: false,
             question: false
         },
-        alertMsg: "hello world"
+        alertState: {
+            msg: "hello world",
+            level: 'warning',
+            visible: false
+        }
     },
     init() {
         this.listenTo(SurveyActions.load, this.fetchData);
@@ -35,7 +39,7 @@ var SurveyStore = Reflux.createStore({
         return {
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
-            alertMsg: this.data.alertMsg
+            alertState: this.data.alertState
         }
     },
     getNewBlock(block) {

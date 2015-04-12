@@ -15,13 +15,17 @@ var Application = React.createClass({
     },
     render: function() {
         var modalState = this.state.modalState;
+        var alertState = this.state.alertState;
         return (
             <div className="row">
                 <QuestionModal
                     isOpen={modalState.question}
                     parentID={this.state.dropTargetID}/>
                 <div className="col-sm-12">
-                    <AlertBox msg={this.state.alertMsg} />
+                    <AlertBox
+                        msg={alertState.msg}
+                        level={alertState.level}
+                        visible={alertState.visible} />
                 </div>
                 <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
