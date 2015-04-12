@@ -6,8 +6,8 @@ var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger,
-    Tooltip = require('react-bootstrap').Tooltip;
+var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
+var Tooltip = require('react-bootstrap').Tooltip;
 
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin],

@@ -1,10 +1,11 @@
 var React = require('react'),
     ReactDND = require('react-dnd');
-
 var ItemTypes = require('./ItemTypes');
 var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
+var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
+var Tooltip = require('react-bootstrap').Tooltip;
 
 var Block = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -58,7 +59,21 @@ var Block = React.createClass({
         return (
             <div className="item block"
                 {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
-            {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
+                {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
+                <div className="config-area">
+                    <ul>
+                        <li className={this.props.ordering ? 'active' : ''}>
+                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
+                                <i className="ion-shuffle"></i>
+                            </OverlayTrigger>
+                        </li>
+                        <li className={this.props.randomizable ? 'active' : ''}>
+                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are ordered.</Tooltip>}>
+                                <i className="ion-arrow-swap"></i>
+                            </OverlayTrigger>
+                        </li>
+                    </ul>
+                </div>
             </div>
         )
     }

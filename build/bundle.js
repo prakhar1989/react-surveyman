@@ -72,11 +72,12 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var React = require("react"),
     ReactDND = require("react-dnd");
-
 var ItemTypes = require("./ItemTypes");
 var Question = require("./Question");
 var SurveyActions = require("../actions/SurveyActions");
 var HelpText = require("./HelpText");
+var OverlayTrigger = require("react-bootstrap").OverlayTrigger;
+var Tooltip = require("react-bootstrap").Tooltip;
 
 var Block = React.createClass({
     displayName: "Block",
@@ -132,14 +133,48 @@ var Block = React.createClass({
             "div",
             _extends({ className: "item block"
             }, this.dropTargetFor(ItemTypes.QUESTION), { style: style }),
-            questions.length > 0 ? questions : React.createElement(HelpText, { itemType: "Question" })
+            questions.length > 0 ? questions : React.createElement(HelpText, { itemType: "Question" }),
+            React.createElement(
+                "div",
+                { className: "config-area" },
+                React.createElement(
+                    "ul",
+                    null,
+                    React.createElement(
+                        "li",
+                        { className: this.props.ordering ? "active" : "" },
+                        React.createElement(
+                            OverlayTrigger,
+                            { placement: "bottom", overlay: React.createElement(
+                                    Tooltip,
+                                    null,
+                                    "Toggles whether options are randomized."
+                                ) },
+                            React.createElement("i", { className: "ion-shuffle" })
+                        )
+                    ),
+                    React.createElement(
+                        "li",
+                        { className: this.props.randomizable ? "active" : "" },
+                        React.createElement(
+                            OverlayTrigger,
+                            { placement: "bottom", overlay: React.createElement(
+                                    Tooltip,
+                                    null,
+                                    "Toggles whether options are ordered."
+                                ) },
+                            React.createElement("i", { className: "ion-arrow-swap" })
+                        )
+                    )
+                )
+            )
         );
     }
 });
 
 module.exports = Block;
 
-},{"../actions/SurveyActions":1,"./HelpText":8,"./ItemTypes":9,"./Question":12,"react":308,"react-dnd":89}],5:[function(require,module,exports){
+},{"../actions/SurveyActions":1,"./HelpText":8,"./ItemTypes":9,"./Question":12,"react":308,"react-bootstrap":71,"react-dnd":89}],5:[function(require,module,exports){
 "use strict";
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -384,8 +419,8 @@ var ItemTypes = require("./ItemTypes");
 var SurveyActions = require("../actions/SurveyActions");
 var HelpText = require("./HelpText");
 
-var OverlayTrigger = require("react-bootstrap").OverlayTrigger,
-    Tooltip = require("react-bootstrap").Tooltip;
+var OverlayTrigger = require("react-bootstrap").OverlayTrigger;
+var Tooltip = require("react-bootstrap").Tooltip;
 
 var Question = React.createClass({
     displayName: "Question",
@@ -693,8 +728,11 @@ var Survey = React.createClass({
             _extends({ style: style, className: "survey"
             }, this.dropTargetFor(ItemTypes.BLOCK)),
             survey.map(function (block) {
-                return React.createElement(Block, { key: block.id,
+                return React.createElement(Block, {
+                    key: block.id,
                     id: block.id,
+                    ordered: block.ordered,
+                    randomizable: block.randomizable,
                     questions: block.questions });
             })
         );
@@ -744,6 +782,7 @@ module.exports = Toolbox;
 var data = [{
     id: 0,
     randomizable: true,
+    ordered: true,
     questions: [],
     subblocks: []
 }];
@@ -795,7 +834,9 @@ var SurveyStore = Reflux.createStore({
         return {
             id: block.id,
             questions: [],
-            subblocks: []
+            subblocks: [],
+            randomizable: true,
+            ordered: true
         };
     },
     getNewQuestionId: function getNewQuestionId() {

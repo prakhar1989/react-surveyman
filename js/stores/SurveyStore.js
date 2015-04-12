@@ -40,7 +40,9 @@ var SurveyStore = Reflux.createStore({
         return {
             id: block.id,
             questions: [],
-            subblocks: []
+            subblocks: [],
+            randomizable: true,
+            ordered: true
         }
     },
     getNewQuestionId() {

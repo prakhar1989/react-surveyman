@@ -41,8 +41,11 @@ var Survey = React.createClass({
                  {...this.dropTargetFor(ItemTypes.BLOCK)}>
             {survey.map(function(block) {
                 return (
-                    <Block key={block.id}
+                    <Block
+                        key={block.id}
                         id={block.id}
+                        ordered={block.ordered}
+                        randomizable={block.randomizable}
                         questions={block.questions} />
                 )
             })}

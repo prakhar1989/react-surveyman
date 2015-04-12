@@ -3,6 +3,7 @@ var data = [
     {
         id: 0,
         randomizable: true,
+        ordered: true,
         questions: [],
         subblocks: []
     }

@@ -88,7 +88,7 @@ div.item.block {
   color: #EFAA1F;
   position: relative;
   margin-bottom: 25px;
-  padding: 25px;
+  padding: 25px 25px 0 25px;
   min-height: 40px;
 }
 
