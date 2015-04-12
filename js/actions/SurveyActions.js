@@ -5,7 +5,8 @@ var SurveyActions = Reflux.createActions([
     "blockDropped",                 // when block is dropped
     "questionDropped",              // when question is dropped
     "optionDropped",                // when option is dropped
-    "toggleModal"                   // when a modal is toggled
+    "toggleModal",                  // when a modal is toggled
+    "showAlert"                     // when the alert box needs to be shown
 ]);
 
 module.exports = SurveyActions;

@@ -5,6 +5,9 @@ var DraggableBlock = require('./DraggableBlock'),
     DraggableQuestion = require('./DraggableQuestion');
 
 var Toolbox = React.createClass({
+    shouldComponentUdpate() {
+        return false;
+    },
     render: function() {
         return (
             <div className="toolbox">

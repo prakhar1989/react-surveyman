@@ -81,7 +81,7 @@ var SurveyStore = Reflux.createStore({
             newSurvey = survey.concat(newBlock);
 
         this.updateData(newSurvey);
-        console.log("new block added");
+        SurveyActions.showAlert("new block added", "success");
     },
     /**
      * Runs when the questionDropped action is called by the view.
@@ -114,7 +114,7 @@ var SurveyStore = Reflux.createStore({
         this.questionMap[newQuestion.id] = questionObj.parentID;
 
         this.updateData(survey);
-        console.log("New question added");
+        SurveyActions.showAlert("new question added", "success");
     },
     /**
      * Runs when the optionDropped action is called by the view.
@@ -145,7 +145,7 @@ var SurveyStore = Reflux.createStore({
         this.optionMap[newOption.id] = question.id;
 
         this.updateData(survey);
-        console.log("new option added");
+        SurveyActions.showAlert("new option added", "success");
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -167,6 +167,28 @@ var SurveyStore = Reflux.createStore({
         // sets the correct dropTarget to pass down to component
         this.data.dropTargetID = dropTargetID;
         this.trigger(this.data);
+    },
+     /* Hides the alert box */
+    hideAlert() {
+        setTimeout(function(self) {
+            self.data.alertState.visible = false;
+            self.trigger(self.data);
+        }, 2000, this);
+    },
+    /**
+     * Run when the action showAlert is called. Responsible for displaying
+     * alert in the app
+     * @param msg - the msg to be displayed
+     * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
+     */
+    onShowAlert(msg, level='info') {
+        this.data.alertState = {
+            msg: msg,
+            level: level,
+            visible: true
+        };
+        this.trigger(this.data);
+        this.hideAlert();
     }
 });
 

@@ -142,3 +142,11 @@ div.item.option {
     border-radius: 20px;
     font-size: 12px;
 }
+div.alert-success {
+    top:5px;
+    position: absolute;
+    width: 960px;
+    -webkit-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
+    -moz-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
+    box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
+}

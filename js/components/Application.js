@@ -10,10 +10,10 @@ var Pallet = require('./Pallet'),
 
 var Application = React.createClass({
     mixins: [Reflux.connect(SurveyStore)],
-    componentDidMount: function() {
+    componentDidMount() {
         SurveyActions.load();
     },
-    render: function() {
+    render() {
         var modalState = this.state.modalState;
         var alertState = this.state.alertState;
         return (
@@ -21,12 +21,10 @@ var Application = React.createClass({
                 <QuestionModal
                     isOpen={modalState.question}
                     parentID={this.state.dropTargetID}/>
-                <div className="col-sm-12">
-                    <AlertBox
-                        msg={alertState.msg}
-                        level={alertState.level}
-                        visible={alertState.visible} />
-                </div>
+                <AlertBox
+                    msg={alertState.msg}
+                    level={alertState.level}
+                    visible={alertState.visible} />
                 <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
                 </div>

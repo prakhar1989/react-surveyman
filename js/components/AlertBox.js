@@ -4,25 +4,14 @@ var SurveyActions = require('../actions/SurveyActions');
 
 var AlertBox = React.createClass({
     propTypes: {
-        level: React.PropTypes.string,
-        visible: React.PropTypes.bool,
+        level: React.PropTypes.string.isRequired,
+        visible: React.PropTypes.bool.isRequired,
         msg: React.PropTypes.string.isRequired
     },
-    getDefaultProps: function() {
-        return {
-            visible: true,
-            level: 'info'
-        }
-    },
-    componentDidMount: function() {
-        setTimeout(function() {
-            console.log("hello world")
-        }, 6000);
-    },
-    render: function() {
+    render() {
         if (this.props.visible) {
             return (
-                <Alert bsStyle={this.props.level} onDismiss={null} dismissAfter={2000}>
+                <Alert bsStyle={this.props.level}>
                     <p>{this.props.msg}</p>
                 </Alert>
             );
@@ -34,3 +23,4 @@ var AlertBox = React.createClass({
 });
 
 module.exports = AlertBox;
+

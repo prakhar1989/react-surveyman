@@ -7,7 +7,8 @@ var SurveyActions = Reflux.createActions(["load", // initial data load
 "blockDropped", // when block is dropped
 "questionDropped", // when question is dropped
 "optionDropped", // when option is dropped
-"toggleModal" // when a modal is toggled
+"toggleModal", // when a modal is toggled
+"showAlert" // when the alert box needs to be shown
 ]);
 
 module.exports = SurveyActions;
@@ -33,26 +34,15 @@ var AlertBox = React.createClass({
     displayName: "AlertBox",
 
     propTypes: {
-        level: React.PropTypes.string,
-        visible: React.PropTypes.bool,
+        level: React.PropTypes.string.isRequired,
+        visible: React.PropTypes.bool.isRequired,
         msg: React.PropTypes.string.isRequired
-    },
-    getDefaultProps: function getDefaultProps() {
-        return {
-            visible: true,
-            level: "info"
-        };
-    },
-    componentDidMount: function componentDidMount() {
-        setTimeout(function () {
-            console.log("hello world");
-        }, 6000);
     },
     render: function render() {
         if (this.props.visible) {
             return React.createElement(
                 Alert,
-                { bsStyle: this.props.level, onDismiss: null, dismissAfter: 2000 },
+                { bsStyle: this.props.level },
                 React.createElement(
                     "p",
                     null,
@@ -95,14 +85,10 @@ var Application = React.createClass({
             React.createElement(QuestionModal, {
                 isOpen: modalState.question,
                 parentID: this.state.dropTargetID }),
-            React.createElement(
-                "div",
-                { className: "col-sm-12" },
-                React.createElement(AlertBox, {
-                    msg: alertState.msg,
-                    level: alertState.level,
-                    visible: alertState.visible })
-            ),
+            React.createElement(AlertBox, {
+                msg: alertState.msg,
+                level: alertState.level,
+                visible: alertState.visible }),
             React.createElement(
                 "div",
                 { className: "col-sm-8" },
@@ -794,6 +780,9 @@ var DraggableBlock = require("./DraggableBlock"),
 var Toolbox = React.createClass({
     displayName: "Toolbox",
 
+    shouldComponentUdpate: function shouldComponentUdpate() {
+        return false;
+    },
     render: function render() {
         return React.createElement(
             "div",
@@ -916,7 +905,7 @@ var SurveyStore = Reflux.createStore({
             newSurvey = survey.concat(newBlock);
 
         this.updateData(newSurvey);
-        console.log("new block added");
+        SurveyActions.showAlert("new block added", "success");
     },
     /**
      * Runs when the questionDropped action is called by the view.
@@ -949,7 +938,7 @@ var SurveyStore = Reflux.createStore({
         this.questionMap[newQuestion.id] = questionObj.parentID;
 
         this.updateData(survey);
-        console.log("New question added");
+        SurveyActions.showAlert("new question added", "success");
     },
     /**
      * Runs when the optionDropped action is called by the view.
@@ -980,7 +969,7 @@ var SurveyStore = Reflux.createStore({
         this.optionMap[newOption.id] = question.id;
 
         this.updateData(survey);
-        console.log("new option added");
+        SurveyActions.showAlert("new option added", "success");
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -1002,6 +991,30 @@ var SurveyStore = Reflux.createStore({
         // sets the correct dropTarget to pass down to component
         this.data.dropTargetID = dropTargetID;
         this.trigger(this.data);
+    },
+    /* Hides the alert box */
+    hideAlert: function hideAlert() {
+        setTimeout(function (self) {
+            self.data.alertState.visible = false;
+            self.trigger(self.data);
+        }, 2000, this);
+    },
+    /**
+     * Run when the action showAlert is called. Responsible for displaying
+     * alert in the app
+     * @param msg - the msg to be displayed
+     * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
+     */
+    onShowAlert: function onShowAlert(msg) {
+        var level = arguments[1] === undefined ? "info" : arguments[1];
+
+        this.data.alertState = {
+            msg: msg,
+            level: level,
+            visible: true
+        };
+        this.trigger(this.data);
+        this.hideAlert();
     }
 });
 
