@@ -1,6 +1,7 @@
 var React = require('react');
 var Reflux = require('reflux');
 var QuestionModal = require('./QuestionModal');
+var AlertBox = require('./AlertBox');
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -19,6 +20,9 @@ var Application = React.createClass({
                 <QuestionModal
                     isOpen={modalState.question}
                     parentID={this.state.dropTargetID}/>
+                <div className="col-sm-12">
+                    <AlertBox msg={this.state.alertMsg} />
+                </div>
                 <div className="col-sm-8">
                     <Pallet survey={this.state.surveyData} />
                 </div>

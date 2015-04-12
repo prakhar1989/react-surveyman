@@ -1,11 +1,9 @@
-var React = require('react'),
-    ReactDND = require('react-dnd');
-
+var React = require('react');
+var ReactDND = require('react-dnd');
 var Option = require('./Option');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
-
 var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
 var Tooltip = require('react-bootstrap').Tooltip;
 
@@ -23,19 +21,12 @@ var Question = React.createClass({
         }
     },
     propTypes: {
-        options: React.PropTypes.array,
-        id: React.PropTypes.number,
-        qtext: React.PropTypes.string
-    },
-    getDefaultProps: function() {
-        return {
-            options: [],
-            id: 0,
-            qtext: "I'm a question",
-            ordering: false,
-            freetext: false,
-            exclusive: false
-        }
+        options: React.PropTypes.array.isRequired,
+        id: React.PropTypes.number.isRequired,
+        qtext: React.PropTypes.string.isRequired,
+        ordering: React.PropTypes.bool.isRequired,
+        freetext: React.PropTypes.bool.isRequired,
+        exclusive: React.PropTypes.bool.isRequired
     },
     handleOptionDrop() {
         SurveyActions.optionDropped(this.props.id);

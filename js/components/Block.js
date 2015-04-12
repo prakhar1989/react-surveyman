@@ -1,5 +1,5 @@
-var React = require('react'),
-    ReactDND = require('react-dnd');
+var React = require('react');
+var ReactDND = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
@@ -15,23 +15,17 @@ var Block = React.createClass({
                 dropTarget: {
                     acceptDrop: function(component, item) {
                         component.handleQuestionDrop();
-
                     }
                 }
             });
         }
     },
     propTypes: {
-        id: React.PropTypes.number,
-        questions: React.PropTypes.array,
-        subblocks: React.PropTypes.array
-    },
-    getDefaultProps: function() {
-        return {
-            id: 0,
-            questions: [],
-            subblocks: []
-        }
+        id: React.PropTypes.number.isRequired,
+        questions: React.PropTypes.array.isRequired,
+        subblocks: React.PropTypes.array.isRequired,
+        randomizable: React.PropTypes.bool.isRequired,
+        ordering: React.PropTypes.bool.isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
@@ -62,7 +56,7 @@ var Block = React.createClass({
                 {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
                 <div className="config-area">
                     <ul>
-                        <li className={this.props.ordered ? 'active' : ''}>
+                        <li className={this.props.ordering ? 'active' : ''}>
                             <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
                                 <i className="ion-shuffle"></i>
                             </OverlayTrigger>

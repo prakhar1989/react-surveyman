@@ -44,7 +44,8 @@ var Survey = React.createClass({
                     <Block
                         key={block.id}
                         id={block.id}
-                        ordered={block.ordered}
+                        subblocks={[]}
+                        ordering={block.ordering}
                         randomizable={block.randomizable}
                         questions={block.questions} />
                 )
