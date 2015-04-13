@@ -1063,8 +1063,8 @@ var SurveyStore = Reflux.createStore({
      * Logs the survey object to the console.
      */
     onDownloadSurvey: function onDownloadSurvey() {
-        console.log(this.data.surveyData);
-        SurveyActions.showAlert("new option added", "success");
+        console.log("Survey:", this.data.surveyData);
+        SurveyActions.showAlert("Survey logged in your Dev console", "success");
     }
 });
 
