@@ -189,6 +189,14 @@ var SurveyStore = Reflux.createStore({
         };
         this.trigger(this.data);
         this.hideAlert();
+    },
+    /**
+     * Called when the downloadSurvey action is called. 
+     * Logs the survey object to the console.
+     */
+    onDownloadSurvey() {
+        console.log(this.data.surveyData);
+        SurveyActions.showAlert("new option added", "success");
     }
 });
 

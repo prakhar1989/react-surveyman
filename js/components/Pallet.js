@@ -1,5 +1,6 @@
 var React = require('react');
 var Survey = require('./Survey');
+var Controls = require('./Controls');
 
 var Pallet = React.createClass({
     propTypes: {
@@ -8,7 +9,7 @@ var Pallet = React.createClass({
     render: function() {
         return (
             <div>
-                <h3>Pallet</h3>
+                <Controls />
                 <div className="survey-area">
                     <Survey survey={this.props.survey} />
                 </div>

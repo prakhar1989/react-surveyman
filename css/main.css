@@ -10,6 +10,10 @@ div.container {
   min-height: 300px;
   padding-bottom: 40px;
 }
+div.controls button {
+  margin-top: 10px;
+  float: right;
+}
 div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
@@ -143,10 +147,20 @@ div.item.option {
     font-size: 12px;
 }
 div.alert-success {
-    top:5px;
-    position: absolute;
+    top: 5px;
+    position: fixed;
     width: 960px;
-    -webkit-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
-    -moz-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
-    box-shadow: 0 2px 5px -1px rgba(170,170,170,.39)
+    -webkit-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39);
+    -moz-box-shadow:0 2px 5px -1px rgba(170,170,170,.39);
+    box-shadow:0 2px 5px -1px rgba(170,170,170,.39);
+    background: #dff0d8;
+    z-index: 10;
+    height: 35px;
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 13px;
+    border: black;
 }
