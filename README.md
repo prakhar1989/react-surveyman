@@ -5,8 +5,6 @@ React-surveyman is a survey building tool for the [Surveyman](https://github.com
 
 React-surveyman is an accepted project in [GSOC 2015](https://www.google-melange.com/gsoc/homepage/google/gsoc2015) under the [Plasma@UMass](http://plasma.cs.umass.edu/) group.
 
-### Wireframe
-
 ![wireframe](http://i.imgur.com/LlAR6HW.png)
 
 ### Build and Run
@@ -14,6 +12,7 @@ In order to run the project locally -
 ```
 $ npm install 
 $ npm run build
+## serve files with your favorite server
 $ python -m SimpleHTTPServer
 ```
 
