@@ -201,16 +201,33 @@ var SurveyStore = Reflux.createStore({
     /**
      * Called when the toggleParam action is called.
      * Toggles the property on the item.
+     * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
+     * @param itemId - Id of the item for which toggle button is clicked
+     * @param toggleName - string name of property that is toggled.
      */
     onToggleParam(itemType, itemId, toggleName) {
+        var block;
+
+        // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            // handle the case when a param on a block is toggled
-            var block = this.data.surveyData[itemId];
+            block = this.data.surveyData[itemId];
             block[toggleName] = !block[toggleName];
             this.trigger(this.data);
-        } else if (itemType === ItemTypes.QUESTION) {
-            // handle the case when a param on a question is toggled
-        } else {
+        }
+
+        // handle the case when a param on a question is toggled
+        else if (itemType === ItemTypes.QUESTION) {
+            var blockId = this.questionMap[itemId];
+            block = this.data.surveyData[blockId];
+            var question = _.find(block.questions, ques => {
+                return ques.id === itemId
+            });
+            question[toggleName] = !question[toggleName];
+            this.trigger(this.data);
+        }
+
+        // throw exception
+        else {
             throw new Error("Not a valid item type");
         }
     }

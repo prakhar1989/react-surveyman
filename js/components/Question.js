@@ -55,19 +55,28 @@ var Question = React.createClass({
                             <ToggleParam
                                 icon="ion-shuffle"
                                 helpText="Toggles whether options are randomized"
-                                toggleProp={this.props.ordering} />
+                                toggleValue={this.props.ordering}
+                                toggleName='ordering'
+                                itemType={ItemTypes.QUESTION}
+                                itemId={this.props.id} />
                         </li>
                         <li>
                             <ToggleParam
                                 icon="ion-android-radio-button-on"
                                 helpText="Toggles whether options appear as radio button or checkbox"
-                                toggleProp={this.props.exclusive} />
+                                toggleValue={this.props.exclusive}
+                                toggleName='exclusive'
+                                itemType={ItemTypes.QUESTION}
+                                itemId={this.props.id} />
                         </li>
                         <li>
                             <ToggleParam
                                 icon="ion-document-text"
                                 helpText="Toggles whether free text can be entered"
-                                toggleProp={this.props.freetext} />
+                                toggleValue={this.props.freetext}
+                                toggleName='freetext'
+                                itemType={ItemTypes.QUESTION}
+                                itemId={this.props.id} />
                         </li>
                     </ul>
                 </div>
