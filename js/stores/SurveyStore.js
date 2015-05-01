@@ -197,6 +197,22 @@ var SurveyStore = Reflux.createStore({
     onDownloadSurvey() {
         console.log("Survey:", this.data.surveyData);
         SurveyActions.showAlert("Survey logged in your Dev console", "success");
+    },
+    /**
+     * Called when the toggleParam action is called.
+     * Toggles the property on the item.
+     */
+    onToggleParam(itemType, itemId, toggleName) {
+        if (itemType === ItemTypes.BLOCK) {
+            // handle the case when a param on a block is toggled
+            var block = this.data.surveyData[itemId];
+            block[toggleName] = !block[toggleName];
+            this.trigger(this.data);
+        } else if (itemType === ItemTypes.QUESTION) {
+            // handle the case when a param on a question is toggled
+        } else {
+            throw new Error("Not a valid item type");
+        }
     }
 });
 

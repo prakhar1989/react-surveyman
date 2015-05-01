@@ -59,13 +59,19 @@ var Block = React.createClass({
                             <ToggleParam
                                 icon="ion-shuffle"
                                 helpText="Toggles whether questions are randomized"
-                                toggleProp={this.props.ordering} />
+                                toggleValue={this.props.ordering}
+                                toggleName='ordering'
+                                itemType={ItemTypes.BLOCK}
+                                itemId={this.props.id} />
                         </li>
                         <li>
                             <ToggleParam
                                 icon="ion-arrow-swap"
                                 helpText="Toggles whether questions are ordered"
-                                toggleProp={this.props.randomizable} />
+                                toggleValue={this.props.randomizable}
+                                toggleName='randomizable'
+                                itemType={ItemTypes.BLOCK}
+                                itemId={this.props.id} />
                         </li>
                     </ul>
                 </div>
