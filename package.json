@@ -1,12 +1,12 @@
 {
   "name": "react-surveyman",
   "version": "0.0.1",
-  "description": "React Surveyman is frontend for the SurveyMan survey tool.",
+  "description": "React Surveyman is a browser-based survey builder meant to be used with SurveyMan.",
   "main": "reactcart.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify -t babelify ./js/app.js -o ./build/bundle.js -v",
-    "build": "gulp build && NODE_ENV=production browserify -t babelify ./js/app.js | ./node_modules/uglify-js/bin/uglifyjs -mc > build/bundle.js"
+    "build": "gulp build && NODE_ENV=production browserify -t babelify ./js/app.js | ./node_modules/uglify-js/bin/uglifyjs -mc  warnings=false > build/bundle.js"
   },
   "author": "Prakhar Srivastav",
   "license": "MIT",
