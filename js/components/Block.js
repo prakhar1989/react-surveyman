@@ -4,8 +4,7 @@ var ItemTypes = require('./ItemTypes');
 var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-var Tooltip = require('react-bootstrap').Tooltip;
+var ToggleParam = require('./ToggleParam');
 
 var Block = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -56,15 +55,17 @@ var Block = React.createClass({
                 {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
                 <div className="config-area">
                     <ul>
-                        <li className={this.props.ordering ? 'active' : ''}>
-                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
-                                <i className="ion-shuffle"></i>
-                            </OverlayTrigger>
+                        <li>
+                            <ToggleParam
+                                icon="ion-shuffle"
+                                helpText="Toggles whether questions are randomized"
+                                toggleProp={this.props.ordering} />
                         </li>
-                        <li className={this.props.randomizable ? 'active' : ''}>
-                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are ordered.</Tooltip>}>
-                                <i className="ion-arrow-swap"></i>
-                            </OverlayTrigger>
+                        <li>
+                            <ToggleParam
+                                icon="ion-arrow-swap"
+                                helpText="Toggles whether questions are ordered"
+                                toggleProp={this.props.randomizable} />
                         </li>
                     </ul>
                 </div>

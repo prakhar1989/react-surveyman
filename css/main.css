@@ -51,7 +51,7 @@ div.config-area ul li i {
     opacity: 0.4;
 }
 
-div.config-area ul li.active i {
+div.config-area ul li div.active i {
     opacity: 1.0;
 }
 

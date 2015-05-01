@@ -6,8 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify -t babelify ./js/app.js -o ./build/bundle.js -v",
-    "build": "gulp build && browserify -t babelify ./js/app.js -o ./build/bundle.js",
-    "build-release": "NODE_ENV=production browserify -t babelify ./js/app.js | ./node_modules/uglify-js/bin/uglifyjs -mc > build/bundle.js"
+    "build": "gulp build && NODE_ENV=production browserify -t babelify ./js/app.js | ./node_modules/uglify-js/bin/uglifyjs -mc > build/bundle.js"
   },
   "author": "Prakhar Srivastav",
   "license": "MIT",

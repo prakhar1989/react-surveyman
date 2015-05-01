@@ -4,8 +4,7 @@ var Option = require('./Option');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-var Tooltip = require('react-bootstrap').Tooltip;
+var ToggleParam = require('./ToggleParam');
 
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -49,25 +48,26 @@ var Question = React.createClass({
                 style={style}
                 {...this.dropTargetFor(ItemTypes.OPTION)}>
                 <div className="qtext"> {this.props.qtext} </div>
-                <div>
-                {options.length > 0 ? options : <HelpText itemType="Option" />}
-                </div>
+                <div> {options.length > 0 ? options : <HelpText itemType="Option" />} </div>
                 <div className="config-area">
                     <ul>
-                        <li className={this.props.ordering ? 'active' : ''}>
-                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options are randomized.</Tooltip>}>
-                                <i className="ion-shuffle"></i>
-                            </OverlayTrigger>
+                        <li>
+                            <ToggleParam
+                                icon="ion-shuffle"
+                                helpText="Toggles whether options are randomized"
+                                toggleProp={this.props.ordering} />
                         </li>
-                        <li className={this.props.exclusive ? 'active' : ''}>
-                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether options appear as radio button or checkbox.</Tooltip>}>
-                                <i className="ion-android-radio-button-on"></i>
-                            </OverlayTrigger>
+                        <li>
+                            <ToggleParam
+                                icon="ion-android-radio-button-on"
+                                helpText="Toggles whether options appear as radio button or checkbox"
+                                toggleProp={this.props.exclusive} />
                         </li>
-                        <li className={this.props.freetext ? 'active' : ''}>
-                            <OverlayTrigger placement='bottom' overlay={<Tooltip>Toggles whether free text can be entered.</Tooltip>}>
-                                <i className="ion-document-text"></i>
-                            </OverlayTrigger>
+                        <li>
+                            <ToggleParam
+                                icon="ion-document-text"
+                                helpText="Toggles whether free text can be entered"
+                                toggleProp={this.props.freetext} />
                         </li>
                     </ul>
                 </div>
