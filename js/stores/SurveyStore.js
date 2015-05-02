@@ -230,6 +230,38 @@ var SurveyStore = Reflux.createStore({
         else {
             throw new Error("Not a valid item type");
         }
+    },
+    /**
+     * Called when an item has to be deleted.
+     * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
+     * @param itemId - Id of item to be deleted.
+     */
+    onItemDelete(itemType, itemId) {
+        // handle block delete
+        if (itemType === ItemTypes.BLOCK) {
+
+        }
+
+        // handle question delete
+        else if (itemType === ItemTypes.QUESTION) {
+            var blockId = this.questionMap[itemId];
+            var block = this.data.surveyData[blockId];
+            var index = _.findIndex(block.questions, ques => {
+                return ques.id === itemId
+            });
+            block.questions.splice(index, 1);
+            SurveyActions.showAlert("Item deleted successfully", "success");
+        }
+
+        // handle option delete
+        else if (itemType === ItemTypes.OPTION) {
+
+        }
+
+        // throw exception
+        else {
+            throw new Error("Not a valid item type");
+        }
     }
 });
 

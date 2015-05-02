@@ -136,6 +136,21 @@ div.item.question .qtext {
     font-weight: 600;
     margin-bottom: 5px;
 }
+
+div.item.question .qtext span.edit-controls {
+    margin-left: 10px;
+}
+
+div.item.question .qtext span.edit-controls i {
+    visibility: hidden;
+    margin-right: 5px;
+}
+
+div.item.question .qtext:hover span.edit-controls i {
+    cursor: pointer;
+    visibility: visible;
+}
+
 div.item.option {
     border: 1px solid #D1D0A3;
     margin-right: 7px;

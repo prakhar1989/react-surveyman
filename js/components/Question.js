@@ -30,6 +30,16 @@ var Question = React.createClass({
     handleOptionDrop() {
         SurveyActions.optionDropped(this.props.id);
     },
+    handleDelete() {
+        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
+                        "question and its options? There's no undo for this action.");
+        if (deleteConfirmation) {
+            SurveyActions.itemDelete(ItemTypes.QUESTION, this.props.id);
+        }
+    },
+    handleEdit() {
+        console.log("Edit text");
+    },
     render: function() {
         var options = this.props.options.map(op => {
             return <Option key={op.id} otext={op.otext} />
@@ -47,7 +57,13 @@ var Question = React.createClass({
             <div className="item question"
                 style={style}
                 {...this.dropTargetFor(ItemTypes.OPTION)}>
-                <div className="qtext"> {this.props.qtext} </div>
+                <div className="qtext">
+                    {this.props.qtext}
+                    <span className="edit-controls">
+                        <i className="ion-edit" onClick={this.handleEdit}></i>
+                        <i className="ion-trash-b" onClick={this.handleDelete}></i>
+                    </span>
+                </div>
                 <div> {options.length > 0 ? options : <HelpText itemType="Option" />} </div>
                 <div className="config-area">
                     <ul>
