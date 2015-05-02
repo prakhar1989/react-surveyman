@@ -11,12 +11,6 @@ var Option = React.createClass({
             otext: "I'm an option"
         }
     },
-    handleEdit() {
-
-    },
-    handleDelete() {
-
-    },
     render: function() {
         return (
             <div className="item option">

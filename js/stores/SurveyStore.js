@@ -262,6 +262,21 @@ var SurveyStore = Reflux.createStore({
         else {
             throw new Error("Not a valid item type");
         }
+    },
+    /**
+     * Called when the question text is edited. Responsible for
+     * saving new value.
+     * @param text - new text value
+     * @param questionId - id of the question that needs to be changed
+     */
+    onSaveEditText(text, questionId) {
+        var blockId = this.questionMap[questionId];
+        var block = this.data.surveyData[blockId];
+        var question = _.find(block.questions, ques => {
+            return ques.id === questionId
+        });
+        question.qtext = text;
+        this.trigger(this.data);
     }
 });
 

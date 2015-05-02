@@ -137,16 +137,12 @@ div.item.question .qtext {
     margin-bottom: 5px;
 }
 
-div.item.question .qtext span.edit-controls {
+div.item.question div.qtext-area i {
     margin-left: 10px;
-}
-
-div.item.question .qtext span.edit-controls i {
     visibility: hidden;
-    margin-right: 5px;
 }
 
-div.item.question .qtext:hover span.edit-controls i {
+div.item.question div.qtext-area:hover i {
     cursor: pointer;
     visibility: visible;
 }

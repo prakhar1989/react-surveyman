@@ -27,6 +27,11 @@ var Question = React.createClass({
         freetext: React.PropTypes.bool.isRequired,
         exclusive: React.PropTypes.bool.isRequired
     },
+    getInitialState: function() {
+        return {
+            editing: false
+        }
+    },
     handleOptionDrop() {
         SurveyActions.optionDropped(this.props.id);
     },
@@ -37,8 +42,28 @@ var Question = React.createClass({
             SurveyActions.itemDelete(ItemTypes.QUESTION, this.props.id);
         }
     },
-    handleEdit() {
-        console.log("Edit text");
+    // toggles the state of question text field to editing
+    toggleInput() {
+        this.setState({
+            editing: true
+        });
+    },
+    /**
+     * handler called when the textinput loses focus or detects change.
+     * responsible for calling relevant action that saves the new text.
+     */
+    handleEdit(e) {
+        if (e.type === "blur" || 
+           (e.type === "keypress" && e.key === "Enter")) {
+
+            this.setState({ editing: false });
+
+            // if the new value is blank do nothing
+            if (e.target.value.trim() === "") {
+                return; 
+            }
+            SurveyActions.saveEditText(e.target.value, this.props.id);
+        }
     },
     render: function() {
         var options = this.props.options.map(op => {
@@ -53,16 +78,22 @@ var Question = React.createClass({
             style.backgroundColor = "#eeeeee";
         }
 
+        // placeholder for taking input when text is clicked
+        var input = <input type="text"
+            defaultValue={this.props.qtext}
+            style={{width: 200}}
+            onBlur={this.handleEdit}
+            onKeyPress={this.handleEdit} />;
+
         return (
             <div className="item question"
                 style={style}
                 {...this.dropTargetFor(ItemTypes.OPTION)}>
-                <div className="qtext">
-                    {this.props.qtext}
-                    <span className="edit-controls">
-                        <i className="ion-edit" onClick={this.handleEdit}></i>
-                        <i className="ion-trash-b" onClick={this.handleDelete}></i>
-                    </span>
+                <div className="qtext-area">
+                  <span className="qtext" onClick={this.toggleInput}>
+                  { this.state.editing ? input : this.props.qtext }
+                  </span>
+                  <i className="ion-trash-b" onClick={this.handleDelete}></i>
                 </div>
                 <div> {options.length > 0 ? options : <HelpText itemType="Option" />} </div>
                 <div className="config-area">
