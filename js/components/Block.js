@@ -29,6 +29,13 @@ var Block = React.createClass({
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
+    handleDelete() {
+        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
+                        "block, its associated questions and options? There's no undo for this action.");
+        if (deleteConfirmation) {
+            SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
+        }
+    },
     render() {
         var questions = this.props.questions.map(q => {
             return <Question
@@ -52,6 +59,12 @@ var Block = React.createClass({
         return (
             <div className="item block"
                 {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
+                <div className="controls-area">
+                    <ul>
+                      <li><i title="Delete Block" className="ion-trash-b" onClick={this.handleDelete}></i></li>
+                      <li><i title="Add Question" className="ion-plus-circled" onClick={this.handleQuestionDrop}></i></li>
+                    </ul>  
+                </div>
                 {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
                 <div className="config-area">
                     <ul>

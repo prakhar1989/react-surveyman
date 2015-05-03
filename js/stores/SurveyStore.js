@@ -239,7 +239,14 @@ var SurveyStore = Reflux.createStore({
     onItemDelete(itemType, itemId) {
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
+            this.data.surveyData.splice(itemId, 1);
 
+            // if all blocks have been deleted, add a new one
+            if (this.data.surveyData.length == 0) {
+                SurveyActions.blockDropped();
+            }
+
+            SurveyActions.showAlert("Block deleted successfully", "success");
         }
 
         // handle question delete

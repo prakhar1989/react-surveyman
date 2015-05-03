@@ -73,6 +73,28 @@ div.config-area ul li {
     cursor: pointer;
 }
 
+div.item div.controls-area {
+    visibility: hidden;
+}
+
+div.item:hover div.controls-area {
+    visibility: visible;
+}
+
+div.item div.controls-area ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    margin-top: 5px;
+}
+
+div.item div.controls-area ul li {
+    display: inline-block;
+    font-size: 18px;
+    margin: 0 8px;
+    cursor: pointer;
+}
+
 p.help-text {
     color: #bbb;
     font-style: italic;
@@ -92,7 +114,7 @@ div.item.block {
   color: #EFAA1F;
   position: relative;
   margin-bottom: 25px;
-  padding: 25px 25px 0 25px;
+  padding: 0 30px;
   min-height: 40px;
 }
 
