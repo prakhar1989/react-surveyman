@@ -6,32 +6,51 @@ var Tags = React.createClass({
     },
     getInitialState: function() {
         return {
-            tags: this.props.tags
+            tags: this.props.tags,
+            suggestions: this.props.suggestions,
+            query: "",
+            selectedIndex: 1
         }
-    },
-    handleInput: function(e) {
-        var tags = this.state.tags;
-        if (e.key === "Enter" && e.target.value.trim() != "") {
-            tags.push(e.target.value);
-            this.refs.input.getDOMNode().value = "";
-        }
-        this.setState({
-            tags: tags
-        });
     },
     handleDelete: function(i, e) {
         var tags = this.state.tags;
         tags.splice(i, 1);
         this.setState({
-            tags: tags
+            tags: tags,
+            query: ""
         });
     },
+    handleChange: function(e) {
+        this.setState({
+            query: e.target.value
+        })
+    },
     handleKeyDown: function(e) {
-        // TODO: might be wrong
         var tags = this.state.tags;
-        var text = this.refs.input.getDOMNode().value;
-        if (e.keyCode === 8 && text == "") {
+        var input = this.refs.input.getDOMNode();
+        var query = this.state.query;
+        var selectedIndex = this.state.selectedIndex;
+
+        // when enter is pressed add query to tass
+        if (e.keyCode === 13 && query != "") {
+            tags.push(query);
+            input.value = "";
+            this.setState({ tags: tags, query: ""});
+        }
+
+        // when backspace key is pressed and query is blank, delete tag
+        if (e.keyCode === 8 && query == "") { //
             this.handleDelete(tags.length - 1);
+        }
+
+        // up arrow
+        if (e.keyCode === 38) {
+            e.preventDefault();
+        }
+
+        // down arrow
+        if (e.keyCode === 40) {
+            e.preventDefault();
         }
     },
     render: function() {
@@ -43,16 +62,47 @@ var Tags = React.createClass({
                 </span>
             )
         }.bind(this));
+
+
+        // get the suggestions for the given query
+        var query = this.state.query;
+        var selectedIndex = this.state.selectedIndex;
+
+        if (query.trim().length > 1) {
+            var suggestions = this.props.suggestions
+                .filter(function(item) {
+                    return (item.toLowerCase()).search(query) !== -1;
+                })
+                .map(function(item, i) {
+                    return (
+                        <li key={i} className={i == selectedIndex ? "active" : ""}>{item}</li>
+                    )
+                });
+        }
+
         return ( 
-            <div className="tagInput"> {tagItems} 
-                <input ref="input" 
-                    type="text" 
-                    placeholder="Add new tag"
-                    onKeyPress={this.handleInput} 
-                    onKeyDown={this.handleKeyDown}/>
+            <div className="tags">
+                <div className="tagInput"> {tagItems} 
+                    <input ref="input" 
+                        type="text" 
+                        placeholder="Add new tag"
+                        onChange={this.handleChange}
+                        onKeyDown={this.handleKeyDown}/>
+                </div>
+                <div className="suggestions">
+                    <ul> {suggestions} </ul>
+                </div>
             </div>
         )
     }
 });
+
+/*
+React.render(
+    <Tags tags={tags} 
+        suggestions={fruits} />, 
+    document.getElementById("app")
+);
+*/
 
 module.exports = Tags;
