@@ -1,23 +1,34 @@
 var React = require('react');
+var ReactTags = require('react-tag-input');
+var SurveyActions = require('../actions/SurveyActions');
+var ItemTypes = require('./ItemTypes');
 
-var Option = React.createClass({
+var Options = React.createClass({
     propTypes: {
-        id: React.PropTypes.number,
-        otext: React.PropTypes.string
+        options: React.PropTypes.array.isRequired,
+        questionId: React.PropTypes.number.isRequired
     },
-    getDefaultProps: function() {
-        return {
-            id: 0,
-            otext: "I'm an option"
-        }
+    handleAddition: function(otext) {
+        SurveyActions.optionAdded(this.props.questionId, otext);
+    },
+    handleDeletion: function(index) {
+        var optionId = this.props.options[index].id;
+        SurveyActions.itemDelete(ItemTypes.OPTION, optionId);
+    },
+    handleDrag: function() {
     },
     render: function() {
+        var suggestions = [];
         return (
-            <div className="item option">
-                {this.props.otext}
-            </div>
+            <ReactTags tags={this.props.options}
+                    suggestions={suggestions}
+                    handleAddition={this.handleAddition}
+                    handleDelete={this.handleDeletion}
+                    handleDrag={this.handleDrag}
+                    labelField={'otext'}
+                    placeholder={"Add new option"} />
         )
     }
 });
 
-module.exports = Option;
+module.exports = Options;

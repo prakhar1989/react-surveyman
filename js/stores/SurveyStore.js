@@ -117,11 +117,12 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("new question added", "success");
     },
     /**
-     * Runs when the optionDropped action is called by the view.
-     * Adds an option to the question whose id is provided as an argument.
+     * Runs when the optionAdded action is called by the view.
+     * Adds an option with text as otext to the question whose id is provided as an argument.
      * @param questionId (int) of the question to which the option will be added.
+     * @param otext (string) the text of the option to be added
      */
-    onOptionDropped(questionId) {
+    onOptionAdded(questionId, otext) {
         var survey = this.data.surveyData,
             blockId = this.questionMap[questionId];
 
@@ -133,8 +134,7 @@ var SurveyStore = Reflux.createStore({
             throw new Error('Question not found');
         }
 
-        var otext = prompt("Enter option text");
-        if (otext == undefined) {
+        if (otext === undefined) {
             return;
         }
 
@@ -145,7 +145,6 @@ var SurveyStore = Reflux.createStore({
         this.optionMap[newOption.id] = question.id;
 
         this.updateData(survey);
-        SurveyActions.showAlert("new option added", "success");
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -262,7 +261,13 @@ var SurveyStore = Reflux.createStore({
 
         // handle option delete
         else if (itemType === ItemTypes.OPTION) {
-
+            var questionId = this.optionMap[itemId];
+            var blockId = this.questionMap[questionId];
+            var block = this.data.surveyData[blockId];
+            var question = block.questions.filter(q => q.id === questionId)[0];
+            var index = _.findIndex(question.options, opt => opt.id === itemId);
+            question.options.splice(index, 1);
+            SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
         // throw exception

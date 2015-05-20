@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
-    webserver = require('gulp-webserver'),
     minifyCSS = require('gulp-minify-css'),
     rename = require('gulp-rename');
 
@@ -15,15 +14,6 @@ gulp.task('css', function() {
         .pipe(minifyCSS())
         .pipe(rename('styles.min.css'))
         .pipe(gulp.dest('build'));
-});
-
-gulp.task('webserver', function() {
-  gulp.src('.')
-    .pipe(webserver({
-      livereload: true,
-      directoryListing: true,
-      open: '/index.html'
-    }));
 });
 
 gulp.task('watch', function() {

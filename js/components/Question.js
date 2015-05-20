@@ -1,6 +1,6 @@
 var React = require('react');
 var ReactDND = require('react-dnd');
-var Option = require('./Option');
+var Options = require('./Option');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
@@ -31,9 +31,6 @@ var Question = React.createClass({
         return {
             editing: false
         }
-    },
-    handleOptionDrop() {
-        SurveyActions.optionDropped(this.props.id);
     },
     handleDelete() {
         var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
@@ -66,11 +63,8 @@ var Question = React.createClass({
         }
     },
     render: function() {
-        var options = this.props.options.map(op => {
-            return <Option key={op.id} otext={op.otext} />
-        });
-
         var dropState = this.getDropState(ItemTypes.OPTION);
+
         var style = {};
         if (dropState.isHovering) {
             style.backgroundColor = '#f4fbd7';
@@ -80,10 +74,10 @@ var Question = React.createClass({
 
         // placeholder for taking input when text is clicked
         var input = <input type="text"
-            defaultValue={this.props.qtext}
-            style={{width: 200}}
-            onBlur={this.handleEdit}
-            onKeyPress={this.handleEdit} />;
+                        defaultValue={this.props.qtext}
+                        style={{width: 200}}
+                        onBlur={this.handleEdit}
+                        onKeyPress={this.handleEdit} />;
 
         return (
             <div className="item question"
@@ -95,7 +89,9 @@ var Question = React.createClass({
                   </span>
                   <i className="ion-trash-b" onClick={this.handleDelete}></i>
                 </div>
-                <div> {options.length > 0 ? options : <HelpText itemType="Option" />} </div>
+
+                <Options options={this.props.options} questionId={this.props.id} />
+
                 <div className="config-area">
                     <ul>
                         <li>

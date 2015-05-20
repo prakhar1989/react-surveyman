@@ -23,6 +23,7 @@
     "react": "^0.13.1",
     "react-bootstrap": "^0.20.1",
     "react-dnd": "0.9.8",
+    "react-tag-input": "0.0.6",
     "reflux": "^0.2.7",
     "webpack": "^1.9.7",
     "webpack-dev-server": "^1.8.2"
