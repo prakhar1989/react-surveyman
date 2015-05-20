@@ -1,6 +1,6 @@
 var React = require('react');
 var ReactDND = require('react-dnd');
-var Options = require('./Option');
+var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
