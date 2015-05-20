@@ -8,10 +8,10 @@ React-surveyman is an accepted project in [GSOC 2015](https://www.google-melange
 ![wireframe](http://i.imgur.com/LlAR6HW.png)
 
 ### Build and Run
-In order to run the project locally - 
+In order to start the project locally - 
 ```
 $ npm install 
-$ npm run build
+$ npm run start
 ## serve files with your favorite server
 $ python -m SimpleHTTPServer
 ```

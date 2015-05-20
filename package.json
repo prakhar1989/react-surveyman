@@ -2,29 +2,29 @@
   "name": "react-surveyman",
   "version": "0.0.1",
   "description": "React Surveyman is a browser-based survey builder meant to be used with SurveyMan.",
-  "main": "reactcart.js",
+  "main": "./lib/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify -t babelify ./js/app.js -o ./build/bundle.js -v",
-    "build": "gulp build && NODE_ENV=production browserify -t babelify ./js/app.js | ./node_modules/uglify-js/bin/uglifyjs -mc  warnings=false > build/bundle.js"
+    "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 8090",
+    "build": "gulp build && webpack -p"
   },
   "author": "Prakhar Srivastav",
   "license": "MIT",
   "repository": "https://github.com/prakhar1989/react-surveyman",
   "dependencies": {
-    "babelify": "^5.0.4",
-    "browserify": "^9.0.3",
+    "babel-core": "^5.4.3",
+    "babel-loader": "^5.1.2",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-minify-css": "^1.0.0",
     "gulp-rename": "^1.2.0",
-    "gulp-webserver": "^0.9.0",
+    "lodash": "^3.9.1",
+    "node-libs-browser": "^0.5.0",
     "react": "^0.13.1",
     "react-bootstrap": "^0.20.1",
-    "react-dnd": "^0.9.8",
+    "react-dnd": "0.9.8",
     "reflux": "^0.2.7",
-    "uglify-js": "^2.4.20",
-    "underscore": "^1.8.3",
-    "watchify": "^3.1.0"
+    "webpack": "^1.9.7",
+    "webpack-dev-server": "^1.8.2"
   }
 }

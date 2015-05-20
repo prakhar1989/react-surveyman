@@ -1,5 +1,5 @@
 var Reflux = require('reflux');
-var _ = require('underscore');
+var _ = require('lodash');
 var SurveyData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
