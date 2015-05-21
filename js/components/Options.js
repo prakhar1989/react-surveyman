@@ -2,26 +2,35 @@ var React = require('react');
 var ReactTags = require('react-tag-input');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
+var SurveyStore = require('../stores/SurveyStore');
 
 var Options = React.createClass({
     propTypes: {
         options: React.PropTypes.array.isRequired,
         questionId: React.PropTypes.number.isRequired
     },
+    getInitialState: function() {
+        return {
+            suggestions: []
+        }
+    },
+    componentDidMount: function() {
+        var optionSet = SurveyStore.getOptionsSet();
+        this.setState({ suggestions: Array.from(optionSet) });
+    },
     handleAddition: function(otext) {
         SurveyActions.optionAdded(this.props.questionId, otext);
     },
     handleDeletion: function(index) {
-        var optionId = this.props.options[index].id;
-        SurveyActions.itemDelete(ItemTypes.OPTION, optionId);
+        var { id } = this.props.options[index];
+        SurveyActions.itemDelete(ItemTypes.OPTION, id);
     },
     handleDrag: function() {
     },
     render: function() {
-        var suggestions = [];
         return (
             <ReactTags tags={this.props.options}
-                    suggestions={suggestions}
+                    suggestions={this.state.suggestions}
                     handleAddition={this.handleAddition}
                     handleDelete={this.handleDeletion}
                     handleDrag={this.handleDrag}

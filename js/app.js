@@ -1,4 +1,5 @@
 var React = require('react');
+require("babel/polyfill");
 
 var App = require('./components/Application'),
     AppComponent = React.createFactory(App);

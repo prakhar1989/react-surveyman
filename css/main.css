@@ -197,3 +197,41 @@ div.alert-success {
     font-size: 13px;
     border: black;
 }
+
+div.ReactTags__tagInput {
+    width: 100px;
+    border-radius: 2px;
+    display: inline-block;
+}
+div.ReactTags__tagInput input, 
+div.ReactTags__tagInput input:focus {
+    height: 31px;
+    margin: 0;
+    font-size: 12px;
+    width: 100%;
+    border: 1px solid #eee;
+}
+div.ReactTags__tags {
+    position: relative;
+    margin-top: 10px;
+}
+div.ReactTags__selected {
+  float: left;
+}
+div.ReactTags__suggestions {
+    position: absolute;
+}
+div.ReactTags__suggestions ul {
+    padding: 0;
+    width: 100px;
+}
+div.ReactTags__suggestions li mark {
+    text-decoration: underline;
+    background: none;
+    font-weight: 600;
+    padding: 0;
+}
+div.ReactTags__suggestions ul li.active {
+    background: #b7cfe0;
+    cursor: pointer;
+}

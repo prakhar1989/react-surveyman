@@ -27,6 +27,12 @@ var SurveyStore = Reflux.createStore({
         // faster retrieval of associated blocks and questions.
         this.questionMap = {};      // question -> block
         this.optionMap = {};        // option -> question
+
+        // a set of option texts - helps in generating suggestions
+        this.optionsSet = new Set();
+    },
+    getOptionsSet() {
+        return this.optionsSet;
     },
     fetchData() {
         this.updateData(SurveyData);
@@ -141,8 +147,9 @@ var SurveyStore = Reflux.createStore({
         var newOption = this.getNewOption({otext: otext});
         question.options = question.options.concat(newOption);
 
-        // update the option map
+        // update the option map and options set
         this.optionMap[newOption.id] = question.id;
+        this.optionsSet.add(otext);
 
         this.updateData(survey);
     },
