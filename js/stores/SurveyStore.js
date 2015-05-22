@@ -1,5 +1,4 @@
 var Reflux = require('reflux');
-var _ = require('lodash');
 var initialData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
@@ -7,6 +6,11 @@ var Immutable = require('immutable');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
+
+// initialize question and option map which will help in
+// faster retrieval of associated blocks and questions.
+var _questionMap = Immutable.Map();     // questionId => block
+var _optionMap = Immutable.Map();       // optionId   => question
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
@@ -26,11 +30,6 @@ var SurveyStore = Reflux.createStore({
     },
     init() {
         this.listenTo(SurveyActions.load, () => (this.updateSurveyData(initialData)))
-
-        // initialize question and option map which will help in
-        // faster retrieval of associated blocks and questions.
-        this.questionMap = {};      // question -> block
-        this.optionMap = {};        // option -> question
     },
     getInitialState() {
         return {
@@ -107,7 +106,7 @@ var SurveyStore = Reflux.createStore({
         block.questions = block.questions.concat(newQuestion);
 
         // update question map with new question
-        this.questionMap[newQuestion.id] = questionObj.parentID;
+        _questionMap = _questionMap.set(newQuestion.id, block);
 
         this.updateSurveyData(survey);
         SurveyActions.showAlert("new question added", "success");
@@ -119,21 +118,13 @@ var SurveyStore = Reflux.createStore({
      * @param otext (string) the text of the option to be added
      */
     onOptionAdded(questionId, otext) {
-        var survey = this.data.surveyData,
-            blockId = this.questionMap[questionId];
-
-        var question = _.find(survey[blockId].questions, ques => {
-            return ques.id === questionId
-        });
+        var question = this.getQuestionWithID(questionId);
 
         if (!question) {
             throw new Error('Question not found');
         }
 
-        if (otext === undefined) {
-            return;
-        }
-
+        // template for new Option
         var newOption = {
             id: this.getNewOptionId(),
             otext: otext
@@ -141,11 +132,10 @@ var SurveyStore = Reflux.createStore({
         question.options = question.options.concat(newOption);
 
         // update the option map and options set
-        this.optionMap[newOption.id] = question.id;
-        //this.optionsSet.add(otext);
+        _optionMap = _optionMap.set(newOption.id, question);
         _optionsSet = _optionsSet.add(otext);
 
-        this.updateSurveyData(survey);
+        this.trigger(this.data);
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -199,6 +189,14 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey logged in your Dev console", "success");
     },
     /**
+     * Returns a reference to the question
+     * @param id - id of the question
+     */
+    getQuestionWithID(id) {
+        var block = _questionMap.get(id);
+        return block.questions.filter(q => q.id === id)[0];
+    },
+    /**
      * Called when the toggleParam action is called.
      * Toggles the property on the item.
      * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
@@ -206,22 +204,17 @@ var SurveyStore = Reflux.createStore({
      * @param toggleName - string name of property that is toggled.
      */
     onToggleParam(itemType, itemId, toggleName) {
-        var block;
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            block = this.data.surveyData[itemId];
+            let block = this.data.surveyData[itemId];
             block[toggleName] = !block[toggleName];
             this.trigger(this.data);
         }
 
         // handle the case when a param on a question is toggled
         else if (itemType === ItemTypes.QUESTION) {
-            var blockId = this.questionMap[itemId];
-            block = this.data.surveyData[blockId];
-            var question = _.find(block.questions, ques => {
-                return ques.id === itemId
-            });
+            let question = this.getQuestionWithID(itemId);
             question[toggleName] = !question[toggleName];
             this.trigger(this.data);
         }
@@ -251,22 +244,16 @@ var SurveyStore = Reflux.createStore({
 
         // handle question delete
         else if (itemType === ItemTypes.QUESTION) {
-            var blockId = this.questionMap[itemId];
-            var block = this.data.surveyData[blockId];
-            var index = _.findIndex(block.questions, ques => {
-                return ques.id === itemId
-            });
+            let block = _questionMap.get(itemId);
+            let index = Array.findIndex(block.questions, q => q.id === itemId);
             block.questions.splice(index, 1);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
         // handle option delete
         else if (itemType === ItemTypes.OPTION) {
-            var questionId = this.optionMap[itemId];
-            var blockId = this.questionMap[questionId];
-            var block = this.data.surveyData[blockId];
-            var question = block.questions.filter(q => q.id === questionId)[0];
-            var index = _.findIndex(question.options, opt => opt.id === itemId);
+            let question = _optionMap.get(itemId);
+            let index = Array.findIndex(question.options, o => o.d === itemId);
             question.options.splice(index, 1);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
@@ -277,17 +264,12 @@ var SurveyStore = Reflux.createStore({
         }
     },
     /**
-     * Called when the question text is edited. Responsible for
-     * saving new value.
+     * Called when the question text is edited. Sets qtext to new value.
      * @param text - new text value
      * @param questionId - id of the question that needs to be changed
      */
     onSaveEditText(text, questionId) {
-        var blockId = this.questionMap[questionId];
-        var block = this.data.surveyData[blockId];
-        var question = _.find(block.questions, ques => {
-            return ques.id === questionId
-        });
+        var question = this.getQuestionWithID(questionId);
         question.qtext = text;
         this.trigger(this.data);
     }
