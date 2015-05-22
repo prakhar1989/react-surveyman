@@ -9,24 +9,28 @@ var Pallet = require('./Pallet'),
     SurveyStore = require('../stores/SurveyStore');
 
 var Application = React.createClass({
+    // this causes setState to run whenever 
+    // the store calls this.trigger
     mixins: [Reflux.connect(SurveyStore)],
     componentDidMount() {
         SurveyActions.load();
     },
     render() {
-        var modalState = this.state.modalState;
-        var alertState = this.state.alertState;
+        var { modalState, 
+              alertState, 
+              dropTargetID,
+              surveyData } = this.state;
         return (
             <div className="row">
                 <QuestionModal
                     isOpen={modalState.question}
-                    parentID={this.state.dropTargetID}/>
+                    parentID={dropTargetID}/>
                 <AlertBox
                     msg={alertState.msg}
                     level={alertState.level}
                     visible={alertState.visible} />
                 <div className="col-sm-8">
-                    <Pallet survey={this.state.surveyData} />
+                    <Pallet survey={surveyData} />
                 </div>
                 <div className="col-sm-4">
                     <Toolbox />

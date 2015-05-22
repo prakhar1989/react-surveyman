@@ -1,8 +1,12 @@
 var Reflux = require('reflux');
 var _ = require('lodash');
-var SurveyData = require('../data.js');
+var initialData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
+var Immutable = require('immutable');
+
+// a set of option texts - helps in generating suggestions
+var _optionsSet = Immutable.OrderedSet();
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
@@ -21,25 +25,12 @@ var SurveyStore = Reflux.createStore({
         }
     },
     init() {
-        this.listenTo(SurveyActions.load, this.fetchData);
+        this.listenTo(SurveyActions.load, () => (this.updateSurveyData(initialData)))
 
         // initialize question and option map which will help in
         // faster retrieval of associated blocks and questions.
         this.questionMap = {};      // question -> block
         this.optionMap = {};        // option -> question
-
-        // a set of option texts - helps in generating suggestions
-        this.optionsSet = new Set();
-    },
-    getOptionsSet() {
-        return this.optionsSet;
-    },
-    fetchData() {
-        this.updateData(SurveyData);
-    },
-    updateData(data) {
-        this.data.surveyData = data;
-        this.trigger(this.data);
     },
     getInitialState() {
         return {
@@ -48,9 +39,24 @@ var SurveyStore = Reflux.createStore({
             alertState: this.data.alertState
         }
     },
-    getNewBlock(block) {
+    /**
+     * Updates the survey data as the args provided. Triggers refresh 
+     * @param data surveydata
+     */
+    updateSurveyData(data) {
+        this.data.surveyData = data;
+        this.trigger(this.data);
+    },
+    /*
+     ** Returns the set (unique list) of options.
+     */
+    getOptionsSet() {
+        return _optionsSet;
+    },
+    getNewBlock() {
+        var survey = this.data.surveyData;
         return {
-            id: block.id,
+            id: survey.length,
             questions: [],
             subblocks: [],
             randomizable: true,
@@ -58,23 +64,10 @@ var SurveyStore = Reflux.createStore({
         }
     },
     getNewQuestionId() {
-        // TODO: Refer to java code for ID generation
         return Math.floor((Math.random() * 1000) + 1);
     },
-    getNewQuestion(question) {
-        var id = this.getNewQuestionId();
-        return {
-            id: id,
-            options: [],
-            qtext: question.qtext
-        }
-    },
-    getNewOption(option) {
-        var id = this.getNewQuestionId();
-        return {
-            id: id,
-            otext: option.otext
-        }
+    getNewOptionId() {
+        return Math.floor((Math.random() * 1000) + 1);
     },
     /**
      * Runs when the blockDropped action is called by the view.
@@ -82,11 +75,10 @@ var SurveyStore = Reflux.createStore({
      */
     onBlockDropped() {
         var survey = this.data.surveyData;
-        var newId = survey.length,
-            newBlock = this.getNewBlock({id: newId}),
+        var newBlock = this.getNewBlock(),
             newSurvey = survey.concat(newBlock);
 
-        this.updateData(newSurvey);
+        this.updateSurveyData(newSurvey);
         SurveyActions.showAlert("new block added", "success");
     },
     /**
@@ -96,7 +88,6 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
-
         var survey = this.data.surveyData,
             position = questionObj.parentID,
             block = survey[position];
@@ -105,7 +96,6 @@ var SurveyStore = Reflux.createStore({
             throw new Error("block does not exist");
         }
 
-        // var newQuestion = this.getNewQuestion(questionObj);
         var newQuestion = {
             id: this.getNewQuestionId(),
             qtext: questionObj.qtext,
@@ -119,7 +109,7 @@ var SurveyStore = Reflux.createStore({
         // update question map with new question
         this.questionMap[newQuestion.id] = questionObj.parentID;
 
-        this.updateData(survey);
+        this.updateSurveyData(survey);
         SurveyActions.showAlert("new question added", "success");
     },
     /**
@@ -144,14 +134,18 @@ var SurveyStore = Reflux.createStore({
             return;
         }
 
-        var newOption = this.getNewOption({otext: otext});
+        var newOption = {
+            id: this.getNewOptionId(),
+            otext: otext
+        };
         question.options = question.options.concat(newOption);
 
         // update the option map and options set
         this.optionMap[newOption.id] = question.id;
-        this.optionsSet.add(otext);
+        //this.optionsSet.add(otext);
+        _optionsSet = _optionsSet.add(otext);
 
-        this.updateData(survey);
+        this.updateSurveyData(survey);
     },
     /**
      * Run when the action toggleModal is called by the view
