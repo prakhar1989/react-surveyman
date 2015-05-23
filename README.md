@@ -15,6 +15,3 @@ $ npm run start
 ## serve files with your favorite server
 $ python -m SimpleHTTPServer
 ```
-
-### Development
-To setup incremental compilation of `js` files, just run `npm run watch`.
