@@ -23,8 +23,8 @@ var Application = React.createClass({
         return (
             <div className="row">
                 <QuestionModal
-                    isOpen={modalState.question}
-                    parentID={dropTargetID}/>
+                    isOpen={modalState.get('isOpen')}
+                    parentID={modalState.get('dropTargetID')}/>
                 <AlertBox
                     msg={alertState.msg}
                     level={alertState.level}

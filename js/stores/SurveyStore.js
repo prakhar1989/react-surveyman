@@ -16,12 +16,10 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: [],
-        dropTargetID: null,
-        modalState: {
-            option: false,
-            block: false,
-            question: false
-        },
+        modalState: Immutable.Map({
+            dropTargetID: null,
+            isOpen: false
+        }),
         alertState: {
             msg: "hello world",
             level: 'warning',
@@ -142,19 +140,16 @@ var SurveyStore = Reflux.createStore({
      * @param dropTargetID - Refers to the ID on which the object was dropped
      */
     onToggleModal(modalType, dropTargetID) {
-
-        // causes a modal popup to toggle
         var modalState = this.data.modalState;
+
+        // TODO: this handles the modal for question separately, although 
+        // this is not really required. deal with it later.
         if (modalType === ItemTypes.QUESTION) {
-            modalState.question = !modalState.question;
-        } else if (modalType === ItemTypes.OPTION) {
-            modalState.option = !modalState.option;
-        } else {
-            modalState.block = !modalState.block;
+            modalState = modalState.set('isOpen', !modalState.get('isOpen'));
         }
 
         // sets the correct dropTarget to pass down to component
-        this.data.dropTargetID = dropTargetID;
+        this.data.modalState = modalState.set('dropTargetID', dropTargetID);
         this.trigger(this.data);
     },
      /* Hides the alert box */
