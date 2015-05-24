@@ -20,11 +20,11 @@ var SurveyStore = Reflux.createStore({
             dropTargetID: null,
             isOpen: false
         }),
-        alertState: {
-            msg: "hello world",
-            level: 'warning',
+        alertState: Immutable.Map({
+            msg: '',
+            level: 'info',
             visible: false
-        }
+        })
     },
     init() {
         this.listenTo(SurveyActions.load, () => {
@@ -155,7 +155,7 @@ var SurveyStore = Reflux.createStore({
      /* Hides the alert box */
     hideAlert() {
         setTimeout(function(self) {
-            self.data.alertState.visible = false;
+            self.data.alertState = self.data.alertState.set('visible', false);
             self.trigger(self.data);
         }, 2000, this);
     },
@@ -166,11 +166,12 @@ var SurveyStore = Reflux.createStore({
      * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
      */
     onShowAlert(msg, level='info') {
-        this.data.alertState = {
+        // TODO: move from strings to consts for alert levels.
+        this.data.alertState = Immutable.Map({
             msg: msg,
             level: level,
             visible: true
-        };
+        });
         this.trigger(this.data);
         this.hideAlert();
     },
