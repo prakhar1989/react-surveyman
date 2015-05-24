@@ -3,7 +3,6 @@ var ReactDND = require('react-dnd');
 var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
-var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
 
 var Question = React.createClass({

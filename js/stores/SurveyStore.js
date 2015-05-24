@@ -29,7 +29,9 @@ var SurveyStore = Reflux.createStore({
         }
     },
     init() {
-        this.listenTo(SurveyActions.load, () => (this.updateSurveyData(initialData)))
+        this.listenTo(SurveyActions.load, () => {
+            this.updateSurveyData(initialData);
+        });
     },
     getInitialState() {
         return {
@@ -52,19 +54,11 @@ var SurveyStore = Reflux.createStore({
     getOptionsSet() {
         return _optionsSet;
     },
-    getNewBlock() {
-        var survey = this.data.surveyData;
-        return {
-            id: survey.length,
-            questions: [],
-            subblocks: [],
-            randomizable: true,
-            ordering: false
-        }
-    },
+    // temp functions to return new IDs
     getNewQuestionId() {
         return Math.floor((Math.random() * 1000) + 1);
     },
+    // temp functions to return new IDs
     getNewOptionId() {
         return Math.floor((Math.random() * 1000) + 1);
     },
@@ -74,9 +68,14 @@ var SurveyStore = Reflux.createStore({
      */
     onBlockDropped() {
         var survey = this.data.surveyData;
-        var newBlock = this.getNewBlock(),
-            newSurvey = survey.concat(newBlock);
-
+        var newBlock = {
+            id: survey.length,
+            questions: [],
+            subblocks: [],
+            randomizable: true,
+            ordering: false
+        };
+        var newSurvey = survey.concat(newBlock);
         this.updateSurveyData(newSurvey);
         SurveyActions.showAlert("new block added", "success");
     },
@@ -185,7 +184,8 @@ var SurveyStore = Reflux.createStore({
      * Logs the survey object to the console.
      */
     onDownloadSurvey() {
-        console.log("Survey:", this.data.surveyData);
+        var survey = { survey: this.data.surveyData };
+        console.log("Survey:", survey);
         SurveyActions.showAlert("Survey logged in your Dev console", "success");
     },
     /**

@@ -1,5 +1,4 @@
 var React = require('react');
-var Survey = require('./Survey');
 var SurveyActions = require('../actions/SurveyActions');
 
 var Controls = React.createClass({

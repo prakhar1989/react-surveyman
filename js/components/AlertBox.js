@@ -1,6 +1,5 @@
 var React = require('react');
 var Alert = require('react-bootstrap').Alert;
-var SurveyActions = require('../actions/SurveyActions');
 
 var AlertBox = React.createClass({
     propTypes: {
