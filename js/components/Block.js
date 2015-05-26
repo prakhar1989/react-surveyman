@@ -5,6 +5,7 @@ var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
+var { List } = require('immutable');
 
 var Block = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -21,7 +22,7 @@ var Block = React.createClass({
     },
     propTypes: {
         id: React.PropTypes.number.isRequired,
-        questions: React.PropTypes.array.isRequired,
+        questions: React.PropTypes.instanceOf(List),
         subblocks: React.PropTypes.array.isRequired,
         randomizable: React.PropTypes.bool.isRequired,
         ordering: React.PropTypes.bool.isRequired
@@ -59,13 +60,16 @@ var Block = React.createClass({
         return (
             <div className="item block"
                 {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
+
                 <div className="controls-area">
                     <ul>
                       <li><i title="Delete Block" className="ion-trash-b" onClick={this.handleDelete}></i></li>
                       <li><i title="Add Question" className="ion-plus-circled" onClick={this.handleQuestionDrop}></i></li>
                     </ul>  
                 </div>
-                {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
+
+                {questions.count() > 0 ? questions : <HelpText itemType="Question" /> }
+
                 <div className="config-area">
                     <ul>
                         <li>

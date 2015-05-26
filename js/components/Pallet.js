@@ -1,10 +1,11 @@
 var React = require('react');
 var Survey = require('./Survey');
 var Controls = require('./Controls');
+var { List } = require('immutable');
 
 var Pallet = React.createClass({
     propTypes: {
-        survey: React.PropTypes.array
+        survey: React.PropTypes.instanceOf(List)
     },
     render: function() {
         return (

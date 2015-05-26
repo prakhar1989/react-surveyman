@@ -82,6 +82,7 @@ var Question = React.createClass({
             <div className="item question"
                 style={style}
                 {...this.dropTargetFor(ItemTypes.OPTION)}>
+
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>
                   { this.state.editing ? input : this.props.qtext }

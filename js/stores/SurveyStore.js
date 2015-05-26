@@ -15,7 +15,7 @@ var _optionMap = Immutable.Map();       // optionId   => question
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
-        surveyData: [],
+        surveyData: Immutable.List(),
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
@@ -43,7 +43,7 @@ var SurveyStore = Reflux.createStore({
      * @param data surveydata
      */
     updateSurveyData(data) {
-        this.data.surveyData = data;
+        this.data.surveyData = Immutable.fromJS(data);
         this.trigger(this.data);
     },
     /*
@@ -66,15 +66,15 @@ var SurveyStore = Reflux.createStore({
      */
     onBlockDropped() {
         var survey = this.data.surveyData;
-        var newBlock = {
+        var newBlock = Immutable.fromJS({
             id: survey.length,
             questions: [],
             subblocks: [],
             randomizable: true,
             ordering: false
-        };
-        var newSurvey = survey.concat(newBlock);
-        this.updateSurveyData(newSurvey);
+        });
+        //var newSurvey = survey.concat(newBlock);
+        this.updateSurveyData(survey.push(newBlock));
         SurveyActions.showAlert("new block added", "success");
     },
     /**
