@@ -67,7 +67,7 @@ var SurveyStore = Reflux.createStore({
     onBlockDropped() {
         var survey = this.data.surveyData;
         var newBlock = Immutable.fromJS({
-            id: survey.length,
+            id: survey.count(),
             questions: [],
             subblocks: [],
             randomizable: true,
@@ -180,7 +180,7 @@ var SurveyStore = Reflux.createStore({
      * Logs the survey object to the console.
      */
     onDownloadSurvey() {
-        var survey = { survey: this.data.surveyData };
+        var survey = { survey: this.data.surveyData.toJS() };
         console.log("Survey:", survey);
         SurveyActions.showAlert("Survey logged in your Dev console", "success");
     },
@@ -203,8 +203,9 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            let block = this.data.surveyData[itemId];
-            block[toggleName] = !block[toggleName];
+            let block = this.data.surveyData.get(itemId);
+            let newBlock = block.set(toggleName, !block.get(toggleName));
+            this.data.surveyData = this.data.surveyData.set(itemId, newBlock);
             this.trigger(this.data);
         }
 
@@ -228,10 +229,10 @@ var SurveyStore = Reflux.createStore({
     onItemDelete(itemType, itemId) {
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
-            this.data.surveyData.splice(itemId, 1);
+            this.data.surveyData = this.data.surveyData.splice(itemId, 1);
 
             // if all blocks have been deleted, add a new one
-            if (this.data.surveyData.length == 0) {
+            if (!this.data.surveyData.count()) {
                 SurveyActions.blockDropped();
             }
 
