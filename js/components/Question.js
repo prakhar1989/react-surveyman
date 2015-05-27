@@ -4,6 +4,7 @@ var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var ToggleParam = require('./ToggleParam');
+var { List } = require('immutable');
 
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin],
@@ -19,7 +20,8 @@ var Question = React.createClass({
         }
     },
     propTypes: {
-        options: React.PropTypes.array.isRequired,
+        //options: React.PropTypes.array.isRequired,
+        options: React.PropTypes.instanceOf(List),
         id: React.PropTypes.number.isRequired,
         qtext: React.PropTypes.string.isRequired,
         ordering: React.PropTypes.bool.isRequired,

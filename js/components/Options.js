@@ -3,10 +3,11 @@ var ReactTags = require('react-tag-input');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
 var SurveyStore = require('../stores/SurveyStore');
+var { List } = require('immutable');
 
 var Options = React.createClass({
     propTypes: {
-        options: React.PropTypes.array.isRequired,
+        options: React.PropTypes.instanceOf(List).isRequired,
         questionId: React.PropTypes.number.isRequired
     },
     getInitialState: function() {

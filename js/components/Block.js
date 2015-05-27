@@ -40,13 +40,13 @@ var Block = React.createClass({
     render() {
         var questions = this.props.questions.map(q => {
             return <Question
-                        key={q.id}
-                        options={q.options}
-                        id={q.id}
-                        qtext={q.qtext}
-                        ordering={q.ordering}
-                        exclusive={q.exclusive}
-                        freetext={q.freetext} />
+                        key={q.get('id')}
+                        options={q.get('options')}
+                        id={q.get('id')}
+                        qtext={q.get('qtext')}
+                        ordering={q.get('ordering')}
+                        exclusive={q.get('exclusive')}
+                        freetext={q.get('freetext')} />
         });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);

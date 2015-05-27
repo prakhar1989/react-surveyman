@@ -87,28 +87,31 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
-        var survey = this.data.surveyData,
-            position = questionObj.parentID,
-            block = survey[position];
+        var blockId = questionObj.parentID;
+        var blockIndex = this.data.surveyData.findIndex(b => b.get('id') === blockId);
+        var block = this.data.surveyData.get(blockIndex);
 
         if (!block) {
             throw new Error("block does not exist");
         }
 
-        var newQuestion = {
+        var newQuestion = Immutable.fromJS({
             id: this.getNewQuestionId(),
             qtext: questionObj.qtext,
             options: [],
             ordering: questionObj.ordering,
             freetext: questionObj.freetext,
             exclusive: questionObj.exclusive
-        };
-        block.questions = block.questions.concat(newQuestion);
+        });
+
+        var questions = block.get('questions');
+        var newBlock = block.set('questions', questions.push(newQuestion));
+        var newSurvey = this.data.surveyData.set(blockIndex, newBlock);
 
         // update question map with new question
-        _questionMap = _questionMap.set(newQuestion.id, block);
+        _questionMap = _questionMap.set(newQuestion.get('id'), newBlock);
 
-        this.updateSurveyData(survey);
+        this.updateSurveyData(newSurvey);
         SurveyActions.showAlert("new question added", "success");
     },
     /**
@@ -206,7 +209,6 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            console.log("ID:", itemId);
             let index = this.data.surveyData.findIndex(b => b.get('id') === itemId);
             let block = this.data.surveyData.get(index);
             let newBlock = block.set(toggleName, !block.get(toggleName));
