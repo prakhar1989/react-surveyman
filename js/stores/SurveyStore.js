@@ -60,6 +60,9 @@ var SurveyStore = Reflux.createStore({
     getNewOptionId() {
         return Math.floor((Math.random() * 1000) + 1);
     },
+    getNewId() {
+        return Math.floor((Math.random() * 1000) + 1);
+    },
     /**
      * Runs when the blockDropped action is called by the view.
      * Adds a new block to the end of the survey object.
@@ -67,7 +70,7 @@ var SurveyStore = Reflux.createStore({
     onBlockDropped() {
         var survey = this.data.surveyData;
         var newBlock = Immutable.fromJS({
-            id: survey.count(),
+            id: this.getNewId(),
             questions: [],
             subblocks: [],
             randomizable: true,
@@ -203,9 +206,11 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            let block = this.data.surveyData.get(itemId);
+            console.log("ID:", itemId);
+            let index = this.data.surveyData.findIndex(b => b.get('id') === itemId);
+            let block = this.data.surveyData.get(index);
             let newBlock = block.set(toggleName, !block.get(toggleName));
-            this.data.surveyData = this.data.surveyData.set(itemId, newBlock);
+            this.data.surveyData = this.data.surveyData.set(index, newBlock);
             this.trigger(this.data);
         }
 
@@ -229,7 +234,8 @@ var SurveyStore = Reflux.createStore({
     onItemDelete(itemType, itemId) {
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
-            this.data.surveyData = this.data.surveyData.splice(itemId, 1);
+            let index = this.data.surveyData.findIndex(b => b.get('id') === itemId);
+            this.data.surveyData = this.data.surveyData.splice(index, 1);
 
             // if all blocks have been deleted, add a new one
             if (!this.data.surveyData.count()) {
