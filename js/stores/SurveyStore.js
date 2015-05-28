@@ -9,8 +9,8 @@ var _optionsSet = Immutable.OrderedSet();
 
 // initialize question and option map which will help in
 // faster retrieval of associated blocks and questions.
-var _questionMap = Immutable.Map();     // questionId => block
-var _optionMap = Immutable.Map();       // optionId   => question
+var _questionMap = Immutable.Map();     // questionId => blockId 
+var _optionMap = Immutable.Map();       // optionId   => questionId
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
@@ -286,9 +286,8 @@ var SurveyStore = Reflux.createStore({
             let blockIndex = this.getBlockIndex(_questionMap.get(questionId));
             let block = survey.get(blockIndex);
             let quesIndex = this.getQuestionIndex(questionId, block);
-            let optionIndex = block
-                                .getIn(['questions', quesIndex, 'options'])
-                                .findIndex(op => op.get('id') === itemId);
+            let options = block.getIn(['questions', quesIndex, 'options']);
+            let optionIndex = options.findIndex(op => op.get('id') === itemId);
             let newSurvey = survey.deleteIn([blockIndex, 'questions', quesIndex, 'options', optionIndex]);
 
             // delete the mapping
