@@ -6,9 +6,10 @@ var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
 var { List } = require('immutable');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 var Block = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
+    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.QUESTION, {
