@@ -23,14 +23,15 @@ var Options = React.createClass({
         SurveyActions.optionAdded(this.props.questionId, otext);
     },
     handleDeletion: function(index) {
-        var { id } = this.props.options[index];
+        var id = this.props.options.getIn(['index', 'id']);
         SurveyActions.itemDelete(ItemTypes.OPTION, id);
     },
     handleDrag: function() {
     },
     render: function() {
+        var options = this.props.options.toJS();
         return (
-            <ReactTags tags={this.props.options}
+            <ReactTags tags={options}
                     suggestions={this.state.suggestions}
                     handleAddition={this.handleAddition}
                     handleDelete={this.handleDeletion}

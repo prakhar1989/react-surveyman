@@ -114,24 +114,26 @@ var SurveyStore = Reflux.createStore({
      * @param otext (string) the text of the option to be added
      */
     onOptionAdded(questionId, otext) {
-        var question = this.getQuestionWithID(questionId);
-
-        if (!question) {
-            throw new Error('Question not found');
-        }
-
         // template for new Option
-        var newOption = {
+        var newOption = Immutable.Map({
             id: this.getNewOptionId(),
             otext: otext
-        };
-        question.options = question.options.concat(newOption);
+        });
+
+        var survey = this.data.surveyData;
+        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+        var block = survey.get(blockIndex);
+        var index = this.getQuestionIndex(questionId, block);
+        var newSurvey = survey.updateIn(
+            [blockIndex, 'questions', index, 'options'], 
+            list => list.push(newOption)
+        );
 
         // update the option map and options set
-        _optionMap = _optionMap.set(newOption.id, question);
+        _optionMap = _optionMap.set(newOption.id, block.getIn(['questions', index, 'id']));
         _optionsSet = _optionsSet.add(otext);
 
-        this.trigger(this.data);
+        this.updateSurveyData(newSurvey);
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -265,9 +267,15 @@ var SurveyStore = Reflux.createStore({
 
         // handle option delete
         else if (itemType === ItemTypes.OPTION) {
-            let question = _optionMap.get(itemId);
-            let index = Array.findIndex(question.options, o => o.d === itemId);
-            question.options.splice(index, 1);
+            let questionId = _optionMap.get(itemId);
+            let blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+            let block = survey.get(blockIndex);
+            let quesIndex = this.getQuestionIndex(itemId, block);
+            let optionIndex = block
+                                .getIn(['questions', quesIndex, 'options'])
+                                .findIndex(op => op.get('id') === itemId);
+            let newSurvey = survey.deleteIn([blockIndex, 'questions', quesIndex, 'options', optionIndex]);
+            this.updateSurveyData(newSurvey);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
