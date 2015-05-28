@@ -76,7 +76,6 @@ var SurveyStore = Reflux.createStore({
             randomizable: true,
             ordering: false
         });
-        //var newSurvey = survey.concat(newBlock);
         this.updateSurveyData(survey.push(newBlock));
         SurveyActions.showAlert("new block added", "success");
     },
@@ -109,7 +108,7 @@ var SurveyStore = Reflux.createStore({
         var newSurvey = this.data.surveyData.set(blockIndex, newBlock);
 
         // update question map with new question
-        _questionMap = _questionMap.set(newQuestion.get('id'), newBlock);
+        _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
         this.updateSurveyData(newSurvey);
         SurveyActions.showAlert("new question added", "success");
@@ -196,7 +195,10 @@ var SurveyStore = Reflux.createStore({
      */
     getQuestionWithID(id) {
         var block = _questionMap.get(id);
-        return block.questions.filter(q => q.id === id)[0];
+        return block.questions.filter(q => q.get(id) === id)[0];
+    },
+    getBlockIndex(blockId) {
+        return this.data.surveyData.findIndex(b => b.get('id') === blockId);
     },
     /**
      * Called when the toggleParam action is called.
@@ -209,11 +211,9 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            let index = this.data.surveyData.findIndex(b => b.get('id') === itemId);
-            let block = this.data.surveyData.get(index);
-            let newBlock = block.set(toggleName, !block.get(toggleName));
-            this.data.surveyData = this.data.surveyData.set(index, newBlock);
-            this.trigger(this.data);
+            let index = this.getBlockIndex(itemId);
+            let newSurvey = this.data.surveyData.update(index, b => b.set(toggleName, !b.get(toggleName)));
+            this.updateSurveyData(newSurvey);
         }
 
         // handle the case when a param on a question is toggled
@@ -236,7 +236,7 @@ var SurveyStore = Reflux.createStore({
     onItemDelete(itemType, itemId) {
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
-            let index = this.data.surveyData.findIndex(b => b.get('id') === itemId);
+            let index = this.getBlockIndex(itemId);
             this.data.surveyData = this.data.surveyData.splice(index, 1);
 
             // if all blocks have been deleted, add a new one
