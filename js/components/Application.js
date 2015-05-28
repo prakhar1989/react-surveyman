@@ -2,6 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var QuestionModal = require('./QuestionModal');
 var AlertBox = require('./AlertBox');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -10,7 +11,7 @@ var Pallet = require('./Pallet'),
 
 var Application = React.createClass({
     // this causes setState to run whenever the store calls this.trigger
-    mixins: [Reflux.connect(SurveyStore)],
+    mixins: [Reflux.connect(SurveyStore), PureRenderMixin],
     componentDidMount() {
         SurveyActions.load();
     },

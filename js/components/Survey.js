@@ -4,9 +4,10 @@ var Block = require('./Block');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
 var { List } = require('immutable');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 var Survey = React.createClass({
-    mixins:[ReactDND.DragDropMixin],
+    mixins:[ReactDND.DragDropMixin, PureRenderMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.BLOCK, {
