@@ -86,14 +86,6 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
-        var blockId = questionObj.parentID;
-        var blockIndex = this.data.surveyData.findIndex(b => b.get('id') === blockId);
-        var block = this.data.surveyData.get(blockIndex);
-
-        if (!block) {
-            throw new Error("block does not exist");
-        }
-
         var newQuestion = Immutable.fromJS({
             id: this.getNewQuestionId(),
             qtext: questionObj.qtext,
@@ -103,11 +95,13 @@ var SurveyStore = Reflux.createStore({
             exclusive: questionObj.exclusive
         });
 
-        var questions = block.get('questions');
-        var newBlock = block.set('questions', questions.push(newQuestion));
-        var newSurvey = this.data.surveyData.set(blockIndex, newBlock);
+        var index = this.getBlockIndex(questionObj.parentID);
+        var newSurvey = this.data.surveyData.updateIn([index, 'questions'], list =>
+            list.push(newQuestion)
+        );
 
         // update question map with new question
+        var block = this.data.surveyData.get(index);
         _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
         this.updateSurveyData(newSurvey);
@@ -190,15 +184,19 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey logged in your Dev console", "success");
     },
     /**
-     * Returns a reference to the question
-     * @param id - id of the question
+     * Returns the index of the block 
+     * @param id - id of the block
      */
-    getQuestionWithID(id) {
-        var block = _questionMap.get(id);
-        return block.questions.filter(q => q.get(id) === id)[0];
-    },
     getBlockIndex(blockId) {
         return this.data.surveyData.findIndex(b => b.get('id') === blockId);
+    },
+    /**
+     * Returns the index of a question in a block
+     * @param id - id of the question
+     * @param block - obj (Immutable.Map) of the container block
+     */
+    getQuestionIndex(questionId, block) {
+        return block.get('questions').findIndex(q => q.get('id') === questionId);
     },
     /**
      * Called when the toggleParam action is called.
@@ -208,19 +206,24 @@ var SurveyStore = Reflux.createStore({
      * @param toggleName - string name of property that is toggled.
      */
     onToggleParam(itemType, itemId, toggleName) {
+        var survey = this.data.surveyData;
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
             let index = this.getBlockIndex(itemId);
-            let newSurvey = this.data.surveyData.update(index, b => b.set(toggleName, !b.get(toggleName)));
+            let newSurvey = survey.update(index, b => b.set(toggleName, !b.get(toggleName)));
             this.updateSurveyData(newSurvey);
         }
 
         // handle the case when a param on a question is toggled
         else if (itemType === ItemTypes.QUESTION) {
-            let question = this.getQuestionWithID(itemId);
-            question[toggleName] = !question[toggleName];
-            this.trigger(this.data);
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let index = this.getQuestionIndex(itemId, block);
+            let newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+                q.set(toggleName, !q.get(toggleName))
+            );
+            this.updateSurveyData(newSurvey);
         }
 
         // throw exception
@@ -234,10 +237,13 @@ var SurveyStore = Reflux.createStore({
      * @param itemId - Id of item to be deleted.
      */
     onItemDelete(itemType, itemId) {
+        var survey = this.data.surveyData;
+
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
             let index = this.getBlockIndex(itemId);
-            this.data.surveyData = this.data.surveyData.splice(index, 1);
+            let newSurvey = survey.splice(index, 1);
+            this.updateSurveyData(newSurvey);
 
             // if all blocks have been deleted, add a new one
             if (!this.data.surveyData.count()) {
@@ -249,9 +255,11 @@ var SurveyStore = Reflux.createStore({
 
         // handle question delete
         else if (itemType === ItemTypes.QUESTION) {
-            let block = _questionMap.get(itemId);
-            let index = Array.findIndex(block.questions, q => q.id === itemId);
-            block.questions.splice(index, 1);
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let index = this.getQuestionIndex(itemId, block);
+            let newSurvey = survey.deleteIn([blockIndex, 'questions', index]);
+            this.updateSurveyData(newSurvey);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
@@ -274,9 +282,14 @@ var SurveyStore = Reflux.createStore({
      * @param questionId - id of the question that needs to be changed
      */
     onSaveEditText(text, questionId) {
-        var question = this.getQuestionWithID(questionId);
-        question.qtext = text;
-        this.trigger(this.data);
+        var survey = this.data.surveyData;
+        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+        var block = survey.get(blockIndex);
+        var index = this.getQuestionIndex(questionId, block);
+        var newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+            q.set('qtext', text)
+        );
+        this.updateSurveyData(newSurvey);
     }
 });
 
