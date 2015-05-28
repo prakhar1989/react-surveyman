@@ -130,7 +130,7 @@ var SurveyStore = Reflux.createStore({
         );
 
         // update the option map and options set
-        _optionMap = _optionMap.set(newOption.id, block.getIn(['questions', index, 'id']));
+        _optionMap = _optionMap.set(newOption.get('id'), block.getIn(['questions', index, 'id']));
         _optionsSet = _optionsSet.add(otext);
 
         this.updateSurveyData(newSurvey);
@@ -244,8 +244,16 @@ var SurveyStore = Reflux.createStore({
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
             let index = this.getBlockIndex(itemId);
-            let newSurvey = survey.splice(index, 1);
+            let newSurvey = survey.delete(index);
             this.updateSurveyData(newSurvey);
+
+            // delete the mapping of question and options
+            survey.getIn([index, 'questions']).forEach(q => {
+                _questionMap = _questionMap.delete(q.get('id'));
+                q.get('options').forEach(o => {
+                    _optionMap = _optionMap.delete(o.get('id'))
+                })
+            });
 
             // if all blocks have been deleted, add a new one
             if (!this.data.surveyData.count()) {
@@ -261,6 +269,13 @@ var SurveyStore = Reflux.createStore({
             let block = survey.get(blockIndex);
             let index = this.getQuestionIndex(itemId, block);
             let newSurvey = survey.deleteIn([blockIndex, 'questions', index]);
+
+            // delete the mapping of the question and its options
+            _questionMap = _questionMap.delete(itemId);
+            block.getIn(['questions', index, 'options']).forEach(o =>
+                _optionMap = _optionMap.delete(o.get('id'))
+            );
+
             this.updateSurveyData(newSurvey);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
@@ -270,11 +285,14 @@ var SurveyStore = Reflux.createStore({
             let questionId = _optionMap.get(itemId);
             let blockIndex = this.getBlockIndex(_questionMap.get(questionId));
             let block = survey.get(blockIndex);
-            let quesIndex = this.getQuestionIndex(itemId, block);
+            let quesIndex = this.getQuestionIndex(questionId, block);
             let optionIndex = block
                                 .getIn(['questions', quesIndex, 'options'])
                                 .findIndex(op => op.get('id') === itemId);
             let newSurvey = survey.deleteIn([blockIndex, 'questions', quesIndex, 'options', optionIndex]);
+
+            // delete the mapping
+            _optionMap = _optionMap.delete(itemId);
             this.updateSurveyData(newSurvey);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
