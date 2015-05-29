@@ -1,10 +1,15 @@
 var React = require('react');
 var Alert = require('react-bootstrap').Alert;
 var SurveyActions = require('../actions/SurveyActions');
+var AlertTypes = require('./AlertTypes');
+
+// Undo option is not shown for INFO alert level
 
 var AlertBox = React.createClass({
     propTypes: {
-        level: React.PropTypes.string.isRequired,
+        level: React.PropTypes.oneOf([AlertTypes.INFO, 
+                                      AlertTypes.WARNING, 
+                                      AlertTypes.SUCCESS]).isRequired,
         visible: React.PropTypes.bool.isRequired,
         msg: React.PropTypes.string.isRequired
     },
@@ -14,9 +19,10 @@ var AlertBox = React.createClass({
     render() {
         if (this.props.visible) {
             return (
-                <Alert bsStyle={this.props.level}>
+                <Alert>
                     <p>{this.props.msg}
-                        <a onClick={this.handleUndo}>Undo</a>
+                    { this.props.level === AlertTypes.INFO ? '' :
+                        <a onClick={this.handleUndo}>Undo</a>  }
                     </p>
                 </Alert>
             );

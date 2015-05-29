@@ -3,6 +3,7 @@ var initialData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
+var AlertTypes = require('../components/AlertTypes');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -11,6 +12,9 @@ var _optionsSet = Immutable.OrderedSet();
 // faster retrieval of associated blocks and questions.
 var _questionMap = Immutable.Map();     // questionId => blockId 
 var _optionMap = Immutable.Map();       // optionId   => questionId
+
+// CONSTS
+const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
 
 // mananging history
 var _history = [];
@@ -25,10 +29,11 @@ var SurveyStore = Reflux.createStore({
         }),
         alertState: Immutable.Map({
             msg: '',
-            level: 'info',
+            level: AlertTypes.INFO,
             visible: false
         })
     },
+    // called when the app component is loaded
     init() {
         this.listenTo(SurveyActions.load, () => {
             var data = Immutable.fromJS(initialData);
@@ -63,9 +68,7 @@ var SurveyStore = Reflux.createStore({
     updateHistory(newState) {
         _pastState = newState;
     },
-    /*
-     ** Returns the set (unique list) of options.
-     */
+    // Returns the set (unique list) of options.
     getOptionsSet() {
         return _optionsSet;
     },
@@ -92,7 +95,7 @@ var SurveyStore = Reflux.createStore({
             ordering: false
         });
         this.updateSurveyData(survey.push(newBlock), true);
-        SurveyActions.showAlert("new block added", "success");
+        SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     },
     /**
      * Runs when the questionDropped action is called by the view.
@@ -120,7 +123,7 @@ var SurveyStore = Reflux.createStore({
         _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
         this.updateSurveyData(newSurvey, true);
-        SurveyActions.showAlert("new question added", "success");
+        SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
     },
     /**
      * Runs when the optionAdded action is called by the view.
@@ -174,8 +177,7 @@ var SurveyStore = Reflux.createStore({
      * @param msg - the msg to be displayed
      * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
      */
-    onShowAlert(msg, level='info') {
-        // TODO: move from strings to consts for alert levels.
+    onShowAlert(msg, level=AlertTypes.INFO) {
         this.data.alertState = Immutable.Map({
             msg: msg,
             level: level,
@@ -189,7 +191,7 @@ var SurveyStore = Reflux.createStore({
                 self.data.alertState = self.data.alertState.set('visible', false);
                 self.trigger(self.data);
             }
-        }, 8000, this);
+        }, ALERT_TIMEOUT, this);
     },
     /**
      * Called when the downloadSurvey action is called. 
@@ -198,7 +200,7 @@ var SurveyStore = Reflux.createStore({
     onDownloadSurvey() {
         var survey = { survey: this.data.surveyData.toJS() };
         console.log("Survey:", survey);
-        SurveyActions.showAlert("Survey logged in your Dev console", "success");
+        SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
      * Returns the index of the block 
@@ -275,7 +277,7 @@ var SurveyStore = Reflux.createStore({
                 SurveyActions.blockDropped();
             }
 
-            SurveyActions.showAlert("Block deleted successfully", "success");
+            SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
         }
 
         // handle question delete
@@ -292,7 +294,7 @@ var SurveyStore = Reflux.createStore({
             );
 
             this.updateSurveyData(newSurvey, true);
-            SurveyActions.showAlert("Item deleted successfully", "success");
+            SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
         }
 
         // handle option delete
