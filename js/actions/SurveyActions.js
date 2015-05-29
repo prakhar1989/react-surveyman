@@ -10,7 +10,8 @@ var SurveyActions = Reflux.createActions([
     "downloadSurvey",               // when a survey download is requested
     "toggleParam",                  // when a config param is toggled for any type
     "itemDelete",                   // when an item (option/question/block) is called to be deleted
-    "saveEditText"                  // when question text is changed
+    "saveEditText",                 // when question text is changed
+    "undoSurvey"                    // when the undo button is clicked
 ]);
 
 module.exports = SurveyActions;

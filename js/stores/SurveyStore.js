@@ -12,6 +12,9 @@ var _optionsSet = Immutable.OrderedSet();
 var _questionMap = Immutable.Map();     // questionId => blockId 
 var _optionMap = Immutable.Map();       // optionId   => questionId
 
+// mananging history
+var _history = [];
+
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
@@ -28,7 +31,8 @@ var SurveyStore = Reflux.createStore({
     },
     init() {
         this.listenTo(SurveyActions.load, () => {
-            this.updateSurveyData(initialData);
+            var data = Immutable.fromJS(initialData);
+            this.updateSurveyData(data, true);
         });
     },
     getInitialState() {
@@ -39,12 +43,25 @@ var SurveyStore = Reflux.createStore({
         }
     },
     /**
-     * Updates the survey data as the args provided. Triggers refresh 
+     * Updates the survey data as the args provided. Triggers refresh.
+     * Stores prev state in history, if second param is true
      * @param data surveydata
+     * @param cache - boolean
      */
-    updateSurveyData(data) {
-        this.data.surveyData = Immutable.fromJS(data);
+    updateSurveyData(data, cache = false) {
+        if (cache) {
+            _history.push(this.data.surveyData);
+        }
+        this.data.surveyData = data
         this.trigger(this.data);
+    },
+    /** 
+     * updates history with new state. As of now only stores
+     * one previous state. Can be extended to a stack later on
+     * @param newState (type of surveyData - Immutable.List)
+     */
+    updateHistory(newState) {
+        _pastState = newState;
     },
     /*
      ** Returns the set (unique list) of options.
@@ -52,11 +69,9 @@ var SurveyStore = Reflux.createStore({
     getOptionsSet() {
         return _optionsSet;
     },
-    // temp functions to return new IDs
     getNewQuestionId() {
         return Math.floor((Math.random() * 1000) + 1);
     },
-    // temp functions to return new IDs
     getNewOptionId() {
         return Math.floor((Math.random() * 1000) + 1);
     },
@@ -76,7 +91,7 @@ var SurveyStore = Reflux.createStore({
             randomizable: true,
             ordering: false
         });
-        this.updateSurveyData(survey.push(newBlock));
+        this.updateSurveyData(survey.push(newBlock), true);
         SurveyActions.showAlert("new block added", "success");
     },
     /**
@@ -104,7 +119,7 @@ var SurveyStore = Reflux.createStore({
         var block = this.data.surveyData.get(index);
         _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
-        this.updateSurveyData(newSurvey);
+        this.updateSurveyData(newSurvey, true);
         SurveyActions.showAlert("new question added", "success");
     },
     /**
@@ -153,13 +168,6 @@ var SurveyStore = Reflux.createStore({
         this.data.modalState = modalState.set('dropTargetID', dropTargetID);
         this.trigger(this.data);
     },
-     /* Hides the alert box */
-    hideAlert() {
-        setTimeout(function(self) {
-            self.data.alertState = self.data.alertState.set('visible', false);
-            self.trigger(self.data);
-        }, 2000, this);
-    },
     /**
      * Run when the action showAlert is called. Responsible for displaying
      * alert in the app
@@ -174,7 +182,14 @@ var SurveyStore = Reflux.createStore({
             visible: true
         });
         this.trigger(this.data);
-        this.hideAlert();
+
+        // Hides the alert box
+        setTimeout(function(self) {
+            if (self.data.alertState.get('visible')) {
+                self.data.alertState = self.data.alertState.set('visible', false);
+                self.trigger(self.data);
+            }
+        }, 8000, this);
     },
     /**
      * Called when the downloadSurvey action is called. 
@@ -245,7 +260,7 @@ var SurveyStore = Reflux.createStore({
         if (itemType === ItemTypes.BLOCK) {
             let index = this.getBlockIndex(itemId);
             let newSurvey = survey.delete(index);
-            this.updateSurveyData(newSurvey);
+            this.updateSurveyData(newSurvey, true);
 
             // delete the mapping of question and options
             survey.getIn([index, 'questions']).forEach(q => {
@@ -276,7 +291,7 @@ var SurveyStore = Reflux.createStore({
                 _optionMap = _optionMap.delete(o.get('id'))
             );
 
-            this.updateSurveyData(newSurvey);
+            this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
@@ -293,7 +308,6 @@ var SurveyStore = Reflux.createStore({
             // delete the mapping
             _optionMap = _optionMap.delete(itemId);
             this.updateSurveyData(newSurvey);
-            SurveyActions.showAlert("Item deleted successfully", "success");
         }
 
         // throw exception
@@ -314,7 +328,12 @@ var SurveyStore = Reflux.createStore({
         var newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
             q.set('qtext', text)
         );
-        this.updateSurveyData(newSurvey);
+        this.updateSurveyData(newSurvey, true);
+    },
+    onUndoSurvey() {
+        // hide the alert and update
+        this.data.alertState = this.data.alertState.set('visible', false);
+        this.updateSurveyData(_history.pop());
     }
 });
 
