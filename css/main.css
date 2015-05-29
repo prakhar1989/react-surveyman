@@ -170,22 +170,27 @@ div.item.question div.qtext-area:hover i {
 }
 
 div.alert-success {
-    top: 5px;
+    top: 15px;
     position: fixed;
-    width: 960px;
-    -webkit-box-shadow: 0 2px 5px -1px rgba(170,170,170,.39);
-    -moz-box-shadow:0 2px 5px -1px rgba(170,170,170,.39);
-    box-shadow:0 2px 5px -1px rgba(170,170,170,.39);
-    background: #dff0d8;
+    left: 42%;
     z-index: 10;
-    height: 35px;
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+    padding: 10px;
+    color: #222;
     text-align: center;
-    border-radius: 2px;
     font-size: 13px;
     border: black;
+    background: #f9edbe;
+    border: 1px solid #f0c36d;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-transform: capitalize;
+}
+
+div.alert-success a {
+    font-weight: bold;
+    text-decoration: underline;
+    color: #222;
+    cursor: pointer;
+    margin-left: 10px;
 }
 
 /* styles for react tags */
