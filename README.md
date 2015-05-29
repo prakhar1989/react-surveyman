@@ -18,7 +18,6 @@ Currently, it uses
 In order to start the project locally - 
 ```
 $ npm install 
-$ npm run start
-## serve files with your favorite server
-$ python -m SimpleHTTPServer
+$ npm run start 
+# open localhost:8090 in your browser
 ```
