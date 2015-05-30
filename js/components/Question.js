@@ -22,7 +22,7 @@ var Question = React.createClass({
     },
     propTypes: {
         options: React.PropTypes.instanceOf(List).isRequired,
-        id: React.PropTypes.number.isRequired,
+        id: React.PropTypes.string.isRequired,
         qtext: React.PropTypes.string.isRequired,
         ordering: React.PropTypes.bool.isRequired,
         freetext: React.PropTypes.bool.isRequired,

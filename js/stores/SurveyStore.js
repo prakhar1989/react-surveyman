@@ -55,31 +55,29 @@ var SurveyStore = Reflux.createStore({
      */
     updateSurveyData(data, cache = false) {
         if (cache) {
-            _history.push(this.data.surveyData);
+            _history.push({
+                data        : this.data.surveyData,
+                optionMap   : _optionMap.toJS(),
+                questionMap : _questionMap.toJS()
+            });
         }
         this.data.surveyData = data
         this.trigger(this.data);
-    },
-    /** 
-     * updates history with new state. As of now only stores
-     * one previous state. Can be extended to a stack later on
-     * @param newState (type of surveyData - Immutable.List)
-     */
-    updateHistory(newState) {
-        _pastState = newState;
     },
     // Returns the set (unique list) of options.
     getOptionsSet() {
         return _optionsSet;
     },
-    getNewQuestionId() {
-        return Math.floor((Math.random() * 1000) + 1);
-    },
-    getNewOptionId() {
-        return Math.floor((Math.random() * 1000) + 1);
-    },
-    getNewId() {
-        return Math.floor((Math.random() * 1000) + 1);
+    getNewId(type) {
+        var prefix;
+        if (type === ItemTypes.QUESTION) {
+            prefix = "q"
+        } else if (type === ItemTypes.OPTION) {
+            prefix = "o"
+        } else {
+            prefix = "b"
+        }
+        return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`
     },
     /**
      * Runs when the blockDropped action is called by the view.
@@ -88,7 +86,7 @@ var SurveyStore = Reflux.createStore({
     onBlockDropped() {
         var survey = this.data.surveyData;
         var newBlock = Immutable.fromJS({
-            id: this.getNewId(),
+            id: this.getNewId(ItemTypes.BLOCK),
             questions: [],
             subblocks: [],
             randomizable: true,
@@ -105,7 +103,7 @@ var SurveyStore = Reflux.createStore({
      */
     onQuestionDropped(questionObj) {
         var newQuestion = Immutable.fromJS({
-            id: this.getNewQuestionId(),
+            id: this.getNewId(ItemTypes.QUESTION),
             qtext: questionObj.qtext,
             options: [],
             ordering: questionObj.ordering,
@@ -134,7 +132,7 @@ var SurveyStore = Reflux.createStore({
     onOptionAdded(questionId, otext) {
         // template for new Option
         var newOption = Immutable.Map({
-            id: this.getNewOptionId(),
+            id: this.getNewId(ItemTypes.OPTION),
             otext: otext
         });
 

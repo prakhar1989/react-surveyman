@@ -1,7 +1,7 @@
 /* Test data to work with */
 var data = [
     {
-        id: 0,
+        id: "b_10101",
         randomizable: true,
         ordering: false,
         questions: [],

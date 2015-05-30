@@ -8,7 +8,7 @@ var { List } = require('immutable');
 var Options = React.createClass({
     propTypes: {
         options: React.PropTypes.instanceOf(List).isRequired,
-        questionId: React.PropTypes.number.isRequired
+        questionId: React.PropTypes.string.isRequired
     },
     getInitialState: function() {
         return {

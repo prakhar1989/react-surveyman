@@ -10,7 +10,7 @@ var ToggleParam = React.createClass({
         helpText: React.PropTypes.string.isRequired,
         toggleName: React.PropTypes.string.isRequired,
         itemType: React.PropTypes.string.isRequired,
-        itemId: React.PropTypes.number.isRequired
+        itemId: React.PropTypes.string.isRequired
     },
     handleClick() {
         SurveyActions.toggleParam(

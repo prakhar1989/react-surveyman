@@ -8,7 +8,7 @@ var ItemTypes = require('./ItemTypes');
 // to get around the refs issues - https://github.com/react-bootstrap/react-bootstrap/issues/223
 var BaseModal = React.createClass({
     propTypes: {
-        parentID: React.PropTypes.number
+        parentID: React.PropTypes.string
     },
     componentDidMount() {
         var textInput = this.refs.qtext.getDOMNode();
@@ -67,7 +67,7 @@ var QuestionModal = React.createClass({
     mixins: [OverlayMixin],
     propTypes: {
         isOpen: React.PropTypes.bool,
-        parentID: React.PropTypes.number
+        parentID: React.PropTypes.string
     },
     render() {
         return (

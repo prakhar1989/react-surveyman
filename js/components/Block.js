@@ -22,7 +22,7 @@ var Block = React.createClass({
         }
     },
     propTypes: {
-        id: React.PropTypes.number.isRequired,
+        id: React.PropTypes.string.isRequired,
         questions: React.PropTypes.instanceOf(List),
         subblocks: React.PropTypes.array.isRequired,
         randomizable: React.PropTypes.bool.isRequired,
