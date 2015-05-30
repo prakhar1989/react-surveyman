@@ -34,8 +34,7 @@ var Question = React.createClass({
         }
     },
     handleDelete() {
-        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
-                        "question and its options? There's no undo for this action.");
+        var deleteConfirmation = confirm("Are you sure you want to delete this question and its options?");
         if (deleteConfirmation) {
             SurveyActions.itemDelete(ItemTypes.QUESTION, this.props.id);
         }

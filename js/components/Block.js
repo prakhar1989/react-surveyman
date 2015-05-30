@@ -32,8 +32,7 @@ var Block = React.createClass({
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     handleDelete() {
-        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
-                        "block, its associated questions and options? There's no undo for this action.");
+        var deleteConfirmation = confirm("Are you sure you want to delete this block, its associated questions and options?");
         if (deleteConfirmation) {
             SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
         }

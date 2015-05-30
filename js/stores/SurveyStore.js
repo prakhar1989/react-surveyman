@@ -188,10 +188,8 @@ var SurveyStore = Reflux.createStore({
 
         // Hides the alert box
         setTimeout(function(self) {
-            if (self.data.alertState.get('visible')) {
-                self.data.alertState = self.data.alertState.set('visible', false);
-                self.trigger(self.data);
-            }
+            self.data.alertState = self.data.alertState.set('visible', false);
+            self.trigger(self.data);
         }, ALERT_TIMEOUT, this);
     },
     /**
