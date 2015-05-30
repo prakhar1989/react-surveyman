@@ -6,6 +6,7 @@ var ItemTypes = require('./ItemTypes');
 var HelpText = require('./HelpText');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var cx = require('classnames');
 
 var Survey = React.createClass({
     mixins:[ReactDND.DragDropMixin, PureRenderMixin],
@@ -29,13 +30,12 @@ var Survey = React.createClass({
     render: function() {
         var survey = this.props.survey;
         var dropState = this.getDropState(ItemTypes.BLOCK);
+        var classes = cx({
+            'survey': true,
+            'dragging': dropState.isDragging,
+            'hovering': dropState.isHovering
+        });
 
-        var style = {};
-        if (dropState.isHovering) {
-            style.backgroundColor = '#f4fbd7';
-        } else if (dropState.isDragging) {
-            style.backgroundColor = "#eeeeee";
-        }
 
         var blocks = survey.map(block =>
             <Block key={block.get('id')}
@@ -47,8 +47,7 @@ var Survey = React.createClass({
         );
 
         return (
-            <div style={style}
-                 className="survey" {...this.dropTargetFor(ItemTypes.BLOCK)}>
+            <div className={classes} {...this.dropTargetFor(ItemTypes.BLOCK)}>
                  { survey.count() > 0 ? blocks : <HelpText itemType="Block" /> }
             </div>
         )

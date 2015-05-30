@@ -15,6 +15,7 @@
     "babel": "^5.4.4",
     "babel-core": "^5.4.3",
     "babel-loader": "^5.1.2",
+    "classnames": "^2.1.2",
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-minify-css": "^1.0.0",

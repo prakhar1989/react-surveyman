@@ -6,6 +6,7 @@ var SurveyActions = require('../actions/SurveyActions');
 var ToggleParam = require('./ToggleParam');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var cx = require('classnames');
 
 var Question = React.createClass({
     mixins: [ReactDND.DragDropMixin, PureRenderMixin],
@@ -64,13 +65,11 @@ var Question = React.createClass({
     },
     render: function() {
         var dropState = this.getDropState(ItemTypes.OPTION);
-
-        var style = {};
-        if (dropState.isHovering) {
-            style.backgroundColor = '#f4fbd7';
-        } else if (dropState.isDragging) {
-            style.backgroundColor = "#eeeeee";
-        }
+        var classes = cx({
+            'item question': true,
+            'dragging': dropState.isDragging,
+            'hovering': dropState.isHovering
+        });
 
         // placeholder for taking input when text is clicked
         var input = <input type="text"
@@ -80,9 +79,7 @@ var Question = React.createClass({
                         onKeyPress={this.handleEdit} />;
 
         return (
-            <div className="item question"
-                style={style}
-                {...this.dropTargetFor(ItemTypes.OPTION)}>
+            <div className={classes} {...this.dropTargetFor(ItemTypes.OPTION)}>
 
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>

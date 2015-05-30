@@ -7,6 +7,7 @@ var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var cx = require('classnames');
 
 var Block = React.createClass({
     mixins: [ReactDND.DragDropMixin, PureRenderMixin],
@@ -50,16 +51,14 @@ var Block = React.createClass({
         });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);
-        var style = {};
-        if (dropState.isHovering) {
-            style.backgroundColor = '#f4fbd7';
-        } else if (dropState.isDragging) {
-            style.backgroundColor = "#eeeeee";
-        }
+        var classes = cx({
+            'item block': true,
+            'dragging': dropState.isDragging,
+            'hovering': dropState.isHovering
+        });
 
         return (
-            <div className="item block"
-                {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
+            <div className={classes} {...this.dropTargetFor(ItemTypes.QUESTION)}>
 
                 <div className="controls-area">
                     <ul>

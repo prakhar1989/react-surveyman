@@ -18,6 +18,13 @@ div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
 }
+div.item.dragging, div.survey.dragging {
+    background: #f4fbd7;
+}
+div.item.hovering, div.survey.hovering {
+    background: #eeeeee;
+}
+
 div.dropzone {
   height: 80px;
   width: 100%;
