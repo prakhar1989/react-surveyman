@@ -116,11 +116,14 @@ var SurveyStore = Reflux.createStore({
             list.push(newQuestion)
         );
 
+
+        // update and cache
+        this.updateSurveyData(newSurvey, true);
+
         // update question map with new question
         var block = this.data.surveyData.get(index);
         _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
-        this.updateSurveyData(newSurvey, true);
         SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
     },
     /**
@@ -149,7 +152,7 @@ var SurveyStore = Reflux.createStore({
         _optionMap = _optionMap.set(newOption.get('id'), block.getIn(['questions', index, 'id']));
         _optionsSet = _optionsSet.add(otext);
 
-        this.updateSurveyData(newSurvey);
+        this.updateSurveyData(newSurvey, true);
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -260,6 +263,7 @@ var SurveyStore = Reflux.createStore({
         if (itemType === ItemTypes.BLOCK) {
             let index = this.getBlockIndex(itemId);
             let newSurvey = survey.delete(index);
+
             this.updateSurveyData(newSurvey, true);
 
             // delete the mapping of question and options
@@ -269,11 +273,6 @@ var SurveyStore = Reflux.createStore({
                     _optionMap = _optionMap.delete(o.get('id'))
                 })
             });
-
-            // if all blocks have been deleted, add a new one
-            if (!this.data.surveyData.count()) {
-                SurveyActions.blockDropped();
-            }
 
             SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
         }
@@ -285,13 +284,15 @@ var SurveyStore = Reflux.createStore({
             let index = this.getQuestionIndex(itemId, block);
             let newSurvey = survey.deleteIn([blockIndex, 'questions', index]);
 
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
             // delete the mapping of the question and its options
             _questionMap = _questionMap.delete(itemId);
             block.getIn(['questions', index, 'options']).forEach(o =>
                 _optionMap = _optionMap.delete(o.get('id'))
             );
 
-            this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
         }
 
@@ -331,9 +332,14 @@ var SurveyStore = Reflux.createStore({
         this.updateSurveyData(newSurvey, true);
     },
     onUndoSurvey() {
-        // hide the alert and update
+        // hide the alert
         this.data.alertState = this.data.alertState.set('visible', false);
-        this.updateSurveyData(_history.pop());
+
+        // retrieve cached data
+        var { data, optionMap, questionMap } = _history.pop();
+        _questionMap = Immutable.Map(questionMap);
+        _optionMap = Immutable.Map(optionMap);
+        this.updateSurveyData(data);
     }
 });
 
