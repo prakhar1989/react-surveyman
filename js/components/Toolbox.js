@@ -15,7 +15,6 @@ var Toolbox = React.createClass({
                 <div className="widgets-area">
                     <DraggableBlock />
                     <DraggableQuestion />
-                    <DraggableOption />
                 </div>
             </div>
         )

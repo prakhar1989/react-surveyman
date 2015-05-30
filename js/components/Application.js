@@ -2,6 +2,7 @@ var React = require('react');
 var Reflux = require('reflux');
 var QuestionModal = require('./QuestionModal');
 var AlertBox = require('./AlertBox');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -9,9 +10,8 @@ var Pallet = require('./Pallet'),
     SurveyStore = require('../stores/SurveyStore');
 
 var Application = React.createClass({
-    // this causes setState to run whenever 
-    // the store calls this.trigger
-    mixins: [Reflux.connect(SurveyStore)],
+    // this causes setState to run whenever the store calls this.trigger
+    mixins: [Reflux.connect(SurveyStore), PureRenderMixin],
     componentDidMount() {
         SurveyActions.load();
     },
@@ -23,12 +23,12 @@ var Application = React.createClass({
         return (
             <div className="row">
                 <QuestionModal
-                    isOpen={modalState.question}
-                    parentID={dropTargetID}/>
+                    isOpen={modalState.get('isOpen')}
+                    parentID={modalState.get('dropTargetID')}/>
                 <AlertBox
-                    msg={alertState.msg}
-                    level={alertState.level}
-                    visible={alertState.visible} />
+                    msg={alertState.get('msg')}
+                    level={alertState.get('level')}
+                    visible={alertState.get('visible')} />
                 <div className="col-sm-8">
                     <Pallet survey={surveyData} />
                 </div>

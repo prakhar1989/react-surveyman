@@ -3,11 +3,13 @@ var ReactDND = require('react-dnd');
 var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
-var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
+var { List } = require('immutable');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var cx = require('classnames');
 
 var Question = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
+    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.OPTION, {
@@ -20,8 +22,8 @@ var Question = React.createClass({
         }
     },
     propTypes: {
-        options: React.PropTypes.array.isRequired,
-        id: React.PropTypes.number.isRequired,
+        options: React.PropTypes.instanceOf(List).isRequired,
+        id: React.PropTypes.string.isRequired,
         qtext: React.PropTypes.string.isRequired,
         ordering: React.PropTypes.bool.isRequired,
         freetext: React.PropTypes.bool.isRequired,
@@ -33,8 +35,7 @@ var Question = React.createClass({
         }
     },
     handleDelete() {
-        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
-                        "question and its options? There's no undo for this action.");
+        var deleteConfirmation = confirm("Are you sure you want to delete this question and its options?");
         if (deleteConfirmation) {
             SurveyActions.itemDelete(ItemTypes.QUESTION, this.props.id);
         }
@@ -64,13 +65,11 @@ var Question = React.createClass({
     },
     render: function() {
         var dropState = this.getDropState(ItemTypes.OPTION);
-
-        var style = {};
-        if (dropState.isHovering) {
-            style.backgroundColor = '#f4fbd7';
-        } else if (dropState.isDragging) {
-            style.backgroundColor = "#eeeeee";
-        }
+        var classes = cx({
+            'item question': true,
+            'dragging': dropState.isDragging,
+            'hovering': dropState.isHovering
+        });
 
         // placeholder for taking input when text is clicked
         var input = <input type="text"
@@ -80,9 +79,8 @@ var Question = React.createClass({
                         onKeyPress={this.handleEdit} />;
 
         return (
-            <div className="item question"
-                style={style}
-                {...this.dropTargetFor(ItemTypes.OPTION)}>
+            <div className={classes} {...this.dropTargetFor(ItemTypes.OPTION)}>
+
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>
                   { this.state.editing ? input : this.props.qtext }

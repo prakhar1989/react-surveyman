@@ -5,9 +5,12 @@ var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
+var { List } = require('immutable');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var cx = require('classnames');
 
 var Block = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
+    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
     statics: {
         configureDragDrop: function(register) {
             register(ItemTypes.QUESTION, {
@@ -20,8 +23,8 @@ var Block = React.createClass({
         }
     },
     propTypes: {
-        id: React.PropTypes.number.isRequired,
-        questions: React.PropTypes.array.isRequired,
+        id: React.PropTypes.string.isRequired,
+        questions: React.PropTypes.instanceOf(List),
         subblocks: React.PropTypes.array.isRequired,
         randomizable: React.PropTypes.bool.isRequired,
         ordering: React.PropTypes.bool.isRequired
@@ -30,8 +33,7 @@ var Block = React.createClass({
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
     },
     handleDelete() {
-        var deleteConfirmation = confirm("DANGER AHEAD: Are you sure you want to delete this " +
-                        "block, its associated questions and options? There's no undo for this action.");
+        var deleteConfirmation = confirm("Are you sure you want to delete this block, its associated questions and options?");
         if (deleteConfirmation) {
             SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
         }
@@ -39,33 +41,34 @@ var Block = React.createClass({
     render() {
         var questions = this.props.questions.map(q => {
             return <Question
-                        key={q.id}
-                        options={q.options}
-                        id={q.id}
-                        qtext={q.qtext}
-                        ordering={q.ordering}
-                        exclusive={q.exclusive}
-                        freetext={q.freetext} />
+                        key={q.get('id')}
+                        options={q.get('options')}
+                        id={q.get('id')}
+                        qtext={q.get('qtext')}
+                        ordering={q.get('ordering')}
+                        exclusive={q.get('exclusive')}
+                        freetext={q.get('freetext')} />
         });
 
         var dropState = this.getDropState(ItemTypes.QUESTION);
-        var style = {};
-        if (dropState.isHovering) {
-            style.backgroundColor = '#f4fbd7';
-        } else if (dropState.isDragging) {
-            style.backgroundColor = "#eeeeee";
-        }
+        var classes = cx({
+            'item block': true,
+            'dragging': dropState.isDragging,
+            'hovering': dropState.isHovering
+        });
 
         return (
-            <div className="item block"
-                {...this.dropTargetFor(ItemTypes.QUESTION)} style={style}>
+            <div className={classes} {...this.dropTargetFor(ItemTypes.QUESTION)}>
+
                 <div className="controls-area">
                     <ul>
                       <li><i title="Delete Block" className="ion-trash-b" onClick={this.handleDelete}></i></li>
                       <li><i title="Add Question" className="ion-plus-circled" onClick={this.handleQuestionDrop}></i></li>
                     </ul>  
                 </div>
-                {questions.length > 0 ? questions : <HelpText itemType="Question" /> }
+
+                {questions.count() > 0 ? questions : <HelpText itemType="Question" /> }
+
                 <div className="config-area">
                     <ul>
                         <li>

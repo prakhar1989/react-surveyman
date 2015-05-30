@@ -3,33 +3,42 @@ var initialData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
+var AlertTypes = require('../components/AlertTypes');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
 
 // initialize question and option map which will help in
 // faster retrieval of associated blocks and questions.
-var _questionMap = Immutable.Map();     // questionId => block
-var _optionMap = Immutable.Map();       // optionId   => question
+var _questionMap = Immutable.Map();     // questionId => blockId 
+var _optionMap = Immutable.Map();       // optionId   => questionId
+
+// CONSTS
+const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
+
+// mananging history
+var _history = [];
 
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
-        surveyData: [],
-        dropTargetID: null,
-        modalState: {
-            option: false,
-            block: false,
-            question: false
-        },
-        alertState: {
-            msg: "hello world",
-            level: 'warning',
+        surveyData: Immutable.List(),
+        modalState: Immutable.Map({
+            dropTargetID: null,
+            isOpen: false
+        }),
+        alertState: Immutable.Map({
+            msg: '',
+            level: AlertTypes.INFO,
             visible: false
-        }
+        })
     },
+    // called when the app component is loaded
     init() {
-        this.listenTo(SurveyActions.load, () => (this.updateSurveyData(initialData)))
+        this.listenTo(SurveyActions.load, () => {
+            var data = Immutable.fromJS(initialData);
+            this.updateSurveyData(data, true);
+        });
     },
     getInitialState() {
         return {
@@ -39,34 +48,36 @@ var SurveyStore = Reflux.createStore({
         }
     },
     /**
-     * Updates the survey data as the args provided. Triggers refresh 
+     * Updates the survey data as the args provided. Triggers refresh.
+     * Stores prev state in history, if second param is true
      * @param data surveydata
+     * @param cache - boolean
      */
-    updateSurveyData(data) {
-        this.data.surveyData = data;
+    updateSurveyData(data, cache = false) {
+        if (cache) {
+            _history.push({
+                data        : this.data.surveyData,
+                optionMap   : _optionMap.toJS(),
+                questionMap : _questionMap.toJS()
+            });
+        }
+        this.data.surveyData = data
         this.trigger(this.data);
     },
-    /*
-     ** Returns the set (unique list) of options.
-     */
+    // Returns the set (unique list) of options.
     getOptionsSet() {
         return _optionsSet;
     },
-    getNewBlock() {
-        var survey = this.data.surveyData;
-        return {
-            id: survey.length,
-            questions: [],
-            subblocks: [],
-            randomizable: true,
-            ordering: false
+    getNewId(type) {
+        var prefix;
+        if (type === ItemTypes.QUESTION) {
+            prefix = "q"
+        } else if (type === ItemTypes.OPTION) {
+            prefix = "o"
+        } else {
+            prefix = "b"
         }
-    },
-    getNewQuestionId() {
-        return Math.floor((Math.random() * 1000) + 1);
-    },
-    getNewOptionId() {
-        return Math.floor((Math.random() * 1000) + 1);
+        return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`
     },
     /**
      * Runs when the blockDropped action is called by the view.
@@ -74,11 +85,15 @@ var SurveyStore = Reflux.createStore({
      */
     onBlockDropped() {
         var survey = this.data.surveyData;
-        var newBlock = this.getNewBlock(),
-            newSurvey = survey.concat(newBlock);
-
-        this.updateSurveyData(newSurvey);
-        SurveyActions.showAlert("new block added", "success");
+        var newBlock = Immutable.fromJS({
+            id: this.getNewId(ItemTypes.BLOCK),
+            questions: [],
+            subblocks: [],
+            randomizable: true,
+            ordering: false
+        });
+        this.updateSurveyData(survey.push(newBlock), true);
+        SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     },
     /**
      * Runs when the questionDropped action is called by the view.
@@ -87,29 +102,29 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
-        var survey = this.data.surveyData,
-            position = questionObj.parentID,
-            block = survey[position];
-
-        if (!block) {
-            throw new Error("block does not exist");
-        }
-
-        var newQuestion = {
-            id: this.getNewQuestionId(),
+        var newQuestion = Immutable.fromJS({
+            id: this.getNewId(ItemTypes.QUESTION),
             qtext: questionObj.qtext,
             options: [],
             ordering: questionObj.ordering,
             freetext: questionObj.freetext,
             exclusive: questionObj.exclusive
-        };
-        block.questions = block.questions.concat(newQuestion);
+        });
+
+        var index = this.getBlockIndex(questionObj.parentID);
+        var newSurvey = this.data.surveyData.updateIn([index, 'questions'], list =>
+            list.push(newQuestion)
+        );
+
+
+        // update and cache
+        this.updateSurveyData(newSurvey, true);
 
         // update question map with new question
-        _questionMap = _questionMap.set(newQuestion.id, block);
+        var block = this.data.surveyData.get(index);
+        _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
-        this.updateSurveyData(survey);
-        SurveyActions.showAlert("new question added", "success");
+        SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
     },
     /**
      * Runs when the optionAdded action is called by the view.
@@ -118,24 +133,26 @@ var SurveyStore = Reflux.createStore({
      * @param otext (string) the text of the option to be added
      */
     onOptionAdded(questionId, otext) {
-        var question = this.getQuestionWithID(questionId);
-
-        if (!question) {
-            throw new Error('Question not found');
-        }
-
         // template for new Option
-        var newOption = {
-            id: this.getNewOptionId(),
+        var newOption = Immutable.Map({
+            id: this.getNewId(ItemTypes.OPTION),
             otext: otext
-        };
-        question.options = question.options.concat(newOption);
+        });
+
+        var survey = this.data.surveyData;
+        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+        var block = survey.get(blockIndex);
+        var index = this.getQuestionIndex(questionId, block);
+        var newSurvey = survey.updateIn(
+            [blockIndex, 'questions', index, 'options'], 
+            list => list.push(newOption)
+        );
 
         // update the option map and options set
-        _optionMap = _optionMap.set(newOption.id, question);
+        _optionMap = _optionMap.set(newOption.get('id'), block.getIn(['questions', index, 'id']));
         _optionsSet = _optionsSet.add(otext);
 
-        this.trigger(this.data);
+        this.updateSurveyData(newSurvey, true);
     },
     /**
      * Run when the action toggleModal is called by the view
@@ -143,27 +160,17 @@ var SurveyStore = Reflux.createStore({
      * @param dropTargetID - Refers to the ID on which the object was dropped
      */
     onToggleModal(modalType, dropTargetID) {
-
-        // causes a modal popup to toggle
         var modalState = this.data.modalState;
+
+        // TODO: this handles the modal for question separately, although 
+        // this is not really required. deal with it later.
         if (modalType === ItemTypes.QUESTION) {
-            modalState.question = !modalState.question;
-        } else if (modalType === ItemTypes.OPTION) {
-            modalState.option = !modalState.option;
-        } else {
-            modalState.block = !modalState.block;
+            modalState = modalState.set('isOpen', !modalState.get('isOpen'));
         }
 
         // sets the correct dropTarget to pass down to component
-        this.data.dropTargetID = dropTargetID;
+        this.data.modalState = modalState.set('dropTargetID', dropTargetID);
         this.trigger(this.data);
-    },
-     /* Hides the alert box */
-    hideAlert() {
-        setTimeout(function(self) {
-            self.data.alertState.visible = false;
-            self.trigger(self.data);
-        }, 2000, this);
     },
     /**
      * Run when the action showAlert is called. Responsible for displaying
@@ -171,30 +178,43 @@ var SurveyStore = Reflux.createStore({
      * @param msg - the msg to be displayed
      * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
      */
-    onShowAlert(msg, level='info') {
-        this.data.alertState = {
+    onShowAlert(msg, level=AlertTypes.INFO) {
+        this.data.alertState = Immutable.Map({
             msg: msg,
             level: level,
             visible: true
-        };
+        });
         this.trigger(this.data);
-        this.hideAlert();
+
+        // Hides the alert box
+        setTimeout(function(self) {
+            self.data.alertState = self.data.alertState.set('visible', false);
+            self.trigger(self.data);
+        }, ALERT_TIMEOUT, this);
     },
     /**
      * Called when the downloadSurvey action is called. 
      * Logs the survey object to the console.
      */
     onDownloadSurvey() {
-        console.log("Survey:", this.data.surveyData);
-        SurveyActions.showAlert("Survey logged in your Dev console", "success");
+        var survey = { survey: this.data.surveyData.toJS() };
+        console.log("Survey:", survey);
+        SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
-     * Returns a reference to the question
-     * @param id - id of the question
+     * Returns the index of the block 
+     * @param id - id of the block
      */
-    getQuestionWithID(id) {
-        var block = _questionMap.get(id);
-        return block.questions.filter(q => q.id === id)[0];
+    getBlockIndex(blockId) {
+        return this.data.surveyData.findIndex(b => b.get('id') === blockId);
+    },
+    /**
+     * Returns the index of a question in a block
+     * @param id - id of the question
+     * @param block - obj (Immutable.Map) of the container block
+     */
+    getQuestionIndex(questionId, block) {
+        return block.get('questions').findIndex(q => q.get('id') === questionId);
     },
     /**
      * Called when the toggleParam action is called.
@@ -204,19 +224,24 @@ var SurveyStore = Reflux.createStore({
      * @param toggleName - string name of property that is toggled.
      */
     onToggleParam(itemType, itemId, toggleName) {
+        var survey = this.data.surveyData;
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            let block = this.data.surveyData[itemId];
-            block[toggleName] = !block[toggleName];
-            this.trigger(this.data);
+            let index = this.getBlockIndex(itemId);
+            let newSurvey = survey.update(index, b => b.set(toggleName, !b.get(toggleName)));
+            this.updateSurveyData(newSurvey);
         }
 
         // handle the case when a param on a question is toggled
         else if (itemType === ItemTypes.QUESTION) {
-            let question = this.getQuestionWithID(itemId);
-            question[toggleName] = !question[toggleName];
-            this.trigger(this.data);
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let index = this.getQuestionIndex(itemId, block);
+            let newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+                q.set(toggleName, !q.get(toggleName))
+            );
+            this.updateSurveyData(newSurvey);
         }
 
         // throw exception
@@ -230,32 +255,58 @@ var SurveyStore = Reflux.createStore({
      * @param itemId - Id of item to be deleted.
      */
     onItemDelete(itemType, itemId) {
+        var survey = this.data.surveyData;
+
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
-            this.data.surveyData.splice(itemId, 1);
+            let index = this.getBlockIndex(itemId);
+            let newSurvey = survey.delete(index);
 
-            // if all blocks have been deleted, add a new one
-            if (this.data.surveyData.length == 0) {
-                SurveyActions.blockDropped();
-            }
+            this.updateSurveyData(newSurvey, true);
 
-            SurveyActions.showAlert("Block deleted successfully", "success");
+            // delete the mapping of question and options
+            survey.getIn([index, 'questions']).forEach(q => {
+                _questionMap = _questionMap.delete(q.get('id'));
+                q.get('options').forEach(o => {
+                    _optionMap = _optionMap.delete(o.get('id'))
+                })
+            });
+
+            SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
         }
 
         // handle question delete
         else if (itemType === ItemTypes.QUESTION) {
-            let block = _questionMap.get(itemId);
-            let index = Array.findIndex(block.questions, q => q.id === itemId);
-            block.questions.splice(index, 1);
-            SurveyActions.showAlert("Item deleted successfully", "success");
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let index = this.getQuestionIndex(itemId, block);
+            let newSurvey = survey.deleteIn([blockIndex, 'questions', index]);
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // delete the mapping of the question and its options
+            _questionMap = _questionMap.delete(itemId);
+            block.getIn(['questions', index, 'options']).forEach(o =>
+                _optionMap = _optionMap.delete(o.get('id'))
+            );
+
+            SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
         }
 
         // handle option delete
         else if (itemType === ItemTypes.OPTION) {
-            let question = _optionMap.get(itemId);
-            let index = Array.findIndex(question.options, o => o.d === itemId);
-            question.options.splice(index, 1);
-            SurveyActions.showAlert("Item deleted successfully", "success");
+            let questionId = _optionMap.get(itemId);
+            let blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+            let block = survey.get(blockIndex);
+            let quesIndex = this.getQuestionIndex(questionId, block);
+            let options = block.getIn(['questions', quesIndex, 'options']);
+            let optionIndex = options.findIndex(op => op.get('id') === itemId);
+            let newSurvey = survey.deleteIn([blockIndex, 'questions', quesIndex, 'options', optionIndex]);
+
+            // delete the mapping
+            _optionMap = _optionMap.delete(itemId);
+            this.updateSurveyData(newSurvey);
         }
 
         // throw exception
@@ -269,9 +320,24 @@ var SurveyStore = Reflux.createStore({
      * @param questionId - id of the question that needs to be changed
      */
     onSaveEditText(text, questionId) {
-        var question = this.getQuestionWithID(questionId);
-        question.qtext = text;
-        this.trigger(this.data);
+        var survey = this.data.surveyData;
+        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
+        var block = survey.get(blockIndex);
+        var index = this.getQuestionIndex(questionId, block);
+        var newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+            q.set('qtext', text)
+        );
+        this.updateSurveyData(newSurvey, true);
+    },
+    onUndoSurvey() {
+        // hide the alert
+        this.data.alertState = this.data.alertState.set('visible', false);
+
+        // retrieve cached data
+        var { data, optionMap, questionMap } = _history.pop();
+        _questionMap = Immutable.Map(questionMap);
+        _optionMap = Immutable.Map(optionMap);
+        this.updateSurveyData(data);
     }
 });
 
