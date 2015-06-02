@@ -116,7 +116,6 @@ var SurveyStore = Reflux.createStore({
             list.push(newQuestion)
         );
 
-
         // update and cache
         this.updateSurveyData(newSurvey, true);
 
@@ -329,6 +328,10 @@ var SurveyStore = Reflux.createStore({
         );
         this.updateSurveyData(newSurvey, true);
     },
+    /**
+     * Called when the undoSurvey action is triggered. Responsible for 
+     * setting global state to last _history item.
+     */
     onUndoSurvey() {
         // hide the alert
         this.data.alertState = this.data.alertState.set('visible', false);
