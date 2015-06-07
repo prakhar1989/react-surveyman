@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDND = require('react-dnd');
 var Block = require('./Block');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
@@ -7,35 +6,37 @@ var HelpText = require('./HelpText');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
+var { DropTarget } = require('react-dnd');
+
+var surveyTarget = {
+    drop(props, monitor, component) {
+        component.handleBlockDrop();
+    }
+};
+
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        canDrop: monitor.canDrop(),
+        isOver: monitor.isOver()
+    }
+}
 
 var Survey = React.createClass({
-    mixins:[ReactDND.DragDropMixin, PureRenderMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.BLOCK, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleBlockDrop();
-                    }
-                }
-            })
-        }
-    },
+    mixins:[PureRenderMixin],
     propTypes: {
         survey: React.PropTypes.instanceOf(List)
     },
     handleBlockDrop() {
         SurveyActions.blockDropped();
     },
-    render: function() {
-        var survey = this.props.survey;
-        var dropState = this.getDropState(ItemTypes.BLOCK);
+    render() {
+        var { survey, canDrop, isOver, connectDropTarget } = this.props;
         var classes = cx({
             'survey': true,
-            'dragging': dropState.isDragging,
-            'hovering': dropState.isHovering
+            'dragging': canDrop,
+            'hovering': isOver
         });
-
 
         var blocks = survey.map(block =>
             <Block key={block.get('id')}
@@ -46,12 +47,12 @@ var Survey = React.createClass({
                 questions={block.get('questions')} />
         );
 
-        return (
-            <div className={classes} {...this.dropTargetFor(ItemTypes.BLOCK)}>
+        return connectDropTarget(
+            <div className={classes}>
                  { survey.count() > 0 ? blocks : <HelpText itemType="Block" /> }
             </div>
         )
     }
 });
 
-module.exports = Survey;
+module.exports = DropTarget(ItemTypes.BLOCK, surveyTarget, collect)(Survey);

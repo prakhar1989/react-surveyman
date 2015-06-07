@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDND = require('react-dnd');
 var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
@@ -9,18 +8,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 
 var Question = React.createClass({
-    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.OPTION, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleOptionDrop();
-                    }
-                }
-            })
-        }
-    },
+    mixins: [PureRenderMixin],
     propTypes: {
         options: React.PropTypes.instanceOf(List).isRequired,
         id: React.PropTypes.string.isRequired,
@@ -64,11 +52,8 @@ var Question = React.createClass({
         }
     },
     render: function() {
-        var dropState = this.getDropState(ItemTypes.OPTION);
         var classes = cx({
-            'item question': true,
-            'dragging': dropState.isDragging,
-            'hovering': dropState.isHovering
+            'item question': true
         });
 
         // placeholder for taking input when text is clicked
@@ -79,7 +64,7 @@ var Question = React.createClass({
                         onKeyPress={this.handleEdit} />;
 
         return (
-            <div className={classes} {...this.dropTargetFor(ItemTypes.OPTION)}>
+            <div className={classes}>
 
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>
