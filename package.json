@@ -24,7 +24,7 @@
     "node-libs-browser": "^0.5.0",
     "react": "^0.13.1",
     "react-bootstrap": "^0.20.1",
-    "react-dnd": "0.9.8",
+    "react-dnd": "1.1.0",
     "react-tag-input": "0.0.7",
     "reflux": "^0.2.7",
     "webpack": "^1.9.7",

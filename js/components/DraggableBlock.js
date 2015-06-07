@@ -1,34 +1,28 @@
-var React = require('react'),
-    ReactDND = require('react-dnd');
-
+var React = require('react');
+var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes.js');
 
-var DraggableBlock = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.BLOCK, {
-                dragSource: {
-                    beginDrag: function(component) {
-                        // TODO: use this to transfer data
-                        return {
-                            item: {
-                            }
-                        };
-                    }
-                }
-            });
+var blockSource = {
+    beginDrag(props) {
+        return {
+            item: {}
         }
-    },
+    }
+};
+
+function collect(connect, monitor) {
+    return {
+        connectDragSource: connect.dragSource(),
+        isDragging: monitor.isDragging()
+    }
+}
+
+var DraggableBlock = React.createClass({
     render() {
-        var style = {};
+        var { isDragging, connectDragSource } = this.props;
 
-        var isDragging = this.getDragState(ItemTypes.BLOCK).isDragging;
-        style.opacity = isDragging ? 0.4 : 1;
-
-        return (
-            <div {...this.dragSourceFor(ItemTypes.BLOCK)}
-                style={style} className="draggable">
+        return connectDragSource(
+            <div style={{opacity: isDragging ? 0.4 : 1 }} className="draggable">
                 <i className="ion-plus-circled"></i>
                 Block
             </div>
@@ -36,4 +30,4 @@ var DraggableBlock = React.createClass({
     }
 });
 
-module.exports = DraggableBlock;
+module.exports = DragSource(ItemTypes.BLOCK, blockSource, collect)(DraggableBlock);
