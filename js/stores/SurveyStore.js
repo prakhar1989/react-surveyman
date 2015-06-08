@@ -248,6 +248,9 @@ var SurveyStore = Reflux.createStore({
             throw new Error("Not a valid item type");
         }
     },
+    onItemCopy(itemType, itemId) {
+        console.log("hello world")
+    },
     /**
      * Called when an item has to be deleted.
      * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
