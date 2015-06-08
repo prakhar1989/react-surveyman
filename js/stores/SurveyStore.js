@@ -248,8 +248,63 @@ var SurveyStore = Reflux.createStore({
             throw new Error("Not a valid item type");
         }
     },
+    /**
+     * Returns a clone of Question with new ID of itself
+     * and all options.
+     * @param question - type of Immutable.Map. The question to be cloned
+     */
+    cloneQuestion(question) {
+        return question
+                .set('id', this.getNewId(ItemTypes.QUESTION)) // generate new ID
+                .update('options', (list) =>                  // do the same for all options
+                            list.map(
+                                o => Immutable.Map({
+                                    id: this.getNewId(ItemTypes.OPTION),
+                                    otext: o.get('otext')
+                                }.bind(this))
+                            )
+                        );
+    },
+    /**
+     * Method called when the itemCopy action is triggered.
+     * Responsible for creating a new copy of an ItemType - works only for
+     * question and block.
+     * @param itemType type of ItemType
+     * @param itemId id of the item to be cloned
+     */
     onItemCopy(itemType, itemId) {
-        console.log("hello world")
+        var survey = this.data.surveyData;
+
+        if (itemType === ItemTypes.BLOCK) {
+            console.log('WIP');
+        }
+
+        else if (itemType === ItemTypes.QUESTION) {
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let question = block.get('questions').find(q => q.get('id') === itemId);
+            let newQuestion = this.cloneQuestion(question);
+            let newSurvey = survey.updateIn([blockIndex, 'questions'], list =>
+                list.push(newQuestion)
+            );
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // update the maps with new question and new options
+            let qId = newQuestion.get('id');
+            _questionMap = _questionMap.set(qId, block.get('id'));
+            newQuestion.get('options').forEach(
+                o => _optionMap.set(o.get(id), qId)
+            );
+
+            SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
+
+        }
+
+        else {
+            throw new Error("Not a valid item type");
+        }
     },
     /**
      * Called when an item has to be deleted.
