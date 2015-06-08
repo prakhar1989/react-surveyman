@@ -2,6 +2,9 @@ var React = require('react');
 var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes.js');
 
+// this is the specification that describes
+// how the drag source reacts to the drag
+// and drop events
 var blockSource = {
     beginDrag(props) {
         return {
@@ -10,6 +13,8 @@ var blockSource = {
     }
 };
 
+// the collecting function that injects 
+// relevant props to the component
 function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),

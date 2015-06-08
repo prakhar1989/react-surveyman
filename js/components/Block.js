@@ -8,6 +8,7 @@ var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
+var ItemControl = require('./ItemControl');
 
 var blockTarget = {
     drop(props, monitor, component) {
@@ -41,6 +42,9 @@ var Block = React.createClass({
             SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
         }
     },
+    handleCopy(e) {
+        SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
+    },
     render() {
         var { canDrop, isOver, connectDropTarget } = this.props;
         var classes = cx({
@@ -65,8 +69,9 @@ var Block = React.createClass({
             <div className={classes}> 
                 <div className="controls-area">
                     <ul>
-                      <li><i title="Delete Block" className="ion-trash-b" onClick={this.handleDelete}></i></li>
-                      <li><i title="Add Question" className="ion-plus-circled" onClick={this.handleQuestionDrop}></i></li>
+                      <li><ItemControl icon="ion-trash-b" helpText="Delete this block" handleClick={this.handleDelete}/></li>
+                      <li><ItemControl icon="ion-plus-circled" helpText="Add a question" handleClick={this.handleQuestionDrop}/></li>
+                      <li><ItemControl icon="ion-ios-copy" helpText="Clone this block" handleClick={this.handleCopy}/></li>
                     </ul>  
                 </div>
 

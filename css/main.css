@@ -97,9 +97,20 @@ div.item div.controls-area ul {
 
 div.item div.controls-area ul li {
     display: inline-block;
+    cursor: pointer;
+}
+
+div.item.block div.controls-area ul li {
     font-size: 18px;
     margin: 0 8px;
-    cursor: pointer;
+}
+
+div.item.question div.controls-area {
+    display: inline-block;
+}
+div.item.question div.controls-area ul li {
+    font-size: 14px;
+    margin: 0 4px;
 }
 
 p.help-text {
