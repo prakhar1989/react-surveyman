@@ -277,7 +277,27 @@ var SurveyStore = Reflux.createStore({
         var survey = this.data.surveyData;
 
         if (itemType === ItemTypes.BLOCK) {
-            console.log('WIP');
+            let block = survey.get(this.getBlockIndex(itemId));
+            let self = this;
+            let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
+                            .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
+            let newSurvey = survey.push(newBlock);
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // update the maps with the new question and new options
+            let blockId = newBlock.get('id');
+            newBlock.get('questions').forEach(function(q) {
+                var qId = q.get('id');
+                _questionMap = _questionMap.set(qId, blockId);
+
+                // set mapping for options
+                q.get('options').forEach(function(o) {
+                    _optionMap = _optionMap.set(o.get('id'), qId);
+                });
+            });
+            console.log(_questionMap.toJS(), _optionMap.toJS());
         }
 
         else if (itemType === ItemTypes.QUESTION) {
