@@ -297,7 +297,8 @@ var SurveyStore = Reflux.createStore({
                     _optionMap = _optionMap.set(o.get('id'), qId);
                 });
             });
-            console.log(_questionMap.toJS(), _optionMap.toJS());
+
+            SurveyActions.showAlert("Block copied.", AlertTypes.SUCCESS);
         }
 
         else if (itemType === ItemTypes.QUESTION) {
@@ -318,7 +319,7 @@ var SurveyStore = Reflux.createStore({
             newQuestion.get('options').forEach( o => {
                 _optionMap = _optionMap.set(o.get('id'), qId)
             });
-            SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
+            SurveyActions.showAlert("Question copied.", AlertTypes.SUCCESS);
         }
 
         else {
