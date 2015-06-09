@@ -254,14 +254,15 @@ var SurveyStore = Reflux.createStore({
      * @param question - type of Immutable.Map. The question to be cloned
      */
     cloneQuestion(question) {
+        var self = this;
         return question
-                .set('id', this.getNewId(ItemTypes.QUESTION)) // generate new ID
+                .set('id', self.getNewId(ItemTypes.QUESTION)) // generate new ID
                 .update('options', (list) =>                  // do the same for all options
                             list.map(
                                 o => Immutable.Map({
-                                    id: this.getNewId(ItemTypes.OPTION),
+                                    id: self.getNewId(ItemTypes.OPTION),
                                     otext: o.get('otext')
-                                }.bind(this))
+                                })
                             )
                         );
     },
@@ -294,12 +295,10 @@ var SurveyStore = Reflux.createStore({
             // update the maps with new question and new options
             let qId = newQuestion.get('id');
             _questionMap = _questionMap.set(qId, block.get('id'));
-            newQuestion.get('options').forEach(
-                o => _optionMap.set(o.get(id), qId)
-            );
-
+            newQuestion.get('options').forEach( o => {
+                _optionMap = _optionMap.set(o.get('id'), qId)
+            });
             SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
-
         }
 
         else {

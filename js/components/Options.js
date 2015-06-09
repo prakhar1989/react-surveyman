@@ -27,7 +27,7 @@ var Options = React.createClass({
         SurveyActions.itemDelete(ItemTypes.OPTION, id);
     },
     handleDrag: function() {
-        console.log("being called");
+        // TODO: to be implemeeted
     },
     render: function() {
         var options = this.props.options.toJS();
