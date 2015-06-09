@@ -1,5 +1,5 @@
 var React = require('react');
-var ReactTags = require('react-tag-input');
+var Tags = require('react-tag-input').WithOutContext;
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
 var SurveyStore = require('../stores/SurveyStore');
@@ -27,11 +27,12 @@ var Options = React.createClass({
         SurveyActions.itemDelete(ItemTypes.OPTION, id);
     },
     handleDrag: function() {
+        console.log("being called");
     },
     render: function() {
         var options = this.props.options.toJS();
         return (
-            <ReactTags tags={options}
+            <Tags tags={options}
                     suggestions={this.state.suggestions}
                     handleAddition={this.handleAddition}
                     handleDelete={this.handleDeletion}
