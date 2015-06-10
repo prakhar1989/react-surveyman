@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDND = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
@@ -8,20 +7,25 @@ var ToggleParam = require('./ToggleParam');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
+var { DropTarget } = require('react-dnd');
+var ItemControl = require('./ItemControl');
+
+var blockTarget = {
+    drop(props, monitor, component) {
+        component.handleQuestionDrop();
+    }
+};
+
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        canDrop: monitor.canDrop(),
+        isOver: monitor.isOver()
+    }
+}
 
 var Block = React.createClass({
-    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.QUESTION, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleQuestionDrop();
-                    }
-                }
-            });
-        }
-    },
+    mixins: [PureRenderMixin],
     propTypes: {
         id: React.PropTypes.string.isRequired,
         questions: React.PropTypes.instanceOf(List),
@@ -38,7 +42,18 @@ var Block = React.createClass({
             SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
         }
     },
+    handleCopy(e) {
+        SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
+    },
     render() {
+        var { canDrop, isOver, connectDropTarget } = this.props;
+        var classes = cx({
+            'item block': true,
+            'dragging': canDrop,
+            'hovering': isOver
+        });
+
+        // render questions
         var questions = this.props.questions.map(q => {
             return <Question
                         key={q.get('id')}
@@ -50,20 +65,13 @@ var Block = React.createClass({
                         freetext={q.get('freetext')} />
         });
 
-        var dropState = this.getDropState(ItemTypes.QUESTION);
-        var classes = cx({
-            'item block': true,
-            'dragging': dropState.isDragging,
-            'hovering': dropState.isHovering
-        });
-
-        return (
-            <div className={classes} {...this.dropTargetFor(ItemTypes.QUESTION)}>
-
+        return connectDropTarget(
+            <div className={classes}> 
                 <div className="controls-area">
                     <ul>
-                      <li><i title="Delete Block" className="ion-trash-b" onClick={this.handleDelete}></i></li>
-                      <li><i title="Add Question" className="ion-plus-circled" onClick={this.handleQuestionDrop}></i></li>
+                      <li><ItemControl icon="ion-trash-b" helpText="Delete this block" handleClick={this.handleDelete}/></li>
+                      <li><ItemControl icon="ion-plus-circled" helpText="Add a question" handleClick={this.handleQuestionDrop}/></li>
+                      <li><ItemControl icon="ion-ios-copy" helpText="Clone this block" handleClick={this.handleCopy}/></li>
                     </ul>  
                 </div>
 
@@ -96,4 +104,4 @@ var Block = React.createClass({
     }
 });
 
-module.exports = Block;
+module.exports = DropTarget(ItemTypes.QUESTION, blockTarget, collect)(Block);

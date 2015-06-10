@@ -3,6 +3,8 @@ var Reflux = require('reflux');
 var QuestionModal = require('./QuestionModal');
 var AlertBox = require('./AlertBox');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var { DragDropContext } = require('react-dnd');
+var HTML5Backend = require('react-dnd/modules/backends/HTML5');
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -40,4 +42,4 @@ var Application = React.createClass({
     }
 });
 
-module.exports = Application;
+module.exports = DragDropContext(HTML5Backend)(Application);

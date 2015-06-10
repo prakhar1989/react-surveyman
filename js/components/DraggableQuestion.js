@@ -1,33 +1,28 @@
-var React = require('react'),
-    ReactDND = require('react-dnd');
-
+var React = require('react');
+var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
-var DraggableQuestion = React.createClass({
-    mixins: [ReactDND.DragDropMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.QUESTION, {
-                dragSource: {
-                    beginDrag: function(component) {
-                        // TODO: use this to transfer data
-                        return {
-                            item: {
-                            }
-                        };
-                    }
-                }
-            });
+var questionSource = {
+    beginDrag(props) {
+        return {
+            item: {}
         }
-    },
-    render() {
-        var style = {};
-        var isDragging = this.getDragState(ItemTypes.QUESTION).isDragging;
-        style.opacity = isDragging ? 0.4 : 1;
+    }
+};
 
-        return (
-            <div {...this.dragSourceFor(ItemTypes.QUESTION)}
-                style={style} className="draggable">
+function collect(connect, monitor) {
+    return {
+        connectDragSource: connect.dragSource(),
+        isDragging: monitor.isDragging()
+    }
+}
+
+var DraggableQuestion = React.createClass({
+    render() {
+        var { isDragging, connectDragSource } = this.props;
+
+        return connectDragSource(
+            <div style={{opacity: isDragging ? 0.4 : 1}} className="draggable">
                 <i className="ion-plus-circled"></i>
                 Question
             </div>
@@ -35,4 +30,4 @@ var DraggableQuestion = React.createClass({
     }
 });
 
-module.exports = DraggableQuestion;
+module.exports = DragSource(ItemTypes.QUESTION, questionSource, collect)(DraggableQuestion);

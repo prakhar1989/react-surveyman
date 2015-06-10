@@ -116,7 +116,6 @@ var SurveyStore = Reflux.createStore({
             list.push(newQuestion)
         );
 
-
         // update and cache
         this.updateSurveyData(newSurvey, true);
 
@@ -250,6 +249,84 @@ var SurveyStore = Reflux.createStore({
         }
     },
     /**
+     * Returns a clone of Question with new ID of itself
+     * and all options.
+     * @param question - type of Immutable.Map. The question to be cloned
+     */
+    cloneQuestion(question) {
+        var self = this;
+        return question
+                .set('id', self.getNewId(ItemTypes.QUESTION)) // generate new ID
+                .update('options', (list) =>                  // do the same for all options
+                            list.map(
+                                o => Immutable.Map({
+                                    id: self.getNewId(ItemTypes.OPTION),
+                                    otext: o.get('otext')
+                                })
+                            )
+                        );
+    },
+    /**
+     * Method called when the itemCopy action is triggered.
+     * Responsible for creating a new copy of an ItemType - works only for
+     * question and block.
+     * @param itemType type of ItemType
+     * @param itemId id of the item to be cloned
+     */
+    onItemCopy(itemType, itemId) {
+        var survey = this.data.surveyData;
+
+        if (itemType === ItemTypes.BLOCK) {
+            let block = survey.get(this.getBlockIndex(itemId));
+            let self = this;
+            let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
+                            .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
+            let newSurvey = survey.push(newBlock);
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // update the maps with the new question and new options
+            let blockId = newBlock.get('id');
+            newBlock.get('questions').forEach(function(q) {
+                var qId = q.get('id');
+                _questionMap = _questionMap.set(qId, blockId);
+
+                // set mapping for options
+                q.get('options').forEach(function(o) {
+                    _optionMap = _optionMap.set(o.get('id'), qId);
+                });
+            });
+
+            SurveyActions.showAlert("Block copied.", AlertTypes.SUCCESS);
+        }
+
+        else if (itemType === ItemTypes.QUESTION) {
+            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
+            let block = survey.get(blockIndex);
+            let question = block.get('questions').find(q => q.get('id') === itemId);
+            let newQuestion = this.cloneQuestion(question);
+            let newSurvey = survey.updateIn([blockIndex, 'questions'], list =>
+                list.push(newQuestion)
+            );
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // update the maps with new question and new options
+            let qId = newQuestion.get('id');
+            _questionMap = _questionMap.set(qId, block.get('id'));
+            newQuestion.get('options').forEach( o => {
+                _optionMap = _optionMap.set(o.get('id'), qId)
+            });
+            SurveyActions.showAlert("Question copied.", AlertTypes.SUCCESS);
+        }
+
+        else {
+            throw new Error("Not a valid item type");
+        }
+    },
+    /**
      * Called when an item has to be deleted.
      * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
      * @param itemId - Id of item to be deleted.
@@ -329,6 +406,10 @@ var SurveyStore = Reflux.createStore({
         );
         this.updateSurveyData(newSurvey, true);
     },
+    /**
+     * Called when the undoSurvey action is triggered. Responsible for 
+     * setting global state to last _history item.
+     */
     onUndoSurvey() {
         // hide the alert
         this.data.alertState = this.data.alertState.set('visible', false);

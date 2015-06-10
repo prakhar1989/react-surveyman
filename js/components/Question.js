@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDND = require('react-dnd');
 var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
@@ -7,20 +6,10 @@ var ToggleParam = require('./ToggleParam');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
+var ItemControl = require('./ItemControl');
 
 var Question = React.createClass({
-    mixins: [ReactDND.DragDropMixin, PureRenderMixin],
-    statics: {
-        configureDragDrop: function(register) {
-            register(ItemTypes.OPTION, {
-                dropTarget: {
-                    acceptDrop: function(component, item) {
-                        component.handleOptionDrop();
-                    }
-                }
-            })
-        }
-    },
+    mixins: [PureRenderMixin],
     propTypes: {
         options: React.PropTypes.instanceOf(List).isRequired,
         id: React.PropTypes.string.isRequired,
@@ -63,12 +52,12 @@ var Question = React.createClass({
             SurveyActions.saveEditText(e.target.value, this.props.id);
         }
     },
+    handleCopy(e) {
+        SurveyActions.itemCopy(ItemTypes.QUESTION, this.props.id);
+    },
     render: function() {
-        var dropState = this.getDropState(ItemTypes.OPTION);
         var classes = cx({
-            'item question': true,
-            'dragging': dropState.isDragging,
-            'hovering': dropState.isHovering
+            'item question': true
         });
 
         // placeholder for taking input when text is clicked
@@ -79,13 +68,19 @@ var Question = React.createClass({
                         onKeyPress={this.handleEdit} />;
 
         return (
-            <div className={classes} {...this.dropTargetFor(ItemTypes.OPTION)}>
+            <div className={classes}>
 
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>
                   { this.state.editing ? input : this.props.qtext }
                   </span>
-                  <i className="ion-trash-b" onClick={this.handleDelete}></i>
+                  
+                  <div className="controls-area">
+                      <ul>
+                          <li><ItemControl icon="ion-trash-b" helpText="Delete this question" handleClick={this.handleDelete}/></li>
+                          <li><ItemControl icon="ion-ios-copy" helpText="Clone this question" handleClick={this.handleCopy}/></li>
+                      </ul>
+                  </div>
                 </div>
 
                 <Options options={this.props.options} questionId={this.props.id} />
