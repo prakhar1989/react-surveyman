@@ -66,7 +66,7 @@ var Block = React.createClass({
         });
 
         return connectDropTarget(
-            <div className={classes}> 
+            <div className={classes} id={this.props.id}>
                 <div className="controls-area">
                     <ul>
                       <li><ItemControl icon="ion-trash-b" helpText="Delete this block" handleClick={this.handleDelete}/></li>

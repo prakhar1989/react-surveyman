@@ -68,7 +68,7 @@ var Question = React.createClass({
                         onKeyPress={this.handleEdit} />;
 
         return (
-            <div className={classes}>
+            <div className={classes} id={this.props.id}>
 
                 <div className="qtext-area">
                   <span className="qtext" onClick={this.toggleInput}>
