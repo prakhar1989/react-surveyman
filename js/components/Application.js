@@ -9,7 +9,9 @@ var HTML5Backend = require('react-dnd/modules/backends/HTML5');
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
     SurveyActions = require('../actions/SurveyActions'),
-    SurveyStore = require('../stores/SurveyStore');
+    SurveyStore = require('../stores/SurveyStore'),
+    TreeView = require('./TreeView');
+
 
 var Application = React.createClass({
     // this causes setState to run whenever the store calls this.trigger
@@ -36,6 +38,7 @@ var Application = React.createClass({
                 </div>
                 <div className="col-sm-4">
                     <Toolbox />
+                    <TreeView survey={surveyData}/>
                 </div>
             </div>
         )
