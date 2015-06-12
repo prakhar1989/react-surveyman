@@ -7,7 +7,8 @@ var TreeNode = React.createClass({
         collapsed: React.PropTypes.bool,
         defaultCollapsed: React.PropTypes.bool,
         type: React.PropTypes.oneOf([ItemTypes.BLOCK, ItemTypes.QUESTION]).isRequired,
-        label: React.PropTypes.node.isRequired
+        label: React.PropTypes.node.isRequired,
+        handleClick: React.PropTypes.func.isRequired,
     },
     getInitialState() {
         return {
@@ -39,7 +40,7 @@ var TreeNode = React.createClass({
 
         return (
            <div className={containerClass}> {arrow}
-                <span onClick={this.handleClick}>{props.label}</span>
+                <span onClick={props.handleClick}>{props.label}</span>
                 { collapsed ? null : <div className="tree-view_children">{this.props.children}</div> }
            </div>
         )
