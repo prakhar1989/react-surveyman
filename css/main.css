@@ -284,3 +284,12 @@ div.ReactTags__suggestions ul li.active {
     background: #b7cfe0;
     cursor: pointer;
 }
+div.tree-view_arrow {
+    cursor: pointer;
+    margin-right: 6px;
+    display: inline-block;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
