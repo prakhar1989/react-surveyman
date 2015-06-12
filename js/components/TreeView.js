@@ -1,6 +1,7 @@
 var React = require('react');
 var TreeNode = require('./TreeNode');
 var { List } = require('immutable');
+var ItemTypes = require('./ItemTypes');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -20,15 +21,15 @@ var TreeView = React.createClass({
         // build the tree
         var tree = survey.map((block, i) => {
             var questions = block.get('questions');
-            var blockLabel = <span className="tree-view_node-block">{"Block #" +  block.get('id')}</span>;
+            var blockLabel = <span className="tree-view_block-title">{"Block #" +  block.get('id')}</span>;
             return (
-                <TreeNode key={i} label={blockLabel}>
+                <TreeNode key={i} label={blockLabel} type={ItemTypes.BLOCK}>
                 {questions.map((ques, j) => {
-                    var quesLabel = <span className="tree-view_node-question">{self.ellipsize(ques.get('qtext'))}</span>;
+                    var quesLabel = <span className="tree-view_question-title">{self.ellipsize(ques.get('qtext'))}</span>;
                     return (
-                        <TreeNode key={j} label={quesLabel} defaultCollapsed={false}>
+                        <TreeNode key={j} label={quesLabel} type={ItemTypes.QUESTION}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
-                            <div className="tree-view_node">{self.renderProp('randomizable', ques.get('randomizable'))}</div>
+                            <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
                             <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
                         </TreeNode>

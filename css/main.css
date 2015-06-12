@@ -284,6 +284,14 @@ div.ReactTags__suggestions ul li.active {
     background: #b7cfe0;
     cursor: pointer;
 }
+div.tree-view {
+    border: 1px solid #dedede;
+    padding: 10px;
+    margin-top: 20px;
+}
+div.tree-view h3 {
+    margin-top: 0;
+}
 div.tree-view_arrow {
     cursor: pointer;
     margin-right: 6px;
@@ -295,4 +303,28 @@ div.tree-view_arrow {
 }
 div.tree-view_children {
     margin-left: 15px;
+}
+div.tree-view_node-block {
+    margin: 10px 0;
+    border: 1px dashed #bbb;
+    padding: 10px;
+}
+div.tree-view_node-block:hover {
+    border: 1px solid #EFAA1F;
+}
+div.tree-view_node-question {
+    margin: 5px 0;
+    padding: 5px 10px;
+    border: 1px dashed #bbb;
+}
+div.tree-view_node-question:hover {
+    border: 1px solid #c4ea2d;
+}
+span.tree-view_question-title, span.tree-view_block-title {
+    text-decoration: underline;
+    cursor: pointer;
+    font-style: italic;
+}
+div.tree-view_node {
+    font-size: 12px;
 }
