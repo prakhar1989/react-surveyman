@@ -293,3 +293,6 @@ div.tree-view_arrow {
     -ms-user-select: none;
     user-select: none;
 }
+div.tree-view_children {
+    margin-left: 15px;
+}

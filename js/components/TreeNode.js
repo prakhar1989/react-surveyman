@@ -32,9 +32,9 @@ var TreeNode = React.createClass({
                     </div>);
 
         return (
-           <div className="tree-view"> {arrow}
+           <div> {arrow}
                 <span onClick={this.handleClick}>{props.label}</span>
-                { collapsed ? null : <div>{this.props.children}</div> }
+                { collapsed ? null : <div className="tree-view_children">{this.props.children}</div> }
            </div>
         )
     }
