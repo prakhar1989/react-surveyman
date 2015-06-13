@@ -7,6 +7,9 @@ var ItemTypes = require('./ItemTypes');
 
 // to get around the refs issues - https://github.com/react-bootstrap/react-bootstrap/issues/223
 var BaseModal = React.createClass({
+    getInitialState() {
+        return { qtext: "" }
+    },
     propTypes: {
         parentID: React.PropTypes.string
     },
@@ -16,6 +19,14 @@ var BaseModal = React.createClass({
     },
     handleClose() {
         SurveyActions.toggleModal(ItemTypes.QUESTION);
+    },
+    handleInput(e) {
+        // submit on enter key press
+        if (e.key === "Enter") {
+            this.handleSubmit();
+        } else {
+            this.setState({qtext: this.refs.qtext.getDOMNode().value});
+        }
     },
     handleSubmit() {
         var qtext = this.refs.qtext.getDOMNode().value;
@@ -41,7 +52,8 @@ var BaseModal = React.createClass({
             <div className='modal-body'>
                 <div className="form-group">
                     <label htmlFor="qtext">Question Text</label>
-                    <input type="text" placeholder="What is value of 4 + 5?" className="form-control" id="qtext" ref="qtext" />
+                    <input type="text" placeholder="What is value of 4 + 5?" 
+                        className="form-control" id="qtext" ref="qtext" onKeyPress={this.handleInput} />
                 </div>
                 <h5>Configuration</h5>
                 <div className="checkbox">

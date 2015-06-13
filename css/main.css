@@ -1,6 +1,6 @@
 /* animation */
 :target {
-  animation: highlight 2s ease-in;
+  animation: highlight 1s ease-in;
 }
 @keyframes highlight {
   0% { background-color: #fcf1bb; }
