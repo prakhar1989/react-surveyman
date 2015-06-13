@@ -337,3 +337,31 @@ span.tree-view_question-title, span.tree-view_block-title {
 div.tree-view_node {
     font-size: 12px;
 }
+
+.example-enter {
+  opacity: 0.01;
+  background-color: red;
+  transition: background-color .5s ease-in;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  background-color: transparent;
+}
+
+.example-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+}
+.example-appear {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+
+.example-appear.example-appear-active {
+  opacity: 1;
+}
