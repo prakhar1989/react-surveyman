@@ -337,3 +337,12 @@ span.tree-view_question-title, span.tree-view_block-title {
 div.tree-view_node {
     font-size: 12px;
 }
+
+.itemTransition-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+.itemTransition-leave.itemTransition-leave-active {
+  opacity: 0.01;
+}

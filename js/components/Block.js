@@ -9,6 +9,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
 var ItemControl = require('./ItemControl');
+var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
     drop(props, monitor, component) {
@@ -54,16 +55,22 @@ var Block = React.createClass({
         });
 
         // render questions
-        var questions = this.props.questions.map(q => {
-            return <Question
-                        key={q.get('id')}
-                        options={q.get('options')}
-                        id={q.get('id')}
-                        qtext={q.get('qtext')}
-                        ordering={q.get('ordering')}
-                        exclusive={q.get('exclusive')}
-                        freetext={q.get('freetext')} />
-        });
+        var questions = this.props.questions.map(q =>
+            <Question key={q.get('id')}
+                options={q.get('options')}
+                id={q.get('id')}
+                qtext={q.get('qtext')}
+                ordering={q.get('ordering')}
+                exclusive={q.get('exclusive')}
+                freetext={q.get('freetext')} />
+        );
+
+        // wrapping the questions in a react transition group
+        var questionAnimationTag = (
+            <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
+                { questions }
+            </ReactCSSTransitionGroup>
+        );
 
         return connectDropTarget(
             <div className={classes} id={this.props.id}>
@@ -75,7 +82,7 @@ var Block = React.createClass({
                     </ul>  
                 </div>
 
-                {questions.count() > 0 ? questions : <HelpText itemType="Question" /> }
+                { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
 
                 <div className="config-area">
                     <ul>

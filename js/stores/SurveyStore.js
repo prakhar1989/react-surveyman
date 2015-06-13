@@ -37,6 +37,7 @@ var SurveyStore = Reflux.createStore({
     init() {
         this.listenTo(SurveyActions.load, () => {
             var data = Immutable.fromJS(initialData);
+            window.location.hash = "";   // clear the location hash on app init
             this.updateSurveyData(data, true);
         });
     },
@@ -282,7 +283,7 @@ var SurveyStore = Reflux.createStore({
             let self = this;
             let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
                             .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-            let newSurvey = survey.splice(blockIndex, 0, newBlock);
+            let newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
 
             // update and cache
             this.updateSurveyData(newSurvey, true);
@@ -299,7 +300,9 @@ var SurveyStore = Reflux.createStore({
                 });
             });
 
+            // alert and focus
             SurveyActions.showAlert("Block copied.", AlertTypes.SUCCESS);
+            SurveyActions.scrollToItem(newBlock.get('id'));
         }
 
         else if (itemType === ItemTypes.QUESTION) {
@@ -309,7 +312,7 @@ var SurveyStore = Reflux.createStore({
             let questionIndex = this.getQuestionIndex(itemId, block);
             let newQuestion = this.cloneQuestion(question);
             let newSurvey = survey.updateIn([blockIndex, 'questions'], list =>
-                list.splice(questionIndex, 0, newQuestion)
+                list.splice(questionIndex + 1, 0, newQuestion)
             );
 
             // update and cache
@@ -321,7 +324,10 @@ var SurveyStore = Reflux.createStore({
             newQuestion.get('options').forEach( o => {
                 _optionMap = _optionMap.set(o.get('id'), qId)
             });
+
+            // alert and focus
             SurveyActions.showAlert("Question copied.", AlertTypes.SUCCESS);
+            SurveyActions.scrollToItem(newQuestion.get('id'));
         }
 
         else {
@@ -421,6 +427,15 @@ var SurveyStore = Reflux.createStore({
         _questionMap = Immutable.Map(questionMap);
         _optionMap = Immutable.Map(optionMap);
         this.updateSurveyData(data);
+    },
+    /**
+     * Called when the scrolltoItem action is triggered. Scrolls the item
+     * into view
+     * @param id - id of the item that needs to be scrolled to
+     */
+    onScrollToItem(id) {
+        // TODO: Animate this
+        window.location.hash = id;
     }
 });
 
