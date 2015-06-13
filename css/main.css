@@ -1,3 +1,12 @@
+/* animation */
+:target {
+  animation: highlight 2s ease-in;
+}
+@keyframes highlight {
+  0% { background-color: #fcf1bb; }
+  100% { background-color: white; }
+}
+
 body {
   margin: 50px 0;
   background: #eee;
