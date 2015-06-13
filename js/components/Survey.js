@@ -7,6 +7,7 @@ var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
+var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var surveyTarget = {
     drop(props, monitor, component) {
@@ -47,9 +48,16 @@ var Survey = React.createClass({
                 questions={block.get('questions')} />
         );
 
+        // wrapping the blocks in a react transition group
+        var blockAnimationTag = (
+            <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
+                { blocks }
+            </ReactCSSTransitionGroup>        
+        );
+
         return connectDropTarget(
             <div className={classes}>
-                 { survey.count() > 0 ? blocks : <HelpText itemType="Block" /> }
+                 { survey.count() > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
             </div>
         )
     }

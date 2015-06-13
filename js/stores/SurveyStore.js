@@ -37,6 +37,7 @@ var SurveyStore = Reflux.createStore({
     init() {
         this.listenTo(SurveyActions.load, () => {
             var data = Immutable.fromJS(initialData);
+            window.location.hash = "";   // clear the location hash on app init
             this.updateSurveyData(data, true);
         });
     },
@@ -63,9 +64,6 @@ var SurveyStore = Reflux.createStore({
         }
         this.data.surveyData = data
         this.trigger(this.data);
-
-        // clear the location hash on app init
-        window.location.hash = "";
     },
     // Returns the set (unique list) of options.
     getOptionsSet() {

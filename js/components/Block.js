@@ -67,7 +67,7 @@ var Block = React.createClass({
 
         // wrapping the questions in a react transition group
         var questionAnimationTag = (
-            <ReactCSSTransitionGroup transitionName="example" transitionAppear={true}>
+            <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
                 { questions }
             </ReactCSSTransitionGroup>
         );
@@ -82,9 +82,7 @@ var Block = React.createClass({
                     </ul>  
                 </div>
 
-                <ReactCSSTransitionGroup transitionName="example" transitionAppear={true}>
-                    { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
-                </ReactCSSTransitionGroup>
+                { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
 
                 <div className="config-area">
                     <ul>
