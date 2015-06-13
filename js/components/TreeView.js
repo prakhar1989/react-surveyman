@@ -2,6 +2,7 @@ var React = require('react');
 var TreeNode = require('./TreeNode');
 var { List } = require('immutable');
 var ItemTypes = require('./ItemTypes');
+var SurveyActions = require('../actions/SurveyActions');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -15,7 +16,7 @@ var TreeView = React.createClass({
         return text.substr(0, 20) + (text.length > 20 ? "..." : "");
     },
     focusOnItem(id) {
-        window.location.hash = id;
+        SurveyActions.scrollToItem(id);
     },
     render() {
         var { survey } = this.props;
