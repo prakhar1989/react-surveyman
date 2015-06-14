@@ -7,6 +7,21 @@ var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var ItemControl = require('./ItemControl');
+var { DropTarget } = require('react-dnd');
+
+var questionTarget = {
+    drop(props, monitor, component) {
+        component.handleOptionGroupDrop();
+    }
+};
+
+function collect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget(),
+        canDrop: monitor.canDrop(),
+        isOver: monitor.isOver()
+    }
+}
 
 var Question = React.createClass({
     mixins: [PureRenderMixin],
@@ -17,6 +32,9 @@ var Question = React.createClass({
         ordering: React.PropTypes.bool.isRequired,
         freetext: React.PropTypes.bool.isRequired,
         exclusive: React.PropTypes.bool.isRequired
+    },
+    handleOptionGroupDrop() {
+        console.log("option group has been dropped");
     },
     getInitialState: function() {
         return {
@@ -56,8 +74,12 @@ var Question = React.createClass({
         SurveyActions.itemCopy(ItemTypes.QUESTION, this.props.id);
     },
     render: function() {
+        var { canDrop, isOver, connectDropTarget } = this.props;
+
         var classes = cx({
-            'item question': true
+            'item question': true,
+            'dragging': canDrop,
+            'hovering': isOver
         });
 
         // placeholder for taking input when text is clicked
@@ -67,7 +89,7 @@ var Question = React.createClass({
                         onBlur={this.handleEdit}
                         onKeyPress={this.handleEdit} />;
 
-        return (
+        return connectDropTarget(
             <div className={classes} id={this.props.id}>
 
                 <div className="qtext-area">
@@ -121,4 +143,4 @@ var Question = React.createClass({
     }
 });
 
-module.exports = Question;
+module.exports = DropTarget(ItemTypes.OPTIONGROUP, questionTarget, collect)(Question);

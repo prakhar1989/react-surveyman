@@ -2,19 +2,12 @@ var React = require('react');
 var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
-// this is the specification that describes
-// how the drag source reacts to the drag
-// and drop events
-var blockSource = {
+var optionGroupSource = {
     beginDrag(props) {
-        return {
-            item: {}
-        }
+        return { item: {} }
     }
 };
 
-// the collecting function that injects 
-// relevant props to the component
 function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
@@ -22,17 +15,17 @@ function collect(connect, monitor) {
     }
 }
 
-var DraggableBlock = React.createClass({
+var DraggableOptionGroup = React.createClass({
     render() {
         var { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={{opacity: isDragging ? 0.4 : 1 }} className="draggable">
+            <div style={{opacity: isDragging ? 0.4 : 1}} className="draggable">
                 <i className="ion-plus-circled"></i>
-                Block
+                Options
             </div>
         )
     }
 });
 
-module.exports = DragSource(ItemTypes.BLOCK, blockSource, collect)(DraggableBlock);
+module.exports = DragSource(ItemTypes.OPTIONGROUP, optionGroupSource, collect)(DraggableOptionGroup);
