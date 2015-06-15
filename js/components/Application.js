@@ -38,7 +38,9 @@ var Application = React.createClass({
                     <Pallet survey={surveyData} />
                 </div>
                 <div className="col-sm-4">
-                    <Toolbox optionGroups={optionGroupState.get('options')}/>
+                    <Toolbox 
+                        optionGroups={optionGroupState.get('options')}
+                        optionGroupId={optionGroupState.get('selectedID')} />
                     <TreeView survey={surveyData}/>
                 </div>
             </div>
