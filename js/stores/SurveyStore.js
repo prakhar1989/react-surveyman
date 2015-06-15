@@ -31,13 +31,29 @@ var SurveyStore = Reflux.createStore({
             msg: '',
             level: AlertTypes.INFO,
             visible: false
+        }),
+        optionGroupState: Immutable.Map({
+            selectedID: 1,
+            options: Immutable.List()
         })
     },
     // called when the app component is loaded
     init() {
+        // TODO: Load this from localstorage
+        var initOptionsData = Immutable.fromJS([
+            { id: 0, optionLabels: ["Yes", "No"] },
+            { id: 1, optionLabels: ["True", "False"] },
+            { id: 2, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
+        ]);
+
         this.listenTo(SurveyActions.load, () => {
-            var data = Immutable.fromJS(initialData);
             window.location.hash = "";   // clear the location hash on app init
+
+            this.data.optionGroupState = 
+                this.data.optionGroupState.set('options', initOptionsData);
+
+            // load up survey data
+            var data = Immutable.fromJS(initialData);
             this.updateSurveyData(data, true);
         });
     },
@@ -45,7 +61,8 @@ var SurveyStore = Reflux.createStore({
         return {
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
-            alertState: this.data.alertState
+            alertState: this.data.alertState,
+            optionGroupState: this.data.optionGroupState
         }
     },
     /**
@@ -62,7 +79,7 @@ var SurveyStore = Reflux.createStore({
                 questionMap : _questionMap.toJS()
             });
         }
-        this.data.surveyData = data
+        this.data.surveyData = data;
         this.trigger(this.data);
     },
     // Returns the set (unique list) of options.
@@ -95,6 +112,17 @@ var SurveyStore = Reflux.createStore({
         });
         this.updateSurveyData(survey.push(newBlock), true);
         SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
+    },
+    /**
+     * Runs when the optiongroup is dropped on a question
+     * @param questionId - ID of the question on which 
+     * the option group is dropped
+     */
+    onOptionGroupDropped(questionId) {
+        var selectedID = this.data.optionGroupState.get('selectedID');
+        var optionLabels = this.data.optionGroupState
+                                .getIn(['options', selectedID, 'optionLabels']);
+        optionLabels.forEach(op => this.onOptionAdded(questionId, op));
     },
     /**
      * Runs when the questionDropped action is called by the view.
@@ -434,8 +462,24 @@ var SurveyStore = Reflux.createStore({
      * @param id - id of the item that needs to be scrolled to
      */
     onScrollToItem(id) {
-        // TODO: Animate this
         window.location.hash = id;
+    },
+    onUpdateOptionGroup(id) {
+        this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
+        this.trigger(this.data);
+    },
+    /**
+     * @param options - array of options
+     */
+    onAddOptionGroup(options) {
+        var { optionGroupState } = this.data;
+        var newId = optionGroupState.get('options').count();
+        this.data.optionGroupState = optionGroupState
+                                        .set('selectedID', newId)
+                                        .updateIn(['options'], list => list.push(
+                                            Immutable.Map({id: newId, optionLabels: options})
+                                        ));
+        this.trigger(this.data);
     }
 });
 

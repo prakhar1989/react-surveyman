@@ -23,7 +23,8 @@ var Application = React.createClass({
         var { modalState, 
               alertState, 
               dropTargetID,
-              surveyData } = this.state;
+              surveyData,
+              optionGroupState } = this.state;
         return (
             <div className="row">
                 <QuestionModal
@@ -37,7 +38,9 @@ var Application = React.createClass({
                     <Pallet survey={surveyData} />
                 </div>
                 <div className="col-sm-4">
-                    <Toolbox />
+                    <Toolbox 
+                        optionGroups={optionGroupState.get('options')}
+                        optionGroupId={optionGroupState.get('selectedID')} />
                     <TreeView survey={surveyData}/>
                 </div>
             </div>

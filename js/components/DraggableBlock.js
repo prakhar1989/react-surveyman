@@ -1,6 +1,6 @@
 var React = require('react');
 var { DragSource } = require('react-dnd');
-var ItemTypes = require('./ItemTypes.js');
+var ItemTypes = require('./ItemTypes');
 
 // this is the specification that describes
 // how the drag source reacts to the drag
@@ -28,7 +28,7 @@ var DraggableBlock = React.createClass({
 
         return connectDragSource(
             <div style={{opacity: isDragging ? 0.4 : 1 }} className="draggable">
-                <i className="ion-plus-circled"></i>
+                <i className="ion-arrow-move"></i>
                 Block
             </div>
         )

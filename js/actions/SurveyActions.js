@@ -4,6 +4,7 @@ var SurveyActions = Reflux.createActions([
     "load",                         // initial data load
     "blockDropped",                 // when block is dropped
     "questionDropped",              // when question is dropped
+    "optionGroupDropped",           // when optionGroup is dropped
     "optionAdded",                  // when option is added
     "toggleModal",                  // when a modal is toggled
     "showAlert",                    // when the alert box needs to be shown
@@ -13,7 +14,9 @@ var SurveyActions = Reflux.createActions([
     "itemCopy",                     // when an item (question/block) is called to be copied
     "saveEditText",                 // when question text is changed
     "undoSurvey",                   // when the undo button is clicked
-    "scrollToItem"                  // when an item needs to be scrolled to
+    "scrollToItem",                 // when an item needs to be scrolled to
+    "updateOptionGroup",            // when an option group is changed
+    "addOptionGroup"                // when an option group is changed
 ]);
 
 module.exports = SurveyActions;

@@ -2,11 +2,9 @@ var React = require('react');
 var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
-var questionSource = {
+var optionGroupSource = {
     beginDrag(props) {
-        return {
-            item: {}
-        }
+        return { item: {} }
     }
 };
 
@@ -17,17 +15,17 @@ function collect(connect, monitor) {
     }
 }
 
-var DraggableQuestion = React.createClass({
+var DraggableOptionGroup = React.createClass({
     render() {
         var { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
             <div style={{opacity: isDragging ? 0.4 : 1}} className="draggable">
                 <i className="ion-arrow-move"></i>
-                Question
+                Options
             </div>
         )
     }
 });
 
-module.exports = DragSource(ItemTypes.QUESTION, questionSource, collect)(DraggableQuestion);
+module.exports = DragSource(ItemTypes.OPTIONGROUP, optionGroupSource, collect)(DraggableOptionGroup);
