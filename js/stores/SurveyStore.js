@@ -49,7 +49,8 @@ var SurveyStore = Reflux.createStore({
         this.listenTo(SurveyActions.load, () => {
             window.location.hash = "";   // clear the location hash on app init
 
-            this.updateOptionsData(initOptionsData);
+            this.data.optionGroupState = 
+                this.data.optionGroupState.set('options', initOptionsData);
 
             // load up survey data
             var data = Immutable.fromJS(initialData);
@@ -63,9 +64,6 @@ var SurveyStore = Reflux.createStore({
             alertState: this.data.alertState,
             optionGroupState: this.data.optionGroupState
         }
-    },
-    updateOptionsData(data) {
-        this.data.optionGroupState = this.data.optionGroupState.set('options', data);
     },
     /**
      * Updates the survey data as the args provided. Triggers refresh.
@@ -453,8 +451,11 @@ var SurveyStore = Reflux.createStore({
      * @param id - id of the item that needs to be scrolled to
      */
     onScrollToItem(id) {
-        // TODO: Animate this
         window.location.hash = id;
+    },
+    onUpdateOptionGroup(id) {
+        this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
+        this.trigger(this.data);
     }
 });
 

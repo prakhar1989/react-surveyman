@@ -1,6 +1,7 @@
 var React = require('react');
 var { List } = require('immutable');
 var Select = require('react-select');
+var SurveyActions = require('../actions/SurveyActions');
 
 var OptionGroup = React.createClass({
     propTypes: {
@@ -8,7 +9,7 @@ var OptionGroup = React.createClass({
         selectedID: React.PropTypes.number.isRequired
     },
     handleChange(val) {
-        console.log("Selected", val);
+        SurveyActions.updateOptionGroup(parseInt(val, 10));
     },
     render() {
         var { options, selectedID } = this.props;

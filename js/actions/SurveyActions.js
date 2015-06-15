@@ -13,7 +13,8 @@ var SurveyActions = Reflux.createActions([
     "itemCopy",                     // when an item (question/block) is called to be copied
     "saveEditText",                 // when question text is changed
     "undoSurvey",                   // when the undo button is clicked
-    "scrollToItem"                  // when an item needs to be scrolled to
+    "scrollToItem",                 // when an item needs to be scrolled to
+    "updateOptionGroup"             // when an option group is changed
 ]);
 
 module.exports = SurveyActions;
