@@ -34,7 +34,7 @@ var Question = React.createClass({
         exclusive: React.PropTypes.bool.isRequired
     },
     handleOptionGroupDrop() {
-        console.log("option group has been dropped");
+        SurveyActions.optionGroupDropped(this.props.id);
     },
     getInitialState: function() {
         return {

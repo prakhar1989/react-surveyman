@@ -41,9 +41,9 @@ var SurveyStore = Reflux.createStore({
     init() {
         // TODO: Load this from localstorage
         var initOptionsData = Immutable.fromJS([
-            { id: 1, optionLabels: ["Yes", "No"] },
-            { id: 2, optionLabels: ["True", "False"] },
-            { id: 3, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
+            { id: 0, optionLabels: ["Yes", "No"] },
+            { id: 1, optionLabels: ["True", "False"] },
+            { id: 2, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
         ]);
 
         this.listenTo(SurveyActions.load, () => {
@@ -112,6 +112,12 @@ var SurveyStore = Reflux.createStore({
         });
         this.updateSurveyData(survey.push(newBlock), true);
         SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
+    },
+    onOptionGroupDropped(questionId) {
+        var selectedID = this.data.optionGroupState.get('selectedID');
+        var optionLabels = this.data.optionGroupState
+                                .getIn(['options', selectedID, 'optionLabels']);
+        optionLabels.forEach(op => this.onOptionAdded(questionId, op));
     },
     /**
      * Runs when the questionDropped action is called by the view.
