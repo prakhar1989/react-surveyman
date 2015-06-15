@@ -113,6 +113,11 @@ var SurveyStore = Reflux.createStore({
         this.updateSurveyData(survey.push(newBlock), true);
         SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     },
+    /**
+     * Runs when the optiongroup is dropped on a question
+     * @param questionId - ID of the question on which 
+     * the option group is dropped
+     */
     onOptionGroupDropped(questionId) {
         var selectedID = this.data.optionGroupState.get('selectedID');
         var optionLabels = this.data.optionGroupState
@@ -461,6 +466,19 @@ var SurveyStore = Reflux.createStore({
     },
     onUpdateOptionGroup(id) {
         this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
+        this.trigger(this.data);
+    },
+    /**
+     * @param options - array of options
+     */
+    onAddOptionGroup(options) {
+        var { optionGroupState } = this.data;
+        var newId = optionGroupState.get('options').count();
+        this.data.optionGroupState = optionGroupState
+                                        .set('selectedID', newId)
+                                        .updateIn(['options'], list => list.push(
+                                            Immutable.Map({id: newId, optionLabels: options})
+                                        ));
         this.trigger(this.data);
     }
 });
