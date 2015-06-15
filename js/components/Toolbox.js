@@ -1,12 +1,13 @@
 var React = require('react');
+var { List } = require('immutable');
 
 var DraggableBlock = require('./DraggableBlock'),
     DraggableOptionGroup = require('./DraggableOptionGroup'),
     DraggableQuestion = require('./DraggableQuestion');
 
 var Toolbox = React.createClass({
-    shouldComponentUdpate() {
-        return false;
+    propTypes: {
+        optionGroups: React.PropTypes.instanceOf(List).isRequired
     },
     render: function() {
         return (

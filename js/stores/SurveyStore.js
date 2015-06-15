@@ -31,13 +31,28 @@ var SurveyStore = Reflux.createStore({
             msg: '',
             level: AlertTypes.INFO,
             visible: false
+        }),
+        optionGroupState: Immutable.Map({
+            currentID: 0,
+            options: Immutable.List()
         })
     },
     // called when the app component is loaded
     init() {
+        // TODO: Load this from localstorage
+        var initOptionsData = Immutable.fromJS([
+            { id: 1, optionLabels: ["Yes", "No"] },
+            { id: 2, optionLabels: ["True", "False"] },
+            { id: 3, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
+        ]);
+
         this.listenTo(SurveyActions.load, () => {
-            var data = Immutable.fromJS(initialData);
             window.location.hash = "";   // clear the location hash on app init
+
+            this.updateOptionsData(initOptionsData);
+
+            // load up survey data
+            var data = Immutable.fromJS(initialData);
             this.updateSurveyData(data, true);
         });
     },
@@ -45,8 +60,12 @@ var SurveyStore = Reflux.createStore({
         return {
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
-            alertState: this.data.alertState
+            alertState: this.data.alertState,
+            optionGroupState: this.data.optionGroupState
         }
+    },
+    updateOptionsData(data) {
+        this.data.optionGroupState = this.data.optionGroupState.set('options', data);
     },
     /**
      * Updates the survey data as the args provided. Triggers refresh.
@@ -62,7 +81,7 @@ var SurveyStore = Reflux.createStore({
                 questionMap : _questionMap.toJS()
             });
         }
-        this.data.surveyData = data
+        this.data.surveyData = data;
         this.trigger(this.data);
     },
     // Returns the set (unique list) of options.
