@@ -33,7 +33,7 @@ var SurveyStore = Reflux.createStore({
             visible: false
         }),
         optionGroupState: Immutable.Map({
-            selectedID: 0,
+            selectedID: 1,
             options: Immutable.List()
         })
     },
