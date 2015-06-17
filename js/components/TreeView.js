@@ -25,13 +25,13 @@ var TreeView = React.createClass({
         // build the tree
         var tree = survey.map((block, i) => {
             var questions = block.get('questions');
-            var label = "Block #" +  block.get('id');
             return (
-                <BlockNode key={i} label={label} handleClick={self.focusOnItem.bind(this, block.get('id'))}>
+                <BlockNode key={i} id={block.get('id')} handleClick={self.focusOnItem.bind(this, block.get('id'))}>
 
                     {questions.map((ques, j) => 
-                        <QuestionNode key={j} label={self.ellipsize(ques.get('qtext'))} 
-                                        handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
+                        <QuestionNode id={ques.get('id')} 
+                                      key={j} label={self.ellipsize(ques.get('qtext'))} 
+                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
                             <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>

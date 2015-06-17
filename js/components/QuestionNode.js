@@ -5,9 +5,7 @@ var ItemTypes = require('./ItemTypes');
 
 var nodeSource = {
     beginDrag(props) {
-        return {
-            item: {}
-        }
+        return { id: props.id }
     }
 }
 
@@ -23,6 +21,7 @@ var QuestionNode = React.createClass({
         collapsed: React.PropTypes.bool,
         defaultCollapsed: React.PropTypes.bool,
         label: React.PropTypes.node.isRequired,
+        id: React.PropTypes.string.isRequired,
         handleClick: React.PropTypes.func.isRequired,
     },
     getInitialState() {

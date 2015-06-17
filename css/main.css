@@ -27,10 +27,14 @@ div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
 }
-div.item.dragging, div.survey.dragging {
+div.item.dragging, 
+div.survey.dragging,
+div.tree-view_node-block.dragging {
     background: #f4fbd7;
 }
-div.item.hovering, div.survey.hovering {
+div.item.hovering, 
+div.survey.hovering,
+div.tree-view_node-block.hovering {
     background: #eeeeee;
 }
 
