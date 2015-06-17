@@ -2,7 +2,9 @@ var ItemTypes = {
     BLOCK: 'block',
     QUESTION: 'question',
     OPTION: 'option',
-    OPTIONGROUP: 'optiongroup'
+    OPTIONGROUP: 'optiongroup',
+    QUESTIONONDE: 'questionnode',
+    BLOCKNODE: 'blocknode'
 };
 
 module.exports = ItemTypes;
