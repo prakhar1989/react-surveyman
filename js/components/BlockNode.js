@@ -1,5 +1,22 @@
 var React = require('react');
 var cx = require('classnames');
+var { DragSource } = require('react-dnd');
+var ItemTypes = require('./ItemTypes');
+
+var nodeSource = {
+    beginDrag(props) {
+        return {
+            item: {}
+        }
+    }
+}
+
+function collect(connect, monitor) {
+    return {
+        connectDragSource: connect.dragSource(),
+        isDragging: monitor.isDragging()
+    }
+}
 
 var BlockNode = React.createClass({
     propTypes: {
@@ -23,6 +40,8 @@ var BlockNode = React.createClass({
         var collapsed = props.collapsed != null ? 
                         props.collapsed : this.state.collapsed;
 
+        var { isDragging, connectDragSource } = this.props;
+
         var arrowClass = cx({
             'ion-arrow-down-b': !collapsed,
             'ion-arrow-right-b': collapsed
@@ -31,7 +50,8 @@ var BlockNode = React.createClass({
         var arrow = (<div onClick={this.handleCollapse} className="tree-view_arrow">
                         <i className={arrowClass}></i>
                     </div>);
-        return (
+
+        return connectDragSource(
            <div className='tree-view_node-block'> {arrow}
                 <span className="tree-view_block-title" onClick={props.handleClick}>{props.label}</span>
                 { collapsed ? null : <div className="tree-view_children">{this.props.children}</div> }
@@ -40,4 +60,4 @@ var BlockNode = React.createClass({
     }
 });
 
-module.exports = BlockNode;
+module.exports = DragSource(ItemTypes.BLOCKNODE, nodeSource, collect)(BlockNode);

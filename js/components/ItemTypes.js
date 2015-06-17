@@ -3,7 +3,7 @@ var ItemTypes = {
     QUESTION: 'question',
     OPTION: 'option',
     OPTIONGROUP: 'optiongroup',
-    QUESTIONONDE: 'questionnode',
+    QUESTIONNODE: 'questionnode',
     BLOCKNODE: 'blocknode'
 };
 
