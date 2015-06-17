@@ -3,6 +3,7 @@ var { List } = require('immutable');
 var BlockNode = require('./BlockNode');
 var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
+var ItemTypes = require('./ItemTypes');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -18,6 +19,14 @@ var TreeView = React.createClass({
     focusOnItem(id) {
         SurveyActions.scrollToItem(id);
     },
+    handleDrop(sourceID, targetID) {
+        var sourceType = sourceID[0] === "q" ? ItemTypes.QUESTION : ItemTypes.BLOCK;
+        var targetType = targetID[0] === "b" ? ItemTypes.BLOCK : ItemTypes.QUESTION;
+
+        if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
+            SurveyActions.moveQuestion(sourceID, targetID);
+        }
+    },
     render() {
         var { survey } = this.props;
         var self = this;
@@ -26,7 +35,9 @@ var TreeView = React.createClass({
         var tree = survey.map((block, i) => {
             var questions = block.get('questions');
             return (
-                <BlockNode key={i} id={block.get('id')} handleClick={self.focusOnItem.bind(this, block.get('id'))}>
+                <BlockNode key={i} id={block.get('id')} 
+                           handleClick={self.focusOnItem.bind(this, block.get('id'))}
+                           handleDrop={self.handleDrop}>
 
                     {questions.map((ques, j) => 
                         <QuestionNode id={ques.get('id')} 

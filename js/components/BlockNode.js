@@ -6,16 +6,13 @@ var flow = require('lodash/function/flow');
 
 var nodeSource = {
     beginDrag(props) {
-        return {
-            item: {}
-        }
+        return { id: props.id }
     }
 };
 
 var nodeTarget = {
     drop(props, monitor) {
-        var item = monitor.getItem();
-        console.log("Got: ", item);
+        props.handleDrop(monitor.getItem().id, props.id);
     }
 };
 

@@ -480,6 +480,33 @@ var SurveyStore = Reflux.createStore({
                                             Immutable.Map({id: newId, optionLabels: options})
                                         ));
         this.trigger(this.data);
+    },
+    moveQuestion(questionID, blockID) {
+        var survey = this.data.surveyData;
+        var currBlockID = _questionMap.get(questionID);
+
+        // if the question is dropped in the same block then do nothing
+        if (currBlockID === blockID) return;
+
+        var currBlockIndex = this.getBlockIndex(currBlockID);
+        var newBlockIndex = this.getBlockIndex(blockID);
+
+        var currBlock = survey.get(currBlockIndex);
+        var index = this.getQuestionIndex(questionID, currBlock);
+        var question = survey.getIn([currBlockIndex, 'questions', index]);
+
+        // delete the question
+        var newSurvey = survey
+                            .deleteIn([currBlockIndex, 'questions', index])
+                            .updateIn([newBlockIndex, 'questions'], list => list.push(question));
+
+        // update and cache
+        this.updateSurveyData(newSurvey, true);
+
+        // update the mappings of the question
+        _questionMap = _questionMap.set(questionID, blockID);
+
+        SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
     }
 });
 
