@@ -40,11 +40,8 @@ var blockTarget = {
     hover(props, monitor) {
         var draggedId = monitor.getItem().id;
         if (draggedId !== props.id) {
-            props.moveBlock(draggedId, props.id);
+            props.reorderBlock(draggedId, props.id);
         }
-    },
-    drop(props, monitor) {
-        console.log("block ", monitor.getItem().id, "dropped on", props.id);
     }
 };
 
@@ -60,7 +57,8 @@ var BlockNode = React.createClass({
         defaultCollapsed: React.PropTypes.bool,
         id: React.PropTypes.string.isRequired,
         handleClick: React.PropTypes.func.isRequired,
-        moveBlock: React.PropTypes.func.isRequired
+        reorderBlock: React.PropTypes.func.isRequired,
+        moveBlock: React.PropTypes.func
     },
     getInitialState() {
         return {
@@ -102,7 +100,7 @@ var BlockNode = React.createClass({
                     </div>);
 
         return connectSortTarget(connectDragSource(connectDropTarget(
-           <div className={classes}> {arrow}
+           <div className={classes} style={{opacity: isDragging ? 0 : 1}}> {arrow}
                 <span className="tree-view_block-title" onClick={handleClick}>{"Block #" + id}</span>
                 { collapsed ? null : <div className="tree-view_children">{children}</div> }
            </div>

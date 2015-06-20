@@ -481,7 +481,7 @@ var SurveyStore = Reflux.createStore({
                                         ));
         this.trigger(this.data);
     },
-    moveQuestion(questionID, blockID) {
+    onMoveQuestion(questionID, blockID) {
         var survey = this.data.surveyData;
         var currBlockID = _questionMap.get(questionID);
 
@@ -507,6 +507,21 @@ var SurveyStore = Reflux.createStore({
         _questionMap = _questionMap.set(questionID, blockID);
 
         SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
+    },
+    /*
+     * Called when block is dragged to be re-ordered in the treeview.
+     * @param draggedBlockId: id of the block being dragged
+     * @param overBlockId: id of the block on which the block is over
+     */
+    onReorderBlock(draggedBlockId, overBlockId) {
+        var survey = this.data.surveyData;
+        var draggedBlockIndex = this.getBlockIndex(draggedBlockId);
+        var overBlockIndex = this.getBlockIndex(overBlockId);
+
+        var block = survey.get(draggedBlockIndex);
+        var newSurvey = survey.delete(draggedBlockIndex)
+                              .splice(overBlockIndex + 1, 0, block);
+        this.updateSurveyData(newSurvey, false);
     }
 });
 
