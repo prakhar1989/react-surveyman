@@ -27,6 +27,9 @@ var TreeView = React.createClass({
             SurveyActions.moveQuestion(sourceID, targetID);
         }
     },
+    moveBlock(id, afterId) {
+        console.log("currentID:", id, "after id:", afterId);
+    },
     render() {
         var { survey } = this.props;
         var self = this;
@@ -37,7 +40,8 @@ var TreeView = React.createClass({
             return (
                 <BlockNode key={i} id={block.get('id')} 
                            handleClick={self.focusOnItem.bind(this, block.get('id'))}
-                           handleDrop={self.handleDrop}>
+                           handleDrop={self.handleDrop}
+                           moveBlock={self.moveBlock}>
 
                     {questions.map((ques, j) => 
                         <QuestionNode id={ques.get('id')} 
