@@ -27,10 +27,14 @@ div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
 }
-div.item.dragging, div.survey.dragging {
+div.item.dragging, 
+div.survey.dragging,
+div.tree-view_node-block.dragging {
     background: #f4fbd7;
 }
-div.item.hovering, div.survey.hovering {
+div.item.hovering, 
+div.survey.hovering,
+div.tree-view_node-block.hovering {
     background: #eeeeee;
 }
 
@@ -317,6 +321,7 @@ div.tree-view_node-block {
     margin: 10px 0;
     border: 1px dashed #bbb;
     padding: 10px;
+    cursor: move;
 }
 div.tree-view_node-block:hover {
     border: 1px solid #EFAA1F;
@@ -325,6 +330,7 @@ div.tree-view_node-question {
     margin: 5px 0;
     padding: 5px 10px;
     border: 1px dashed #bbb;
+    cursor: move;
 }
 div.tree-view_node-question:hover {
     border: 1px solid #c4ea2d;

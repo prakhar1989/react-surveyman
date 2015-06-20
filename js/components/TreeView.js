@@ -1,8 +1,9 @@
 var React = require('react');
-var TreeNode = require('./TreeNode');
 var { List } = require('immutable');
-var ItemTypes = require('./ItemTypes');
+var BlockNode = require('./BlockNode');
+var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
+var ItemTypes = require('./ItemTypes');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -18,6 +19,17 @@ var TreeView = React.createClass({
     focusOnItem(id) {
         SurveyActions.scrollToItem(id);
     },
+    handleDrop(sourceID, targetID) {
+        var sourceType = sourceID[0] === "q" ? ItemTypes.QUESTION : ItemTypes.BLOCK;
+        var targetType = targetID[0] === "b" ? ItemTypes.BLOCK : ItemTypes.QUESTION;
+
+        if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
+            SurveyActions.moveQuestion(sourceID, targetID);
+        }
+    },
+    reorderBlock(id, afterId) {
+        SurveyActions.reorderBlock(id, afterId);
+    },
     render() {
         var { survey } = this.props;
         var self = this;
@@ -25,25 +37,24 @@ var TreeView = React.createClass({
         // build the tree
         var tree = survey.map((block, i) => {
             var questions = block.get('questions');
-            var blockLabel = <span className="tree-view_block-title">{"Block #" +  block.get('id')}</span>;
             return (
-                <TreeNode key={i} label={blockLabel} type={ItemTypes.BLOCK} 
-                            handleClick={self.focusOnItem.bind(this, block.get('id'))}>
+                <BlockNode key={i} id={block.get('id')} 
+                           handleClick={self.focusOnItem.bind(this, block.get('id'))}
+                           handleDrop={self.handleDrop}
+                           reorderBlock={self.reorderBlock}>
 
-                    {questions.map((ques, j) => {
-                        var quesLabel = <span className="tree-view_question-title">{self.ellipsize(ques.get('qtext'))}</span>;
-                        return (
-                            <TreeNode key={j} label={quesLabel} type={ItemTypes.QUESTION} 
-                                        handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
-                                <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
-                                <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
-                                <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
-                                <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
-                            </TreeNode>
-                        )
-                     })}
+                    {questions.map((ques, j) => 
+                        <QuestionNode id={ques.get('id')} 
+                                      key={j} label={self.ellipsize(ques.get('qtext'))} 
+                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
+                            <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
+                            <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
+                            <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
+                            <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
+                        </QuestionNode>
+                     )}
 
-                </TreeNode>
+                </BlockNode>
             )
         });
 
