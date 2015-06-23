@@ -297,12 +297,17 @@ div.ReactTags__suggestions ul li.active {
     background: #b7cfe0;
     cursor: pointer;
 }
+div.toolbox {
+    border: 1px solid #dedede;
+    padding: 10px;
+}
 div.tree-view {
     border: 1px solid #dedede;
     padding: 10px;
     margin-top: 20px;
 }
-div.tree-view h3 {
+div.tree-view h3, 
+div.toolbox h3 {
     margin-top: 0;
 }
 div.tree-view_arrow {
@@ -585,4 +590,13 @@ div.tree-view_node {
   to {
     -webkit-transform: rotate(1turn);
   }
+}
+
+h3 > span.help-text {
+  font-size: 12px;
+  float: right;
+  font-style: italic;
+  color: #bbb;
+  text-transform: lowercase;
+  margin-top: 10px;
 }

@@ -43,7 +43,7 @@ var SurveyStore = Reflux.createStore({
         var initOptionsData = Immutable.fromJS([
             { id: 0, optionLabels: ["Yes", "No"] },
             { id: 1, optionLabels: ["True", "False"] },
-            { id: 2, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
+            { id: 2, optionLabels: ["Strongly Disagree", "Disagree", "Neither agree or disagree","Agree", "Strongly Agree"] }
         ]);
 
         this.listenTo(SurveyActions.load, () => {
@@ -511,16 +511,13 @@ var SurveyStore = Reflux.createStore({
     /*
      * Called when block is dragged to be re-ordered in the treeview.
      * @param draggedBlockId: id of the block being dragged
-     * @param overBlockId: id of the block on which the block is over
+     * @param finalIndex: final location where the block needs to be moved to
      */
-    onReorderBlock(draggedBlockId, overBlockId) {
+    onReorderBlock(draggedBlockId, finalIndex) {
         var survey = this.data.surveyData;
         var draggedBlockIndex = this.getBlockIndex(draggedBlockId);
-        var overBlockIndex = this.getBlockIndex(overBlockId);
-
         var block = survey.get(draggedBlockIndex);
-        var newSurvey = survey.delete(draggedBlockIndex)
-                              .splice(overBlockIndex + 1, 0, block);
+        var newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
         this.updateSurveyData(newSurvey, false);
     }
 });
