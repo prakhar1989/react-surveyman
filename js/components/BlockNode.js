@@ -44,6 +44,8 @@ var blockTarget = {
         }
     },
     drop(props) {
+        // called when the hover ends - used to propagate
+        // changes upstream
         props.handleDrop(props.id, props.id);
     }
 };

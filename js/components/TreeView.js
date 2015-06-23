@@ -36,8 +36,10 @@ var TreeView = React.createClass({
         var targetType = targetID[0] === "b" ? ItemTypes.BLOCK : ItemTypes.QUESTION;
 
         if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
+            // when a question is dropped in a block
             SurveyActions.moveQuestion(sourceID, targetID);
         } else if (sourceType === ItemTypes.BLOCK && targetType === ItemTypes.BLOCK) {
+            // when a block is dropped (ie. re-ordered)
             SurveyActions.reorderBlock(sourceID, this.state.finalIndex);
         }
     },

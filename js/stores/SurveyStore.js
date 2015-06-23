@@ -511,7 +511,7 @@ var SurveyStore = Reflux.createStore({
     /*
      * Called when block is dragged to be re-ordered in the treeview.
      * @param draggedBlockId: id of the block being dragged
-     * @param overBlockId: id of the block on which the block is over
+     * @param finalIndex: final location where the block needs to be moved to
      */
     onReorderBlock(draggedBlockId, finalIndex) {
         var survey = this.data.surveyData;
