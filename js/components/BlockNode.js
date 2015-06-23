@@ -42,6 +42,9 @@ var blockTarget = {
         if (draggedId !== props.id) {
             props.reorderBlock(draggedId, props.id);
         }
+    },
+    drop(props) {
+        props.handleDrop(props.id, props.id);
     }
 };
 

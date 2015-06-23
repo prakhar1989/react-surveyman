@@ -513,14 +513,11 @@ var SurveyStore = Reflux.createStore({
      * @param draggedBlockId: id of the block being dragged
      * @param overBlockId: id of the block on which the block is over
      */
-    onReorderBlock(draggedBlockId, overBlockId) {
+    onReorderBlock(draggedBlockId, finalIndex) {
         var survey = this.data.surveyData;
         var draggedBlockIndex = this.getBlockIndex(draggedBlockId);
-        var overBlockIndex = this.getBlockIndex(overBlockId);
-
         var block = survey.get(draggedBlockIndex);
-        var newSurvey = survey.delete(draggedBlockIndex)
-                              .splice(overBlockIndex + 1, 0, block);
+        var newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
         this.updateSurveyData(newSurvey, false);
     }
 });

@@ -11,12 +11,14 @@ var TreeView = React.createClass({
     },
     getInitialState() {
         return {
-            survey: this.props.survey
+            survey: this.props.survey,
+            finalIndex: -1
         }
     },
     componentWillReceiveProps(nextProps) {
         this.setState({
-            survey: nextProps.survey
+            survey: nextProps.survey,
+            finalIndex: -1
         });
     },
     renderProp(label, prop) {
@@ -35,17 +37,21 @@ var TreeView = React.createClass({
 
         if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
             SurveyActions.moveQuestion(sourceID, targetID);
+        } else if (sourceType === ItemTypes.BLOCK && targetType === ItemTypes.BLOCK) {
+            SurveyActions.reorderBlock(sourceID, this.state.finalIndex);
         }
     },
     reorderBlock(draggedBlockId, overBlockId) {
-        //SurveyActions.reorderBlock(draggedBlockId, overBlockId);
         var survey = this.state.survey;
         var draggedBlockIndex = survey.findIndex(b => b.get('id') === draggedBlockId);
         var overBlockIndex = survey.findIndex(b => b.get('id') === overBlockId);
 
         var block = survey.get(draggedBlockIndex);
         var newSurvey = survey.delete(draggedBlockIndex).splice(overBlockIndex, 0, block);
-        this.setState({ survey: newSurvey });
+        this.setState({
+            survey: newSurvey,
+            finalIndex: overBlockIndex
+        });
     },
     render() {
         var { survey } = this.state;
