@@ -43,7 +43,7 @@ var SurveyStore = Reflux.createStore({
         var initOptionsData = Immutable.fromJS([
             { id: 0, optionLabels: ["Yes", "No"] },
             { id: 1, optionLabels: ["True", "False"] },
-            { id: 2, optionLabels: ["Strongly Agree", "Strongly Disagree", "Agree", "Disagree"] }
+            { id: 2, optionLabels: ["Strongly Disagree", "Disagree", "Neither agree or disagree","Agree", "Strongly Agree"] }
         ]);
 
         this.listenTo(SurveyActions.load, () => {

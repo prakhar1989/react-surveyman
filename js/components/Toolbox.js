@@ -21,12 +21,12 @@ var Toolbox = React.createClass({
         var { optionGroupId, optionGroups } = this.props;
         return (
             <div className="toolbox">
-                <h3>ToolBox</h3>
+                <h3>ToolBox <span className="help-text">Drop items on the pallet</span></h3>
                 <div className="widgets-area">
                     <DraggableBlock />
                     <DraggableQuestion />
                     <DraggableOptionGroup />
-                    <h5>Choose an Option Group   <i className="ion-plus-circled" 
+                    <h5>Add Options <i className="ion-plus-circled" 
                         style={{cursor: 'pointer'}} onClick={this.handleAdd}></i></h5>
                     <OptionGroup 
                         options={optionGroups} 

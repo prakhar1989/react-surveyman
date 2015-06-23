@@ -85,7 +85,7 @@ var TreeView = React.createClass({
 
         return (
             <div className="tree-view">
-                <h3>Minimap</h3>
+                <h3>Minimap <span className="help-text">Drag items to re-order</span></h3>
                 {tree}
             </div>
         )

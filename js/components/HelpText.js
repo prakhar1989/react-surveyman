@@ -6,7 +6,7 @@ var HelpText = React.createClass({
     },
     render() {
         return (
-            <p className="help-text">Drop {this.props.itemType} here!</p>
+            <p className="help-text">Drop {this.props.itemType} here from the Toolbox!</p>
         )
     }
 });
