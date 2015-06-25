@@ -28,9 +28,7 @@ var questionTarget = {
 
 function dropCollect(connect, monitor) {
     return {
-        connectDropTarget: connect.dropTarget(),
-        canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        connectDropTarget: connect.dropTarget()
     }
 }
 
@@ -76,16 +74,14 @@ var BlockNode = React.createClass({
         });
     },
     render() {
-        var collapsed = this.props.collapsed != null ? 
+        var collapsed = this.props.collapsed != null ?
                         this.props.collapsed : this.state.collapsed;
 
-        var { isDragging, 
-              connectDragSource, 
-              id, 
+        var { isDragging,
+              connectDragSource,
+              id,
               connectDropTarget,
               connectSortTarget,
-              canDrop,
-              isOver,
               handleClick,
               children } = this.props;
 
@@ -94,18 +90,12 @@ var BlockNode = React.createClass({
             'ion-arrow-right-b': collapsed
         });
 
-        var classes = cx({
-            'tree-view_node-block': true,
-            'dragging': canDrop,
-            'hovering': isOver
-        });
-
         var arrow = (<div onClick={this.handleCollapse} className="tree-view_arrow">
                         <i className={arrowClass}></i>
                     </div>);
 
         return connectSortTarget(connectDragSource(connectDropTarget(
-           <div className={classes} style={{opacity: isDragging ? 0 : 1}}> {arrow}
+           <div className='tree-view_node-block' style={{opacity: isDragging ? 0 : 1}}> {arrow}
                 <span className="tree-view_block-title" onClick={handleClick}>{"Block #" + id}</span>
                 { collapsed ? null : <div className="tree-view_children">{children}</div> }
            </div>

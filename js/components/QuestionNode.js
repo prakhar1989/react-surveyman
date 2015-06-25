@@ -73,7 +73,7 @@ var QuestionNode = React.createClass({
                     </div>);
 
         return connectDropTarget(connectDragSource(
-           <div className='tree-view_node-question'> {arrow}
+           <div className='tree-view_node-question' style={{opacity: isDragging ? 0 : 1}}> {arrow}
                 <span onClick={props.handleClick} className="tree-view_question-title">{props.label}</span>
                 { collapsed ? null : <div className="tree-view_children">{this.props.children}</div> }
            </div>
