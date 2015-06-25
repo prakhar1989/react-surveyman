@@ -23,10 +23,9 @@ function dragCollect(connect, monitor) {
 var questionTarget = {
     hover(props, monitor) {
         var draggedId = monitor.getItem().id;
-        console.log("dragging on ", props.id, draggedId);
-    },
-    drop(props, monitor) {
-        console.log("question is dropped");
+        if (draggedId !== props.id) {
+            props.reorderQuestion(draggedId, props.id);
+        }
     }
 }
 
@@ -43,6 +42,7 @@ var QuestionNode = React.createClass({
         label: React.PropTypes.node.isRequired,
         id: React.PropTypes.string.isRequired,
         handleClick: React.PropTypes.func.isRequired,
+        reorderQuestion: React.PropTypes.func.isRequired
     },
     getInitialState() {
         return {

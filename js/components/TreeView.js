@@ -22,7 +22,7 @@ var TreeView = React.createClass({
         });
     },
     renderProp(label, prop) {
-        return prop ? <span><i className="ion-checkmark"></i> {label}</span> : 
+        return prop ? <span><i className="ion-checkmark"></i> {label}</span> :
                       <span><i className="ion-close"></i>  {label}</span>
     },
     ellipsize(text) {
@@ -55,6 +55,9 @@ var TreeView = React.createClass({
             finalIndex: overBlockIndex
         });
     },
+    reorderQuestion(draggedQuestionId, overQuestionId) {
+        console.log("dragging happening");
+    },
     render() {
         var { survey } = this.state;
         var self = this;
@@ -68,10 +71,12 @@ var TreeView = React.createClass({
                            handleDrop={self.handleDrop}
                            reorderBlock={self.reorderBlock}>
 
-                    {questions.map((ques, j) => 
-                        <QuestionNode id={ques.get('id')} 
-                                      key={ques.get('id')} label={self.ellipsize(ques.get('qtext'))}
-                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
+                    {questions.map((ques, j) =>
+                        <QuestionNode id={ques.get('id')}
+                                      key={ques.get('id')}
+                                      label={self.ellipsize(ques.get('qtext'))}
+                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}
+                                      reorderQuestion={self.reorderQuestion}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
                             <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
