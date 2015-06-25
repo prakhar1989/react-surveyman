@@ -4,6 +4,7 @@ var BlockNode = require('./BlockNode');
 var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
+var SurveyStore = require('../stores/SurveyStore');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -56,7 +57,35 @@ var TreeView = React.createClass({
         });
     },
     reorderQuestion(draggedQuestionId, overQuestionId) {
-        console.log("dragging happening");
+        var survey = this.state.survey;
+        var newSurvey;
+
+        // get indices of the blocks holding the drag and drop targets (questions)
+        var draggedBlockId = SurveyStore.getBlockId(draggedQuestionId);
+        var overBlockId = SurveyStore.getBlockId(overQuestionId);
+        var draggedBlockIndex = survey.findIndex(b => b.get('id') === draggedBlockId);
+        var overBlockIndex = survey.findIndex(b => b.get('id') === overBlockId);
+        var draggedBlock = survey.get(draggedBlockIndex);
+        var overBlock = survey.get(overBlockIndex);
+
+        // get indices of the drop and drag targets (questions) themselves
+        var draggedQuestionIndex = draggedBlock.get('questions')
+                                      .findIndex(q => q.get('id') === draggedQuestionId);
+
+        var overQuestionIndex = overBlock.get('questions')
+                                      .findIndex(q => q.get('id') === overQuestionId);
+
+        // handle the case when the question is being ordered withtin the same block
+        if (draggedBlockId === overBlockId) {
+            // delete the question from the block and add at new location
+            newSurvey = survey.updateIn([draggedBlockIndex, 'questions'], (questions) => {
+                var question = questions.get(draggedQuestionIndex);
+                return questions.delete(draggedQuestionIndex).splice(overQuestionIndex, 0, question);
+            });
+        }
+
+        // change the state
+        this.setState({ survey: newSurvey });
     },
     render() {
         var { survey } = this.state;

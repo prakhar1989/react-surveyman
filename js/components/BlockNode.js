@@ -95,7 +95,8 @@ var BlockNode = React.createClass({
                     </div>);
 
         return connectSortTarget(connectDragSource(connectDropTarget(
-           <div className='tree-view_node-block' style={{opacity: isDragging ? 0 : 1}}> {arrow}
+           <div className='tree-view_node-block'
+                  style={{opacity: isDragging ? 0 : 1}} onClick={this.handleCollapse}> {arrow}
                 <span className="tree-view_block-title" onClick={handleClick}>{"Block #" + id}</span>
                 { collapsed ? null : <div className="tree-view_children">{children}</div> }
            </div>
