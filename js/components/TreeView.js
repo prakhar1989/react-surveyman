@@ -75,13 +75,22 @@ var TreeView = React.createClass({
         var overQuestionIndex = overBlock.get('questions')
                                       .findIndex(q => q.get('id') === overQuestionId);
 
+        // cache the question being dragged
+        var draggedQuestion = draggedBlock.getIn(['questions', draggedQuestionIndex]);
+
         // handle the case when the question is being ordered withtin the same block
         if (draggedBlockId === overBlockId) {
-            // delete the question from the block and add at new location
-            newSurvey = survey.updateIn([draggedBlockIndex, 'questions'], (questions) => {
-                var question = questions.get(draggedQuestionIndex);
-                return questions.delete(draggedQuestionIndex).splice(overQuestionIndex, 0, question);
-            });
+            console.log("same block");
+            newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
+                (questions) => questions.delete(draggedQuestionIndex)
+                                        .splice(overQuestionIndex, 0, draggedQuestion)
+            );
+        } else { // handle the case when the question is being ordered in a diff block
+            console.log("diff block");
+            newSurvey = survey.deleteIn([draggedBlockIndex, 'questions', draggedQuestionIndex])
+                              .updateIn([overBlockIndex, 'questions'],
+                                   (questions) => questions.splice(overQuestionIndex, 0, draggedQuestion)
+                               );
         }
 
         // change the state
