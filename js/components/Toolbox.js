@@ -14,12 +14,12 @@ var Toolbox = React.createClass({
         var { optionGroupId, optionGroups } = this.props;
         return (
             <div className="toolbox">
-                <h3>ToolBox <span className="help-text">Drop items on the pallet</span></h3>
+                <h3>Toolbox <span className="help-text">Drop items on the pallet</span></h3>
                 <div className="widgets-area">
                     <DraggableBlock />
                     <DraggableQuestion />
                     <DraggableOptionGroup />
-                    <OptionGroupArea 
+                    <OptionGroupArea
                         optionGroupId={optionGroupId}
                         optionGroups={optionGroups} />
                 </div>

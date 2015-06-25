@@ -1,18 +1,38 @@
 var React = require('react');
-var { DragSource } = require('react-dnd');
+var { DragSource, DropTarget } = require('react-dnd');
 var cx = require('classnames');
+var flow = require('lodash/function/flow');
 var ItemTypes = require('./ItemTypes');
 
+/* setup for dragging question nodes */
 var nodeSource = {
     beginDrag(props) {
         return { id: props.id }
     }
 }
 
-function collect(connect, monitor) {
+function dragCollect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         isDragging: monitor.isDragging()
+    }
+}
+
+/* setup for allowing questions to act as drop targets for questions.
+ * this is required to implement sortable on questions */
+var questionTarget = {
+    hover(props, monitor) {
+        var draggedId = monitor.getItem().id;
+        console.log("dragging on ", props.id, draggedId);
+    },
+    drop(props, monitor) {
+        console.log("question is dropped");
+    }
+}
+
+function dropCollect(connect, monitor) {
+    return {
+        connectDropTarget: connect.dropTarget()
     }
 }
 
@@ -36,10 +56,12 @@ var QuestionNode = React.createClass({
     },
     render() {
         var props = this.props;
-        var collapsed = props.collapsed != null ? 
+        var collapsed = props.collapsed != null ?
                         props.collapsed : this.state.collapsed;
 
-        var { isDragging, connectDragSource } = this.props;
+        var { isDragging,
+              connectDragSource,
+              connectDropTarget } = this.props;
 
         var arrowClass = cx({
             'ion-arrow-down-b': !collapsed,
@@ -50,13 +72,16 @@ var QuestionNode = React.createClass({
                         <i className={arrowClass}></i>
                     </div>);
 
-        return connectDragSource(
+        return connectDropTarget(connectDragSource(
            <div className='tree-view_node-question'> {arrow}
                 <span onClick={props.handleClick} className="tree-view_question-title">{props.label}</span>
                 { collapsed ? null : <div className="tree-view_children">{this.props.children}</div> }
            </div>
-        )
+        ));
     }
 });
 
-module.exports = DragSource(ItemTypes.QUESTIONNODE, nodeSource, collect)(QuestionNode);
+module.exports = flow(
+    DragSource(ItemTypes.QUESTIONNODE, nodeSource, dragCollect),
+    DropTarget(ItemTypes.QUESTIONNODE, questionTarget, dropCollect)
+)(QuestionNode);
