@@ -4,6 +4,7 @@ var BlockNode = require('./BlockNode');
 var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
+var SurveyStore = require('../stores/SurveyStore');
 
 var TreeView = React.createClass({
     propTypes: {
@@ -22,7 +23,7 @@ var TreeView = React.createClass({
         });
     },
     renderProp(label, prop) {
-        return prop ? <span><i className="ion-checkmark"></i> {label}</span> : 
+        return prop ? <span><i className="ion-checkmark"></i> {label}</span> :
                       <span><i className="ion-close"></i>  {label}</span>
     },
     ellipsize(text) {
@@ -55,6 +56,51 @@ var TreeView = React.createClass({
             finalIndex: overBlockIndex
         });
     },
+    reorderQuestion(draggedQuestionId, overQuestionId) {
+        var survey = this.state.survey;
+        var newSurvey;
+
+        // get indices of the blocks holding the drag and drop targets (questions)
+        var draggedBlockId = SurveyStore.getBlockId(draggedQuestionId);
+        var overBlockId = SurveyStore.getBlockId(overQuestionId);
+        var draggedBlockIndex = survey.findIndex(b => b.get('id') === draggedBlockId);
+        var overBlockIndex = survey.findIndex(b => b.get('id') === overBlockId);
+        var draggedBlock = survey.get(draggedBlockIndex);
+        var overBlock = survey.get(overBlockIndex);
+
+        // get indices of the drop and drag targets (questions) themselves
+        var draggedQuestionIndex = draggedBlock.get('questions')
+                                      .findIndex(q => q.get('id') === draggedQuestionId);
+
+        var overQuestionIndex = overBlock.get('questions')
+                                      .findIndex(q => q.get('id') === overQuestionId);
+
+        // cache the question being dragged
+        var draggedQuestion = draggedBlock.getIn(['questions', draggedQuestionIndex]);
+
+        // handle the case when the question is being ordered withtin the same block
+        if (draggedBlockId === overBlockId) {
+            console.log("same block");
+            newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
+                (questions) => questions.delete(draggedQuestionIndex)
+                                        .splice(overQuestionIndex, 0, draggedQuestion)
+            );
+
+            // change the state
+            this.setState({ survey: newSurvey });
+        }
+
+        else { // handle the case when the question is being ordered in a diff block
+            /*
+            console.log("diff block");
+            newSurvey = survey.deleteIn([draggedBlockIndex, 'questions', draggedQuestionIndex])
+                              .updateIn([overBlockIndex, 'questions'],
+                                   (questions) => questions.splice(overQuestionIndex, 0, draggedQuestion)
+                               );
+           */
+        }
+
+    },
     render() {
         var { survey } = this.state;
         var self = this;
@@ -68,10 +114,12 @@ var TreeView = React.createClass({
                            handleDrop={self.handleDrop}
                            reorderBlock={self.reorderBlock}>
 
-                    {questions.map((ques, j) => 
-                        <QuestionNode id={ques.get('id')} 
-                                      key={ques.get('id')} label={self.ellipsize(ques.get('qtext'))}
-                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}>
+                    {questions.map((ques, j) =>
+                        <QuestionNode id={ques.get('id')}
+                                      key={ques.get('id')}
+                                      label={self.ellipsize(ques.get('qtext'))}
+                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}
+                                      reorderQuestion={self.reorderQuestion}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
                             <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>

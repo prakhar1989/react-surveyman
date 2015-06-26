@@ -10,7 +10,7 @@ var _optionsSet = Immutable.OrderedSet();
 
 // initialize question and option map which will help in
 // faster retrieval of associated blocks and questions.
-var _questionMap = Immutable.Map();     // questionId => blockId 
+var _questionMap = Immutable.Map();     // questionId => blockId
 var _optionMap = Immutable.Map();       // optionId   => questionId
 
 // CONSTS
@@ -49,7 +49,7 @@ var SurveyStore = Reflux.createStore({
         this.listenTo(SurveyActions.load, () => {
             window.location.hash = "";   // clear the location hash on app init
 
-            this.data.optionGroupState = 
+            this.data.optionGroupState =
                 this.data.optionGroupState.set('options', initOptionsData);
 
             // load up survey data
@@ -86,6 +86,14 @@ var SurveyStore = Reflux.createStore({
     getOptionsSet() {
         return _optionsSet;
     },
+    /**
+     * Returns the id of the block which has the
+     * question with questionId
+     * @param questionId
+     */
+    getBlockId(questionId) {
+        return _questionMap.get(questionId)
+    },
     getNewId(type) {
         var prefix;
         if (type === ItemTypes.QUESTION) {
@@ -115,7 +123,7 @@ var SurveyStore = Reflux.createStore({
     },
     /**
      * Runs when the optiongroup is dropped on a question
-     * @param questionId - ID of the question on which 
+     * @param questionId - ID of the question on which
      * the option group is dropped
      */
     onOptionGroupDropped(questionId) {
@@ -172,7 +180,7 @@ var SurveyStore = Reflux.createStore({
         var block = survey.get(blockIndex);
         var index = this.getQuestionIndex(questionId, block);
         var newSurvey = survey.updateIn(
-            [blockIndex, 'questions', index, 'options'], 
+            [blockIndex, 'questions', index, 'options'],
             list => list.push(newOption)
         );
 
@@ -190,7 +198,7 @@ var SurveyStore = Reflux.createStore({
     onToggleModal(modalType, dropTargetID) {
         var modalState = this.data.modalState;
 
-        // TODO: this handles the modal for question separately, although 
+        // TODO: this handles the modal for question separately, although
         // this is not really required. deal with it later.
         if (modalType === ItemTypes.QUESTION) {
             modalState = modalState.set('isOpen', !modalState.get('isOpen'));
@@ -221,7 +229,7 @@ var SurveyStore = Reflux.createStore({
         }, ALERT_TIMEOUT, this);
     },
     /**
-     * Called when the downloadSurvey action is called. 
+     * Called when the downloadSurvey action is called.
      * Logs the survey object to the console.
      */
     onDownloadSurvey() {
@@ -230,7 +238,7 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
-     * Returns the index of the block 
+     * Returns the index of the block
      * @param id - id of the block
      */
     getBlockIndex(blockId) {
@@ -266,7 +274,7 @@ var SurveyStore = Reflux.createStore({
             let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
             let block = survey.get(blockIndex);
             let index = this.getQuestionIndex(itemId, block);
-            let newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+            let newSurvey = survey.updateIn([blockIndex, 'questions', index], q =>
                 q.set(toggleName, !q.get(toggleName))
             );
             this.updateSurveyData(newSurvey);
@@ -437,13 +445,13 @@ var SurveyStore = Reflux.createStore({
         var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
         var block = survey.get(blockIndex);
         var index = this.getQuestionIndex(questionId, block);
-        var newSurvey = survey.updateIn([blockIndex, 'questions', index], q => 
+        var newSurvey = survey.updateIn([blockIndex, 'questions', index], q =>
             q.set('qtext', text)
         );
         this.updateSurveyData(newSurvey, true);
     },
     /**
-     * Called when the undoSurvey action is triggered. Responsible for 
+     * Called when the undoSurvey action is triggered. Responsible for
      * setting global state to last _history item.
      */
     onUndoSurvey() {
