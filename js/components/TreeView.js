@@ -85,16 +85,21 @@ var TreeView = React.createClass({
                 (questions) => questions.delete(draggedQuestionIndex)
                                         .splice(overQuestionIndex, 0, draggedQuestion)
             );
-        } else { // handle the case when the question is being ordered in a diff block
+
+            // change the state
+            this.setState({ survey: newSurvey });
+        }
+
+        else { // handle the case when the question is being ordered in a diff block
+            /*
             console.log("diff block");
             newSurvey = survey.deleteIn([draggedBlockIndex, 'questions', draggedQuestionIndex])
                               .updateIn([overBlockIndex, 'questions'],
                                    (questions) => questions.splice(overQuestionIndex, 0, draggedQuestion)
                                );
+           */
         }
 
-        // change the state
-        this.setState({ survey: newSurvey });
     },
     render() {
         var { survey } = this.state;
