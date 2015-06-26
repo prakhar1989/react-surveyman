@@ -18,7 +18,7 @@ var SurveyActions = Reflux.createActions([
     "updateOptionGroup",            // when an option group is changed
     "addOptionGroup",               // when an option group is changed
     "moveQuestion",                 // when a question is moved in the treeview
-    "reorderBlock"                  // when a block in moved in the treeview
+    "reorderItem"                   // when an item is reordered in the treeview
 ]);
 
 module.exports = SurveyActions;
