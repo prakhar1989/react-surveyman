@@ -516,18 +516,12 @@ var SurveyStore = Reflux.createStore({
 
         SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
     },
-    /*
-     * Called when block is dragged to be re-ordered in the treeview.
-     * @param draggedBlockId: id of the block being dragged
-     * @param finalIndex: final location where the block needs to be moved to
+    /**
+     * Called when an item is dragged to be re-ordered in the treeview.
+     * This works on the assumption that the item is ordered within its parent container.
+     * @param draggedItemId: id of the block being dragged
+     * @param finalIndex: final location where the item needs to be moved to within the container
      */
-    onReorderBlock(draggedBlockId, finalIndex) {
-        var survey = this.data.surveyData;
-        var draggedBlockIndex = this.getBlockIndex(draggedBlockId);
-        var block = survey.get(draggedBlockIndex);
-        var newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
-        this.updateSurveyData(newSurvey, false);
-    },
     onReorderItem(draggedItemId, finalIndex, itemType) {
         var survey = this.data.surveyData;
 
@@ -536,9 +530,20 @@ var SurveyStore = Reflux.createStore({
             let block = survey.get(draggedBlockIndex);
             let newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
             this.updateSurveyData(newSurvey, false);
-        } else if (itemType === ItemTypes.QUESTION) {
-            console.log("handle the question case separately");
-        } else {
+        }
+        else if (itemType === ItemTypes.QUESTION) {
+            let draggedBlockId = _questionMap.get(draggedItemId);
+            let draggedBlockIndex = this.getBlockIndex(draggedBlockId);
+            let block = survey.get(draggedBlockIndex);
+            let draggedQuestionIndex = this.getQuestionIndex(draggedItemId, block);
+            let draggedQuestion = block.getIn(['questions', draggedQuestionIndex]);
+            let newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
+              (questions) => questions.delete(draggedQuestionIndex)
+                                      .splice(finalIndex, 0, draggedQuestion)
+            );
+            this.updateSurveyData(newSurvey, false);
+        }
+        else {
           throw new ('Invalid item type');
         }
     }
