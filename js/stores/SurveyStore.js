@@ -527,6 +527,20 @@ var SurveyStore = Reflux.createStore({
         var block = survey.get(draggedBlockIndex);
         var newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
         this.updateSurveyData(newSurvey, false);
+    },
+    onReorderItem(draggedItemId, finalIndex, itemType) {
+        var survey = this.data.surveyData;
+
+        if (itemType === ItemTypes.BLOCK) {
+            let draggedBlockIndex = this.getBlockIndex(draggedItemId);
+            let block = survey.get(draggedBlockIndex);
+            let newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
+            this.updateSurveyData(newSurvey, false);
+        } else if (itemType === ItemTypes.QUESTION) {
+            console.log("handle the question case separately");
+        } else {
+          throw new ('Invalid item type');
+        }
     }
 });
 

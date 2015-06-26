@@ -39,9 +39,9 @@ var TreeView = React.createClass({
         if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
             // when a question is dropped in a block
             SurveyActions.moveQuestion(sourceID, targetID);
-        } else if (sourceType === ItemTypes.BLOCK && targetType === ItemTypes.BLOCK) {
-            // when a block is dropped (ie. re-ordered)
-            SurveyActions.reorderBlock(sourceID, this.state.finalIndex);
+        } else {
+            // when a question is dropped on a question or a block is dropped on a block
+            SurveyActions.reorderItem(sourceID, this.state.finalIndex, sourceType)
         }
     },
     reorderBlock(draggedBlockId, overBlockId) {
@@ -72,34 +72,26 @@ var TreeView = React.createClass({
         var draggedQuestionIndex = draggedBlock.get('questions')
                                       .findIndex(q => q.get('id') === draggedQuestionId);
 
+        // this gives an error - q is undefined
         var overQuestionIndex = overBlock.get('questions')
                                       .findIndex(q => q.get('id') === overQuestionId);
 
         // cache the question being dragged
         var draggedQuestion = draggedBlock.getIn(['questions', draggedQuestionIndex]);
 
-        // handle the case when the question is being ordered withtin the same block
+        // ensure that the question is being ordered withtin the same block
         if (draggedBlockId === overBlockId) {
-            console.log("same block");
             newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
                 (questions) => questions.delete(draggedQuestionIndex)
                                         .splice(overQuestionIndex, 0, draggedQuestion)
             );
 
             // change the state
-            this.setState({ survey: newSurvey });
+            this.setState({
+                survey: newSurvey,
+                finalIndex: overQuestionIndex
+            });
         }
-
-        else { // handle the case when the question is being ordered in a diff block
-            /*
-            console.log("diff block");
-            newSurvey = survey.deleteIn([draggedBlockIndex, 'questions', draggedQuestionIndex])
-                              .updateIn([overBlockIndex, 'questions'],
-                                   (questions) => questions.splice(overQuestionIndex, 0, draggedQuestion)
-                               );
-           */
-        }
-
     },
     render() {
         var { survey } = this.state;
@@ -119,6 +111,7 @@ var TreeView = React.createClass({
                                       key={ques.get('id')}
                                       label={self.ellipsize(ques.get('qtext'))}
                                       handleClick={self.focusOnItem.bind(this, ques.get('id'))}
+                                      handleDrop={self.handleDrop}
                                       reorderQuestion={self.reorderQuestion}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
                             <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
