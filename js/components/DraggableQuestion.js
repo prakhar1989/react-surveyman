@@ -22,7 +22,7 @@ var DraggableQuestion = React.createClass({
         var { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={{opacity: isDragging ? 0.4 : 1}} className="draggable">
+            <div style={{opacity: isDragging ? 0.4 : 1, backgroundColor: '#c4ea2d'}} className="draggable">
                 <i className="ion-arrow-move"></i>
                 Question
             </div>

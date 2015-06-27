@@ -20,7 +20,7 @@ var DraggableOptionGroup = React.createClass({
         var { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
-            <div style={{opacity: isDragging ? 0.4 : 1}} className="draggable">
+            <div style={{opacity: isDragging ? 0.4 : 1, backgroundColor: '#9d9c4f'}} className="draggable">
                 <i className="ion-arrow-move"></i>
                 Option List
             </div>
