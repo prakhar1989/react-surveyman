@@ -2,13 +2,11 @@ var React = require('react');
 var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
-var questionSource = {
+var subblockGroupSource = {
     beginDrag(props) {
-        return {
-            item: {}
-        }
+        return { item: {} }
     }
-};
+}
 
 function collect(connect, monitor) {
     return {
@@ -17,19 +15,19 @@ function collect(connect, monitor) {
     }
 }
 
-var DraggableQuestion = React.createClass({
+var DraggableSubblock = React.createClass({
     render() {
-        var blockColor = '#008148';
+        var blockColor = "#C33149";
         var { isDragging, connectDragSource } = this.props;
 
         return connectDragSource(
             <div style={{opacity: isDragging ? 0.4 : 1,
                         backgroundColor: blockColor}} className="draggable">
                 <i className="ion-arrow-move"></i>
-                Question
+                Subblock
             </div>
         )
     }
 });
 
-module.exports = DragSource(ItemTypes.QUESTION, questionSource, collect)(DraggableQuestion);
+module.exports = DragSource(ItemTypes.SUBBLOCK, subblockGroupSource, collect)(DraggableSubblock);

@@ -3,6 +3,7 @@ var { List } = require('immutable');
 var DraggableBlock = require('./DraggableBlock');
 var DraggableOptionGroup = require('./DraggableOptionGroup');
 var DraggableQuestion = require('./DraggableQuestion');
+var DraggableSubblock = require('./DraggableSubblock');
 var OptionGroupArea = require('./OptionGroupArea');
 
 var Toolbox = React.createClass({
@@ -17,6 +18,7 @@ var Toolbox = React.createClass({
                 <h3>Toolbox <span className="help-text">Drop items on the pallet</span></h3>
                 <div className="widgets-area">
                     <DraggableBlock />
+                    <DraggableSubblock />
                     <DraggableQuestion />
                     <DraggableOptionGroup />
                     <OptionGroupArea
