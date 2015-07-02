@@ -118,7 +118,8 @@ var SurveyStore = Reflux.createStore({
             randomizable: true,
             ordering: false
         });
-        this.updateSurveyData(survey.push(newBlock), true);
+        var newSurvey = survey.splice(0, 0, newBlock);
+        this.updateSurveyData(newSurvey, true);
         SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     },
     /**
@@ -150,7 +151,7 @@ var SurveyStore = Reflux.createStore({
 
         var index = this.getBlockIndex(questionObj.parentID);
         var newSurvey = this.data.surveyData.updateIn([index, 'questions'], list =>
-            list.push(newQuestion)
+            list.splice(0, 0, newQuestion)
         );
 
         // update and cache
@@ -319,7 +320,7 @@ var SurveyStore = Reflux.createStore({
             let self = this;
             let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
                             .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-            let newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
+            let newSurvey = surveysplice(blockIndex + 1, 0, newBlock);
 
             // update and cache
             this.updateSurveyData(newSurvey, true);
