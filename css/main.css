@@ -27,12 +27,12 @@ div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
 }
-div.item.dragging, 
+div.item.dragging,
 div.survey.dragging,
 div.tree-view_node-block.dragging {
     background: #f4fbd7;
 }
-div.item.hovering, 
+div.item.hovering,
 div.survey.hovering,
 div.tree-view_node-block.hovering {
     background: #eeeeee;
@@ -47,9 +47,9 @@ div.dropzone {
 }
 div.draggable {
     border: 1px dashed black;
-    width: 60px;
+    width: 70px;
     height: 60px;
-    margin: 10px 12px;
+    margin: 10px 4px;
     cursor: move;
     box-sizing: border-box;
     text-align: center;
@@ -167,7 +167,8 @@ div.item.block:after {
 }
 
 div.item.question {
-  border: 2px solid #c4ea2d;
+  /*border: 2px solid #c4ea2d;*/
+  border: 2px solid #008148;
   margin-bottom: 5px;
   padding: 10px;
   position: relative;
@@ -180,8 +181,9 @@ div.item.question:after {
     top: 0;
     right: 0;
     content: "question";
+    color: white;
     font-style: italic;
-    background: #c4ea2d;
+    background: #008148;
     padding: 0 2px 2px 5px;
 }
 
@@ -236,7 +238,7 @@ div.ReactTags__tagInput {
     border-radius: 2px;
     display: inline-block;
 }
-div.ReactTags__tagInput input, 
+div.ReactTags__tagInput input,
 div.ReactTags__tagInput input:focus {
     height: 31px;
     margin: 0;
@@ -262,7 +264,7 @@ div.ReactTags__selected span.ReactTags__tag {
     color: #9d9c4f;
     padding: 3px 8px;
     border-radius: 20px;
-    
+
 }
 div.ReactTags__selected a.ReactTags__remove {
     color: #aaa;
@@ -306,7 +308,7 @@ div.tree-view {
     padding: 10px;
     margin-top: 20px;
 }
-div.tree-view h3, 
+div.tree-view h3,
 div.toolbox h3 {
     margin-top: 0;
 }
@@ -338,7 +340,7 @@ div.tree-view_node-question {
     cursor: move;
 }
 div.tree-view_node-question:hover {
-    border: 1px solid #c4ea2d;
+    border: 1px solid #008148;
 }
 span.tree-view_question-title, span.tree-view_block-title {
     text-decoration: underline;

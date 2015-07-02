@@ -13,14 +13,15 @@ var OptionGroup = React.createClass({
     },
     render() {
         var { options, selectedID } = this.props;
-        var selectOptions = options.toJS().map(o => ({ 
+        var selectOptions = options.toJS().map(o => ({
                 value: o.id.toString(),
                 label: o.optionLabels.join(", ")
             })
         );
-        return selectOptions.length === 0 ? null : 
-            <Select options={selectOptions} 
-                    onChange={this.handleChange} 
+        return selectOptions.length === 0 ? null :
+            <Select options={selectOptions}
+                    onChange={this.handleChange}
+                    clearable={false}
                     value={selectedID.toString()} />
 
     }
