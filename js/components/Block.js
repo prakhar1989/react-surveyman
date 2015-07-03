@@ -4,6 +4,7 @@ var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
+var flow = require('lodash/function/flow');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
@@ -13,15 +14,29 @@ var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
     drop(props, monitor, component) {
-        component.handleQuestionDrop();
+        console.log("block is dropped");
     }
 };
 
-function collect(connect, monitor) {
+function blockCollect(connect, monitor) {
     return {
-        connectDropTarget: connect.dropTarget(),
-        canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        connectBlockDropTarget: connect.dropTarget(),
+        canBlockDrop: monitor.canDrop(),
+        isBlockOver: monitor.isOver()
+    }
+}
+
+var questionTarget = {
+  drop(props, monitor, component) {
+      component.handleQuestionDrop();
+  }
+}
+
+function questionCollect(connect, monitor) {
+    return {
+        connectQuestionDropTarget: connect.dropTarget(),
+        canQuestionDrop: monitor.canDrop(),
+        isQuestionOver: monitor.isOver()
     }
 }
 
@@ -46,11 +61,15 @@ var Block = React.createClass({
         SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
     },
     render() {
-        var { canDrop, isOver, connectDropTarget } = this.props;
+        var { canQuestionDrop,
+              isQuestionOver,
+              connectQuestionDropTarget,
+              connectBlockDropTarget } = this.props;
+
         var classes = cx({
             'item block': true,
-            'dragging': canDrop,
-            'hovering': isOver
+            'dragging': canQuestionDrop,
+            'hovering': isQuestionOver
         });
 
         // render questions
@@ -71,7 +90,7 @@ var Block = React.createClass({
             </ReactCSSTransitionGroup>
         );
 
-        return connectDropTarget(
+        return connectBlockDropTarget(connectQuestionDropTarget(
             <div className={classes} id={this.props.id}>
                 <div className="controls-area">
                     <ul>
@@ -97,8 +116,11 @@ var Block = React.createClass({
                     </ul>
                 </div>
             </div>
-        )
+        ))
     }
 });
 
-module.exports = DropTarget(ItemTypes.QUESTION, blockTarget, collect)(Block);
+module.exports = flow(
+  DropTarget(ItemTypes.BLOCK, blockTarget, blockCollect),
+  DropTarget(ItemTypes.QUESTION, questionTarget, questionCollect)
+)(Block);

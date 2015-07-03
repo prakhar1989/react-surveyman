@@ -11,15 +11,17 @@ var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var surveyTarget = {
     drop(props, monitor, component) {
-        component.handleBlockDrop();
+        let droppedOnChild = !monitor.isOver({ shallow: true });
+        if (!droppedOnChild) {
+            component.handleBlockDrop();
+        }
     }
 };
 
 function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
-        canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        isOverCurrent: monitor.isOver({ shallow: true })
     }
 }
 
@@ -32,11 +34,12 @@ var Survey = React.createClass({
         SurveyActions.blockDropped();
     },
     render() {
-        var { survey, canDrop, isOver, connectDropTarget } = this.props;
+        var { survey, isOverCurrent, connectDropTarget } = this.props;
+
         var classes = cx({
             'survey': true,
-            'dragging': canDrop,
-            'hovering': isOver
+            'dragging': isOverCurrent,
+            'hovering': isOverCurrent
         });
 
         var blocks = survey.map(block =>
