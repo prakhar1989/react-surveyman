@@ -14,7 +14,7 @@ var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
     drop(props, monitor, component) {
-        console.log("block is dropped");
+        component.handleBlockDrop()
     }
 };
 
@@ -27,9 +27,9 @@ function blockCollect(connect, monitor) {
 }
 
 var questionTarget = {
-  drop(props, monitor, component) {
-      component.handleQuestionDrop();
-  }
+      drop(props, monitor, component) {
+          component.handleQuestionDrop();
+      }
 }
 
 function questionCollect(connect, monitor) {
@@ -50,6 +50,9 @@ var Block = React.createClass({
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
+    },
+    handleBlockDrop() {
+        SurveyActions.blockDropped(this.props.id);
     },
     handleDelete() {
         var deleteConfirmation = confirm("Are you sure you want to delete this block, its associated questions and options?");

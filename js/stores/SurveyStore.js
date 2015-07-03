@@ -39,7 +39,6 @@ var SurveyStore = Reflux.createStore({
     },
     // called when the app component is loaded
     init() {
-        // TODO: Load this from localstorage
         var initOptionsData = Immutable.fromJS([
             { id: 0, optionLabels: ["Yes", "No"] },
             { id: 1, optionLabels: ["True", "False"] },
@@ -108,8 +107,10 @@ var SurveyStore = Reflux.createStore({
     /**
      * Runs when the blockDropped action is called by the view.
      * Adds a new block to the end of the survey object.
+     * @param targetID: targetId of the target on which the block is dropped.
+     * If this is undefined, then block is assumed to have dropped on the survey
      */
-    onBlockDropped() {
+    onBlockDropped(targetID) {
         var survey = this.data.surveyData;
         var newBlock = Immutable.fromJS({
             id: this.getNewId(ItemTypes.BLOCK),
@@ -117,9 +118,18 @@ var SurveyStore = Reflux.createStore({
             subblocks: [],
             randomize: true
         });
-        var newSurvey = survey.splice(0, 0, newBlock);
-        this.updateSurveyData(newSurvey, true);
-        SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
+        var newSurvey;
+
+        if (targetID === undefined) {
+            // block is dropped on the survey
+            newSurvey = survey.splice(0, 0, newBlock);
+            this.updateSurveyData(newSurvey, true);
+            SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
+        } else {
+            // block is dropped on another block
+            let blockId = targetID;
+            console.log("block is dropped on another block: id", blockId);
+        }
     },
     /**
      * Runs when the optiongroup is dropped on a question
