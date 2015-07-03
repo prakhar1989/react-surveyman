@@ -31,8 +31,7 @@ var Block = React.createClass({
         id: React.PropTypes.string.isRequired,
         questions: React.PropTypes.instanceOf(List),
         subblocks: React.PropTypes.array.isRequired,
-        randomizable: React.PropTypes.bool.isRequired,
-        ordering: React.PropTypes.bool.isRequired
+        randomize: React.PropTypes.bool.isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
@@ -79,7 +78,7 @@ var Block = React.createClass({
                       <li><ItemControl icon="ion-trash-b" helpText="Delete this block" handleClick={this.handleDelete}/></li>
                       <li><ItemControl icon="ion-plus-circled" helpText="Add a question" handleClick={this.handleQuestionDrop}/></li>
                       <li><ItemControl icon="ion-ios-copy" helpText="Clone this block" handleClick={this.handleCopy}/></li>
-                    </ul>  
+                    </ul>
                 </div>
 
                 { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
@@ -89,18 +88,9 @@ var Block = React.createClass({
                         <li>
                             <ToggleParam
                                 icon="ion-shuffle"
-                                helpText="Toggles whether questions are randomized"
-                                toggleValue={this.props.ordering}
-                                toggleName='ordering'
-                                itemType={ItemTypes.BLOCK}
-                                itemId={this.props.id} />
-                        </li>
-                        <li>
-                            <ToggleParam
-                                icon="ion-arrow-swap"
-                                helpText="Toggles whether questions are ordered"
-                                toggleValue={this.props.randomizable}
-                                toggleName='randomizable'
+                                helpText="Toggles whether questions will be randomized"
+                                toggleValue={this.props.randomize}
+                                toggleName='randomize'
                                 itemType={ItemTypes.BLOCK}
                                 itemId={this.props.id} />
                         </li>

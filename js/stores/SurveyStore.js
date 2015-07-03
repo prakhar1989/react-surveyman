@@ -115,8 +115,7 @@ var SurveyStore = Reflux.createStore({
             id: this.getNewId(ItemTypes.BLOCK),
             questions: [],
             subblocks: [],
-            randomizable: true,
-            ordering: false
+            randomize: true
         });
         var newSurvey = survey.splice(0, 0, newBlock);
         this.updateSurveyData(newSurvey, true);
@@ -320,7 +319,7 @@ var SurveyStore = Reflux.createStore({
             let self = this;
             let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
                             .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-            let newSurvey = surveysplice(blockIndex + 1, 0, newBlock);
+            let newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
 
             // update and cache
             this.updateSurveyData(newSurvey, true);

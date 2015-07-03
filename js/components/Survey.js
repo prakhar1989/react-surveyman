@@ -43,8 +43,7 @@ var Survey = React.createClass({
             <Block key={block.get('id')}
                 id={block.get('id')}
                 subblocks={[]}
-                ordering={block.get('ordering')}
-                randomizable={block.get('randomizable')}
+                randomize={block.get('randomize')}
                 questions={block.get('questions')} />
         );
 
@@ -52,7 +51,7 @@ var Survey = React.createClass({
         var blockAnimationTag = (
             <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
                 { blocks }
-            </ReactCSSTransitionGroup>        
+            </ReactCSSTransitionGroup>
         );
 
         return connectDropTarget(

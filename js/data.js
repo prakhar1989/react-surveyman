@@ -2,12 +2,10 @@
 var data = [
     {
         id: "b_10101",
-        randomizable: true,
-        ordering: false,
+        randomize: true,
         questions: [],
         subblocks: []
     }
 ];
-
 
 module.exports = data;
