@@ -13,8 +13,8 @@ var ItemControl = require('./ItemControl');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
-    drop(props, monitor, component) {
-        component.handleBlockDrop()
+    drop(props) {
+        SurveyActions.blockDropped(props.id);
     }
 };
 
@@ -27,9 +27,9 @@ function blockCollect(connect, monitor) {
 }
 
 var questionTarget = {
-      drop(props, monitor, component) {
-          component.handleQuestionDrop();
-      }
+    drop(props) {
+        SurveyActions.toggleModal(ItemTypes.QUESTION, props.id);
+    }
 }
 
 function questionCollect(connect, monitor) {
@@ -44,15 +44,12 @@ var Block = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
         id: React.PropTypes.string.isRequired,
-        questions: React.PropTypes.instanceOf(List),
-        subblocks: React.PropTypes.array.isRequired,
+        questions: React.PropTypes.instanceOf(List).isRequired,
+        subblocks: React.PropTypes.instanceOf(List).isRequired,
         randomize: React.PropTypes.bool.isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
-    },
-    handleBlockDrop() {
-        SurveyActions.blockDropped(this.props.id);
     },
     handleDelete() {
         var deleteConfirmation = confirm("Are you sure you want to delete this block, its associated questions and options?");
@@ -124,6 +121,6 @@ var Block = React.createClass({
 });
 
 module.exports = flow(
-  DropTarget(ItemTypes.BLOCK, blockTarget, blockCollect),
-  DropTarget(ItemTypes.QUESTION, questionTarget, questionCollect)
+  DropTarget(ItemTypes.QUESTION, questionTarget, questionCollect),
+  DropTarget(ItemTypes.BLOCK, blockTarget, blockCollect)
 )(Block);

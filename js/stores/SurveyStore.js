@@ -8,10 +8,11 @@ var AlertTypes = require('../components/AlertTypes');
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
 
-// initialize question and option map which will help in
+// initialize question, option, block maps that will help in
 // faster retrieval of associated blocks and questions.
 var _questionMap = Immutable.Map();     // questionId => blockId
 var _optionMap = Immutable.Map();       // optionId   => questionId
+var _blockMap = Immutable.Map();        // subblockId => blockid
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
@@ -118,17 +119,27 @@ var SurveyStore = Reflux.createStore({
             subblocks: [],
             randomize: true
         });
-        var newSurvey;
 
         if (targetID === undefined) {
             // block is dropped on the survey
-            newSurvey = survey.splice(0, 0, newBlock);
+            let newSurvey = survey.splice(0, 0, newBlock);
+
+            // update and cache
             this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
         } else {
             // block is dropped on another block
-            let blockId = targetID;
-            console.log("block is dropped on another block: id", blockId);
+            let blockIndex = this.getBlockIndex(targetID);
+            let newSurvey = survey.updateIn([blockIndex, 'subblocks'], list =>
+               list.splice(0, 0, newBlock)
+            );
+
+            // update and cache
+            this.updateSurveyData(newSurvey, true);
+
+            // update block map with new subblock
+            _blockMap = _blockMap.set(newBlock.get('id'), targetID);
+            SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
         }
     },
     /**
