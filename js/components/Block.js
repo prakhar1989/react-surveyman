@@ -13,8 +13,12 @@ var ItemControl = require('./ItemControl');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
-    drop(props) {
-        SurveyActions.blockDropped(props.id);
+    drop(props, monitor) {
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+          console.log("dropped on block id: ", props.id);
+          SurveyActions.blockDropped(props.id);
+        }
     }
 };
 
@@ -23,6 +27,7 @@ function blockCollect(connect, monitor) {
         connectBlockDropTarget: connect.dropTarget(),
         canBlockDrop: monitor.canDrop(),
         isBlockOver: monitor.isOver()
+        //isOverCurrent: monitor.isOver({ shallow: true})
     }
 }
 

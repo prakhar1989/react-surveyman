@@ -129,13 +129,27 @@ var SurveyStore = Reflux.createStore({
             SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
         } else {
             // block is dropped on another block
-            let blockIndex = this.getBlockIndex(targetID);
-            let newSurvey = survey.updateIn([blockIndex, 'subblocks'], list =>
-               list.splice(0, 0, newBlock)
-            );
+            let isSubblock = _blockMap.has(targetID);
+            if (isSubblock) { // only handles 2 levels currently
+                let parentBlockIndex = this.getBlockIndex(_blockMap.get(targetID));
+                let blockIndex = this.getBlockIndex(targetID, survey.get(parentBlockIndex));
+                let newSurvey = survey.updateIn(
+                    [parentBlockIndex, 'subblocks', blockIndex, 'subblocks'],
+                    list => list.splice(0, 0, newBlock)
+                );
 
-            // update and cache
-            this.updateSurveyData(newSurvey, true);
+                // update and cache
+                this.updateSurveyData(newSurvey, true);
+            } else {
+                let blockIndex = this.getBlockIndex(targetID);
+                let newSurvey = survey.updateIn([blockIndex, 'subblocks'], list =>
+                   list.splice(0, 0, newBlock)
+                );
+
+                // update and cache
+                this.updateSurveyData(newSurvey, true);
+            }
+
 
             // update block map with new subblock
             _blockMap = _blockMap.set(newBlock.get('id'), targetID);
@@ -260,10 +274,17 @@ var SurveyStore = Reflux.createStore({
     },
     /**
      * Returns the index of the block
-     * @param id - id of the block
+     * @param blockId - id of the block
+     * @param withinBlock (optional) - if provided the it finds the subblock
+     * within the `withinBlock`
      */
-    getBlockIndex(blockId) {
-        return this.data.surveyData.findIndex(b => b.get('id') === blockId);
+    getBlockIndex(blockId, withinBlock) {
+        // find in the survey
+        if (withinBlock === undefined) {
+            return this.data.surveyData.findIndex(b => b.get('id') === blockId);
+        } else {
+            return withinBlock.get('subblocks').findIndex(b => b.get('id') === blockId);
+        }
     },
     /**
      * Returns the index of a question in a block
