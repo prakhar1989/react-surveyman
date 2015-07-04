@@ -102,6 +102,8 @@ var Block = React.createClass({
 
                 { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
 
+                { this.props.children }
+
                 <div className="config-area">
                     <ul>
                         <li>

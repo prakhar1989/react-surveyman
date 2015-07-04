@@ -25,6 +25,21 @@ function collect(connect, monitor) {
     }
 }
 
+function renderSubblocks(block) {
+    var subblocks = block.get('subblocks');
+    if (subblocks.count() > 0) {
+        return subblocks.map(subb =>
+          <Block key={subb.get('id')}
+                 id={subb.get('id')}
+                 subblocks={subb.get('subblocks')}
+                 randomize={subb.get('randomize')}
+                 questions={subb.get('questions')}>
+                   {renderSubblocks(subb)}
+          </Block>
+        )
+    }
+}
+
 var Survey = React.createClass({
     mixins:[PureRenderMixin],
     propTypes: {
@@ -42,13 +57,19 @@ var Survey = React.createClass({
             'hovering': isOverCurrent
         });
 
-        var blocks = survey.map(block =>
-            <Block key={block.get('id')}
-                id={block.get('id')}
-                subblocks={[]}
-                randomize={block.get('randomize')}
-                questions={block.get('questions')} />
-        );
+        var self = this;
+        var blocks = survey.map(block => {
+            var subblocks = block.get('subblocks');
+            return (
+              <Block key={block.get('id')}
+                  id={block.get('id')}
+                  subblocks={block.get('subblocks')}
+                  randomize={block.get('randomize')}
+                  questions={block.get('questions')}>
+                    {renderSubblocks(block)}
+              </Block>
+            );
+        });
 
         // wrapping the blocks in a react transition group
         var blockAnimationTag = (
