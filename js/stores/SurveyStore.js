@@ -273,17 +273,17 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
-     * Returns the index of the block
-     * @param blockId - id of the block
-     * @param withinBlock (optional) - if provided the it finds the subblock
-     * within the `withinBlock`
+     * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.
+     * @param blockId - id of the block who's index is required
+     * @param parentBlock (optional) - The parent block at which to begin the search. If left out, the search starts from the top of the survey
+     * within the `parentBlock`
      */
-    getBlockIndex(blockId, withinBlock) {
+    getBlockIndex(blockId, parentBlock = false) {
         // find in the survey
-        if (withinBlock === undefined) {
+        if (!parentBlock) {
             return this.data.surveyData.findIndex(b => b.get('id') === blockId);
         } else {
-            return withinBlock.get('subblocks').findIndex(b => b.get('id') === blockId);
+            return parentBlock.get('subblocks').findIndex(b => b.get('id') === blockId);
         }
     },
     /**
