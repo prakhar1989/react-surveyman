@@ -21,6 +21,12 @@ module.exports = [
             "id": "b_39562",
             "questions": [],
             "subblocks": [],
+            "randomize": false
+          },
+          {
+            "id": "b_99223",
+            "questions": [],
+            "subblocks": [],
             "randomize": true
           }
         ],

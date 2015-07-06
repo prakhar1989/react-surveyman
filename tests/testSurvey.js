@@ -8,22 +8,39 @@ var survey = Immutable.fromJS(data);
 var _blockMap = Immutable.fromJS({
   "b_41444": "b_90914",
   "b_53209": "b_10101",
-  "b_39562": "b_53209"
+  "b_39562": "b_53209",
+  "b_99223": "b_53209"
 });
 
-function getBlockIndex(blockId, parentBlock = survey, path = []) {
-    var isSubblock = _blockMap.has(blockId);
-    if (!isSubblock) {
-        let index = parentBlock.findIndex(b => b.get('id') === blockId);
-        return path.concat(index);
-    }
+function getPath(blockID) {
+    var getIDsList = (id, path = []) => {
+      if (!_blockMap.has(id)) {
+        return path.concat([id]).reverse()
+      }
+      return getIDsList(_blockMap.get(id), path.concat([id]));
+    };
+
+    var [rootID, ...restIDs] = getIDsList(blockID);
+    var path = [survey.findIndex(b => b.get('id') === rootID)];
+
+    return restIDs.reduce((path, id) => {
+      let index = survey.getIn(path.concat(['subblocks']))
+                      .findIndex(b => b.get('id') === id);
+      return path.concat(['subblocks', index]);
+    }, path);
 }
 
-// test cases
-describe('Immutable', function() {
-  describe("get()", function() {
-    it("should return the block index of top block correctly", function() {
-      assert.equal(survey.getIn([0, 'id']), "b_10101");
-    });
+describe("getPath", function() {
+  it("should return the index paths correctly", function() {
+    assert.deepEqual(getPath('b_10101'), [0]);
+    assert.deepEqual(getPath('b_90914'), [1]);
+    assert.deepEqual(getPath('b_41444'), [1, 'subblocks', 0]);
+    assert.deepEqual(getPath('b_53209'), [0, 'subblocks', 0]);
+    assert.deepEqual(getPath('b_39562'), [0, 'subblocks', 0, 'subblocks', 0]);
+    assert.deepEqual(getPath('b_99223'), [0, 'subblocks', 0, 'subblocks', 1]);
+  });
+  it("should get the correct block", function() {
+    var block = survey.getIn(getPath('b_39562'))
+    assert(!block.get('randomize'));
   });
 });
