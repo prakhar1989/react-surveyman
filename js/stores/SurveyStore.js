@@ -105,14 +105,14 @@ var SurveyStore = Reflux.createStore({
         }
         return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`
     },
-    getBlockPath(blockID, survey, _blockMap) {
+    getBlockPath(blockID, survey, blockMap = _blockMap) {
         // function that returns a chain of IDs from the root block
         // to the block with id - id
         var getIDsList = function getIDsList(id, path = []) {
-            if (!_blockMap.has(id)) {
+            if (!blockMap.has(id)) {
                 return path.concat([id]).reverse()
             }
-            return getIDsList(_blockMap.get(id), path.concat([id]));
+            return getIDsList(blockMap.get(id), path.concat([id]));
         };
 
         // function that returns the index of block id within the list of blocks
@@ -153,7 +153,7 @@ var SurveyStore = Reflux.createStore({
             this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
         } else {
-            let blockPath = this.getBlockPath(targetID, survey, _blockMap);
+            let blockPath = this.getBlockPath(targetID, survey)
             let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
                 list => list.splice(0, 0, newBlock)
             );
@@ -314,8 +314,10 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a block is toggled
         if (itemType === ItemTypes.BLOCK) {
-            let index = this.getBlockIndex(itemId);
-            let newSurvey = survey.update(index, b => b.set(toggleName, !b.get(toggleName)));
+            let blockPath = this.getBlockPath(itemId, survey);
+            let newSurvey = survey.updateIn(blockPath,
+                b => b.set(toggleName, !b.get(toggleName))
+            );
             this.updateSurveyData(newSurvey);
         }
 
@@ -430,13 +432,13 @@ var SurveyStore = Reflux.createStore({
 
         // handle block delete
         if (itemType === ItemTypes.BLOCK) {
-            let index = this.getBlockIndex(itemId);
-            let newSurvey = survey.delete(index);
+            let blockPath = this.getBlockPath(itemId, survey);
+            let newSurvey = survey.deleteIn(blockPath);
 
             this.updateSurveyData(newSurvey, true);
 
             // delete the mapping of question and options
-            survey.getIn([index, 'questions']).forEach(q => {
+            survey.getIn([...blockPath, 'questions']).forEach(q => {
                 _questionMap = _questionMap.delete(q.get('id'));
                 q.get('options').forEach(o => {
                     _optionMap = _optionMap.delete(o.get('id'))
