@@ -54,5 +54,32 @@ describe("getBlockPath", function() {
   it("should delete the block correctly", function() {
       var newSurvey = this.survey.deleteIn(getBlockPath('b_10101', this.survey, this._blockMap));
       assert(this.survey.count(), newSurvey.count() + 1);
-  })
+  });
+  it("should edit the block correctly", function() {
+      var blockPath = getBlockPath('b_99223', this.survey, this._blockMap);
+      var newSurvey = this.survey.updateIn(blockPath,
+          b => b.set('hello', 'world')
+      );
+      var newBlock = newSurvey.getIn(getBlockPath('b_99223', newSurvey, this._blockMap));
+      assert(newBlock.get('hello'), 'world');
+  });
+  it("should add a subblock correctly", function() {
+      var block = Immutable.fromJS({
+          id: 'b_00000',
+          subblocks: [],
+          questions: [],
+          randomize: false
+      });
+      var blockPath = getBlockPath('b_41444', this.survey, this._blockMap);
+
+      // add new subblock
+      var newSurvey = this.survey.updateIn(blockPath.concat(['subblocks']),
+          list => [block, ...list]
+      );
+
+      // update the blockMap
+      this._blockMap = this._blockMap.set('b_00000', 'b_41444');
+      var newBlockPath = getBlockPath('b_00000', newSurvey, this._blockMap);
+      assert.deepEqual(blockPath.concat(['subblocks', 0]), newBlockPath);
+  });
 });
