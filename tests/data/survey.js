@@ -5,9 +5,9 @@ module.exports = [
     "questions": [
       {
         "id": "q_7806",
-        "qtext": "asdasdsd",
+        "qtext": "First question?",
         "options": [],
-        "ordering": false,
+        "ordering": true,
         "freetext": false,
         "exclusive": false
       }
@@ -25,7 +25,24 @@ module.exports = [
           },
           {
             "id": "b_99223",
-            "questions": [],
+            "questions": [
+                {
+                  "id": "q_7332",
+                  "qtext": "Second question?",
+                  "options": [],
+                  "ordering": true,
+                  "freetext": false,
+                  "exclusive": false
+                },
+                {
+                  "id": "q_9410",
+                  "qtext": "Third question?",
+                  "options": [],
+                  "ordering": true,
+                  "freetext": true,
+                  "exclusive": true
+                }
+            ],
             "subblocks": [],
             "randomize": true
           }
