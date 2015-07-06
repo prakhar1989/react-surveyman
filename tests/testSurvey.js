@@ -73,8 +73,8 @@ describe("getBlockPath", function() {
       var blockPath = getBlockPath('b_41444', this.survey, this._blockMap);
 
       // add new subblock
-      var newSurvey = this.survey.updateIn(blockPath.concat(['subblocks']),
-          list => [block, ...list]
+      var newSurvey = this.survey.updateIn([...blockPath, 'subblocks'],
+          list => list.splice(0, 0, block)
       );
 
       // update the blockMap

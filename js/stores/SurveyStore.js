@@ -105,6 +105,31 @@ var SurveyStore = Reflux.createStore({
         }
         return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`
     },
+    getBlockPath(blockID, survey, _blockMap) {
+        // function that returns a chain of IDs from the root block
+        // to the block with id - id
+        var getIDsList = function getIDsList(id, path = []) {
+            if (!_blockMap.has(id)) {
+                return path.concat([id]).reverse()
+            }
+            return getIDsList(_blockMap.get(id), path.concat([id]));
+        };
+
+        // function that returns the index of block id within the list of blocks
+        var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
+
+        // initialize path with index of root node
+        var [rootID, ...restIDs] = getIDsList(blockID);
+        var path = [getIndex(rootID, survey)];
+
+        // reduce over the rest of ids by finding id at each level
+        // and changing path accordingly
+        return restIDs.reduce((path, id) => {
+            var path = path.concat(['subblocks']);
+            var index = getIndex(id, survey.getIn(path));
+            return path.concat([index]);
+        }, path);
+    },
     /**
      * Runs when the blockDropped action is called by the view.
      * Adds a new block to the end of the survey object.
@@ -128,28 +153,11 @@ var SurveyStore = Reflux.createStore({
             this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
         } else {
-            // block is dropped on another block
-            let isSubblock = _blockMap.has(targetID);
-            if (isSubblock) { // only handles 2 levels currently
-                let parentBlockIndex = this.getBlockIndex(_blockMap.get(targetID));
-                let blockIndex = this.getBlockIndex(targetID, survey.get(parentBlockIndex));
-                let newSurvey = survey.updateIn(
-                    [parentBlockIndex, 'subblocks', blockIndex, 'subblocks'],
-                    list => list.splice(0, 0, newBlock)
-                );
-
-                // update and cache
-                this.updateSurveyData(newSurvey, true);
-            } else {
-                let blockIndex = this.getBlockIndex(targetID);
-                let newSurvey = survey.updateIn([blockIndex, 'subblocks'], list =>
-                   list.splice(0, 0, newBlock)
-                );
-
-                // update and cache
-                this.updateSurveyData(newSurvey, true);
-            }
-
+            let blockPath = this.getBlockPath(targetID, survey, _blockMap);
+            let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
+                list => list.splice(0, 0, newBlock)
+            );
+            this.updateSurveyData(newSurvey, true);
 
             // update block map with new subblock
             _blockMap = _blockMap.set(newBlock.get('id'), targetID);
