@@ -130,6 +130,11 @@ var SurveyStore = Reflux.createStore({
             return path.concat([index]);
         }, path);
     },
+    getQuestionPath(questionID, survey, questionMap = _questionMap) {
+        var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
+        var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
+        return [...blockPath, 'questions', index];
+    },
     /**
      * Runs when the blockDropped action is called by the view.
      * Adds a new block to the end of the survey object.
@@ -325,11 +330,9 @@ var SurveyStore = Reflux.createStore({
 
         // handle the case when a param on a question is toggled
         else if (itemType === ItemTypes.QUESTION) {
-            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
-            let block = survey.get(blockIndex);
-            let index = this.getQuestionIndex(itemId, block);
-            let newSurvey = survey.updateIn([blockIndex, 'questions', index], q =>
-                q.set(toggleName, !q.get(toggleName))
+            let questionPath = this.getQuestionPath(itemId, survey);
+            let newSurvey = survey.updateIn(questionPath,
+                q => q.set(toggleName, !q.get(toggleName))
             );
             this.updateSurveyData(newSurvey);
         }
@@ -452,19 +455,17 @@ var SurveyStore = Reflux.createStore({
 
         // handle question delete
         else if (itemType === ItemTypes.QUESTION) {
-            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
-            let block = survey.get(blockIndex);
-            let index = this.getQuestionIndex(itemId, block);
-            let newSurvey = survey.deleteIn([blockIndex, 'questions', index]);
+            let questionPath = this.getQuestionPath(itemId, survey);
+            let newSurvey = survey.deleteIn(questionPath);
 
             // update and cache
             this.updateSurveyData(newSurvey, true);
 
             // delete the mapping of the question and its options
             _questionMap = _questionMap.delete(itemId);
-            block.getIn(['questions', index, 'options']).forEach(o =>
+            survey.getIn([...questionPath, 'options']).forEach(o => {
                 _optionMap = _optionMap.delete(o.get('id'))
-            );
+            });
 
             SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
         }
