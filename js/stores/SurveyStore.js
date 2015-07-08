@@ -226,16 +226,13 @@ var SurveyStore = Reflux.createStore({
         });
 
         var survey = this.data.surveyData;
-        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
-        var block = survey.get(blockIndex);
-        var index = this.getQuestionIndex(questionId, block);
-        var newSurvey = survey.updateIn(
-            [blockIndex, 'questions', index, 'options'],
+        var questionPath = this.getQuestionPath(questionId, survey);
+        var newSurvey = survey.updateIn([...questionPath, 'options'],
             list => list.push(newOption)
         );
 
         // update the option map and options set
-        _optionMap = _optionMap.set(newOption.get('id'), block.getIn(['questions', index, 'id']));
+        _optionMap = _optionMap.set(newOption.get('id'), questionId);
         _optionsSet = _optionsSet.add(otext);
 
         this.updateSurveyData(newSurvey, true);
@@ -472,13 +469,11 @@ var SurveyStore = Reflux.createStore({
 
         // handle option delete
         else if (itemType === ItemTypes.OPTION) {
-            let questionId = _optionMap.get(itemId);
-            let blockIndex = this.getBlockIndex(_questionMap.get(questionId));
-            let block = survey.get(blockIndex);
-            let quesIndex = this.getQuestionIndex(questionId, block);
-            let options = block.getIn(['questions', quesIndex, 'options']);
-            let optionIndex = options.findIndex(op => op.get('id') === itemId);
-            let newSurvey = survey.deleteIn([blockIndex, 'questions', quesIndex, 'options', optionIndex]);
+            let questionPath = this.getQuestionPath(_optionMap.get(itemId), survey);
+            let index = survey.getIn([...questionPath, 'options'])
+                              .findIndex(op => op.get('id') === itemId);
+
+            let newSurvey = survey.deleteIn([...questionPath, 'options', index]);
 
             // delete the mapping
             _optionMap = _optionMap.delete(itemId);
@@ -497,12 +492,8 @@ var SurveyStore = Reflux.createStore({
      */
     onSaveEditText(text, questionId) {
         var survey = this.data.surveyData;
-        var blockIndex = this.getBlockIndex(_questionMap.get(questionId));
-        var block = survey.get(blockIndex);
-        var index = this.getQuestionIndex(questionId, block);
-        var newSurvey = survey.updateIn([blockIndex, 'questions', index], q =>
-            q.set('qtext', text)
-        );
+        var path = this.getQuestionPath(questionId, survey);
+        var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
         this.updateSurveyData(newSurvey, true);
     },
     /**
@@ -527,6 +518,7 @@ var SurveyStore = Reflux.createStore({
     onScrollToItem(id) {
         window.location.hash = id;
     },
+    // called when a new optiongroup is selected as the default in the optionlist selectbox
     onUpdateOptionGroup(id) {
         this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
         this.trigger(this.data);

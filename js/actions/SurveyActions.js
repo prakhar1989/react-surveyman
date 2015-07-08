@@ -15,8 +15,8 @@ var SurveyActions = Reflux.createActions([
     "saveEditText",                 // when question text is changed
     "undoSurvey",                   // when the undo button is clicked
     "scrollToItem",                 // when an item needs to be scrolled to
-    "updateOptionGroup",            // when an option group is changed
-    "addOptionGroup",               // when an option group is changed
+    "updateOptionGroup",            // when the default option group is changed
+    "addOptionGroup",               // when an option group is added to the list
     "moveQuestion",                 // when a question is moved in the treeview
     "reorderItem"                   // when an item is reordered in the treeview
 ]);
