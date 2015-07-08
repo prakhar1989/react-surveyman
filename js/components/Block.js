@@ -16,7 +16,6 @@ var blockTarget = {
     drop(props, monitor) {
         let droppedOnChild = !monitor.isOver({shallow: false});
         if (!droppedOnChild) {
-          console.log("dropped on block id: ", props.id);
           SurveyActions.blockDropped(props.id);
         }
     }
@@ -32,8 +31,11 @@ function blockCollect(connect, monitor) {
 }
 
 var questionTarget = {
-    drop(props) {
-        SurveyActions.toggleModal(ItemTypes.QUESTION, props.id);
+    drop(props, monitor) {
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+            SurveyActions.toggleModal(ItemTypes.QUESTION, props.id);
+        }
     }
 }
 

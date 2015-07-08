@@ -28,14 +28,21 @@ function getBlockPath(blockID, survey, _blockMap) {
     }, path);
 }
 
+function getQuestionPath(questionID, survey, _blockMap, _questionMap) {
+    var blockPath = getBlockPath(_questionMap.get(questionID), survey, _blockMap);
+    var index = survey.getIn([...blockPath, 'questions'])
+                      .findIndex(q => q.get('id') === questionID);
+    return [...blockPath, 'questions', index];
+}
+
 describe("getBlockPath", function() {
   beforeEach(function() {
       this.survey = Immutable.fromJS(data);
       this._blockMap = Immutable.fromJS({
-        "b_41444": "b_90914",
-        "b_53209": "b_10101",
-        "b_39562": "b_53209",
-        "b_99223": "b_53209"
+          "b_41444": "b_90914",
+          "b_53209": "b_10101",
+          "b_39562": "b_53209",
+          "b_99223": "b_53209"
       });
   });
 
@@ -82,4 +89,39 @@ describe("getBlockPath", function() {
       var newBlockPath = getBlockPath('b_00000', newSurvey, this._blockMap);
       assert.deepEqual(blockPath.concat(['subblocks', 0]), newBlockPath);
   });
+});
+
+describe("getQuestionPath", function() {
+    beforeEach(function() {
+        this.survey = Immutable.fromJS(data);
+        this._blockMap = Immutable.fromJS({
+            "b_41444": "b_90914",
+            "b_53209": "b_10101",
+            "b_39562": "b_53209",
+            "b_99223": "b_53209"
+        });
+        this._questionMap = Immutable.fromJS({
+            "q_74906" : "b_10101",
+            "q_96482": "b_39562",
+            "q_7332" : "b_99223",
+            "q_9410" : "b_99223",
+            "q_7806" : "b_90914"
+        });
+    });
+
+    it ("should return the index path correctly", function() {
+        var ids = ["q_7806", "q_96482", "q_7332", "q_9410", "q_7806"];
+        var texts = {
+          "q_7806" : "q1",
+          "q_96482": "q2",
+          "q_7332" : "q3",
+          "q_9410" : "q4",
+          "q_74906" : "q5"
+        };
+
+        for (let id of ids) {
+            var path = getQuestionPath(id, this.survey, this._blockMap, this._questionMap);
+            assert.equal(this.survey.getIn([...path, 'qtext']), texts[id]);
+        }
+    });
 });

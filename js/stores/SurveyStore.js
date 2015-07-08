@@ -182,6 +182,8 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
+        var survey = this.data.surveyData;
+
         var newQuestion = Immutable.fromJS({
             id: this.getNewId(ItemTypes.QUESTION),
             qtext: questionObj.qtext,
@@ -191,16 +193,16 @@ var SurveyStore = Reflux.createStore({
             exclusive: questionObj.exclusive
         });
 
-        var index = this.getBlockIndex(questionObj.parentID);
-        var newSurvey = this.data.surveyData.updateIn([index, 'questions'], list =>
-            list.splice(0, 0, newQuestion)
+        var blockPath = this.getBlockPath(questionObj.parentID, survey);
+        var newSurvey = survey.updateIn([...blockPath, 'questions'],
+            list => list.splice(0, 0, newQuestion)
         );
 
         // update and cache
         this.updateSurveyData(newSurvey, true);
 
         // update question map with new question
-        var block = this.data.surveyData.get(index);
+        var block = survey.getIn(blockPath);
         _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
         SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);

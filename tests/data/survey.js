@@ -4,8 +4,8 @@ module.exports = [
     "randomize": true,
     "questions": [
       {
-        "id": "q_7806",
-        "qtext": "First question?",
+        "id": "q_74906",
+        "qtext": "q5",
         "options": [],
         "ordering": true,
         "freetext": false,
@@ -19,7 +19,19 @@ module.exports = [
         "subblocks": [
           {
             "id": "b_39562",
-            "questions": [],
+            "questions": [
+              {
+                "id": "q_96482",
+                "qtext": "q2",
+                "options": [
+                  { "id": "o_64877", "otext": "answer_one" },
+                  { "id": "o_41312", "otext": "answer_two" }
+                ],
+                "ordering": false,
+                "freetext": false,
+                "exclusive": false
+              }
+            ],
             "subblocks": [],
             "randomize": false
           },
@@ -28,7 +40,7 @@ module.exports = [
             "questions": [
                 {
                   "id": "q_7332",
-                  "qtext": "Second question?",
+                  "qtext": "q3",
                   "options": [],
                   "ordering": true,
                   "freetext": false,
@@ -36,7 +48,7 @@ module.exports = [
                 },
                 {
                   "id": "q_9410",
-                  "qtext": "Third question?",
+                  "qtext": "q4",
                   "options": [],
                   "ordering": true,
                   "freetext": true,
@@ -57,7 +69,7 @@ module.exports = [
     "questions": [
       {
         "id": "q_7806",
-        "qtext": "asdasdsd",
+        "qtext": "q1",
         "options": [],
         "ordering": false,
         "freetext": false,
