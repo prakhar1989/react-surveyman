@@ -51,7 +51,8 @@ var Block = React.createClass({
         id: React.PropTypes.string.isRequired,
         questions: React.PropTypes.instanceOf(List).isRequired,
         subblocks: React.PropTypes.instanceOf(List).isRequired,
-        randomize: React.PropTypes.bool.isRequired
+        randomize: React.PropTypes.bool.isRequired,
+        isFirst: React.PropTypes.bool.isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
@@ -71,12 +72,15 @@ var Block = React.createClass({
               isOverChild,
               connectQuestionDropTarget,
               connectBlockDropTarget,
+              isFirst,
               subblocks } = this.props;
 
         var classes = cx({
             'item block': true,
-            'hovering': (isQuestionOver && !isOverChild) || isBlockOver
+            'hovering': (isQuestionOver && !isOverChild) || isBlockOver,
+            'first': isFirst
         });
+
 
         // render questions
         var questions = this.props.questions.map(q =>
