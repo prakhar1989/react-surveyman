@@ -24,9 +24,7 @@ var blockTarget = {
 function blockCollect(connect, monitor) {
     return {
         connectBlockDropTarget: connect.dropTarget(),
-        canBlockDrop: monitor.canDrop(),
-        isBlockOver: monitor.isOver()
-        //isOverCurrent: monitor.isOver({ shallow: true})
+        isBlockOver: monitor.isOver({shallow: true})
     }
 }
 
@@ -42,8 +40,8 @@ var questionTarget = {
 function questionCollect(connect, monitor) {
     return {
         connectQuestionDropTarget: connect.dropTarget(),
-        canQuestionDrop: monitor.canDrop(),
-        isQuestionOver: monitor.isOver()
+        isQuestionOver: monitor.isOver(),
+        isOverChild: monitor.isOver({shallow: true})
     }
 }
 
@@ -68,15 +66,16 @@ var Block = React.createClass({
         SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
     },
     render() {
-        var { canQuestionDrop,
-              isQuestionOver,
+        var { isQuestionOver,
+              isBlockOver,
+              isOverChild,
               connectQuestionDropTarget,
-              connectBlockDropTarget } = this.props;
+              connectBlockDropTarget,
+              subblocks } = this.props;
 
         var classes = cx({
             'item block': true,
-            'dragging': canQuestionDrop,
-            'hovering': isQuestionOver
+            'hovering': (isQuestionOver && !isOverChild) || isBlockOver
         });
 
         // render questions
@@ -96,6 +95,7 @@ var Block = React.createClass({
                 { questions }
             </ReactCSSTransitionGroup>
         );
+        var help = subblocks.count() > 0 ? null : <HelpText itemType="Question" />;
 
         return connectBlockDropTarget(connectQuestionDropTarget(
             <div className={classes} id={this.props.id}>
@@ -107,7 +107,7 @@ var Block = React.createClass({
                     </ul>
                 </div>
 
-                { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
+                { questions.count() > 0 ? questionAnimationTag :  help }
 
                 { this.props.children }
 
