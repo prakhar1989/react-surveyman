@@ -394,15 +394,19 @@ var SurveyStore = Reflux.createStore({
             let blockIndex = blockPath[blockPath.length - 1];
             let newBlock = this.cloneBlock(survey.getIn(blockPath));
             let newSurvey;
-            if (_blockMap.has(itemId)) {
-                console.log("This is a subblock")
-                return;
-            } else {
+            if (_blockMap.has(itemId)) { // if subblock, append in parent
+                let parentId = _blockMap.get(itemId);
+                let parentblockPath = this.getBlockPath(parentId, survey);
+                newSurvey = survey.updateIn([...parentblockPath, 'subblocks'],
+                    list => list.splice(blockIndex + 1, 0, newBlock)
+                );
+                _blockMap = _blockMap.set(newBlock.get('id'), parentId);
+            } else { // else simply put in survey array
                 newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
             }
 
-            // update and cache
-            this.updateSurveyData(newSurvey, true);
+            // update
+            this.updateSurveyData(newSurvey, false);
 
             // alert and focus
             SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
@@ -421,7 +425,7 @@ var SurveyStore = Reflux.createStore({
             this.updateSurveyData(newSurvey, false);
 
             // update the _questionMap
-            _questionMap = _questionMap.set(newQuestion.get('id'), _blockMap.get(itemId));
+            _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
 
             // alert and focus
             SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
