@@ -340,8 +340,8 @@ var SurveyStore = Reflux.createStore({
         }
     },
     /**
-     * Returns a clone of Question with new ID of itself
-     * and all options.
+     * Returns a clone of Question passed as a parameter.
+     * Updates _optionMap with all new options
      * @param question - type of Immutable.Map. The question to be cloned
      */
     cloneQuestion(question) {
@@ -362,6 +362,11 @@ var SurveyStore = Reflux.createStore({
         });
         return newQuestion;
     },
+    /**
+     * Returns a clone of Block passed as a parameter.
+     * Updates _blockMap and _questionMap with the new subblocks and questions
+     * @param block - type of Immutable.Map. The block to be cloned.
+     */
     cloneBlock(block) {
         var self = this;
         var newBlock = block
@@ -420,12 +425,10 @@ var SurveyStore = Reflux.createStore({
             let newSurvey = survey.updateIn(questionPath.slice(0, -1),
                 list => list.splice(questionIndex + 1, 0, newQuestion)
             );
+            _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
 
             // update and cache
             this.updateSurveyData(newSurvey, false);
-
-            // update the _questionMap
-            _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
 
             // alert and focus
             SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
