@@ -28,9 +28,10 @@ function collect(connect, monitor) {
 function renderSubblocks(block) {
     var subblocks = block.get('subblocks');
     if (subblocks.count() > 0) {
-        return subblocks.map(subb =>
+        return subblocks.map((subb, i) =>
           <Block key={subb.get('id')}
                  id={subb.get('id')}
+                 isFirst={i==0}
                  subblocks={subb.get('subblocks')}
                  randomize={subb.get('randomize')}
                  questions={subb.get('questions')}>
@@ -58,11 +59,12 @@ var Survey = React.createClass({
         });
 
         var self = this;
-        var blocks = survey.map(block => {
+        var blocks = survey.map((block, i) => {
             var subblocks = block.get('subblocks');
             return (
               <Block key={block.get('id')}
                   id={block.get('id')}
+                  isFirst={i==0}
                   subblocks={block.get('subblocks')}
                   randomize={block.get('randomize')}
                   questions={block.get('questions')}>

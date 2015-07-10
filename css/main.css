@@ -144,15 +144,16 @@ div.item.block {
   border: 2px solid #EFAA1F;
   color: #EFAA1F;
   position: relative;
-  margin-bottom: 25px;
+  margin-top: 25px;
   padding: 0 30px;
   min-height: 40px;
 }
-
+div.item.block.first {
+    margin-top: 0;
+}
 div.item.block:last-child {
     margin-bottom: 0;
 }
-
 div.item.block:after {
     position: absolute;
     font-size: 10px;
