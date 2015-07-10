@@ -4,9 +4,9 @@
   "description": "React Surveyman is a browser-based survey builder meant to be used with SurveyMan.",
   "main": "./lib/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 8090",
-    "build": "gulp && webpack -p"
+    "build": "gulp && webpack -p",
+    "test": "mocha --compilers js:babel/register tests"
   },
   "author": "Prakhar Srivastav",
   "license": "MIT",
@@ -31,5 +31,8 @@
     "reflux": "^0.2.7",
     "webpack": "^1.9.7",
     "webpack-dev-server": "^1.8.2"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5"
   }
 }

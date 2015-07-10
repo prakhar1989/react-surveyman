@@ -1,7 +1,7 @@
 React-Surveyman
 ===
 
-React-surveyman is a survey building tool for the [Surveyman](https://github.com/SurveyMan/SurveyMan) project. The key idea is to build a drag-and-drop web interface where users generate instances of the types in the SurveyMan language, and combine them to form surveys. The system will use visual cues, like shape and color, to indicate types and legal operations. Once completed, the surveys will be exported to json which can then be fed into the Java program to build a live survey.
+React-surveyman is a survey building tool for the [Surveyman](http://surveyman.github.io/) project. The idea is to build a drag-and-drop web interface where users generate instances of the types in the SurveyMan language, and combine them to form surveys. The system will use visual cues, like shape and color, to indicate types and legal operations. Once completed, the surveys will be exported to json which can then be fed into the Java program to build a live survey.
 
 React-surveyman is an accepted project in [GSOC 2015](https://www.google-melange.com/gsoc/homepage/google/gsoc2015) under the [Plasma@UMass](http://plasma.cs.umass.edu/) group.
 
@@ -20,4 +20,10 @@ In order to start the project locally -
 $ npm install 
 $ npm run start 
 # open localhost:8090 in your browser
+```
+
+### Tests
+The test suite has it stands is pretty sparse right now and is primarily built for purpose of testing the flux stores.
+```
+$ npm run test
 ```

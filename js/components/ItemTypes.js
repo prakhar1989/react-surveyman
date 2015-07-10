@@ -4,8 +4,7 @@ var ItemTypes = {
     OPTION: 'option',
     OPTIONGROUP: 'optiongroup',
     QUESTIONNODE: 'questionnode',
-    BLOCKNODE: 'blocknode',
-    SUBBLOCK: 'subblock'
+    BLOCKNODE: 'blocknode'
 };
 
 module.exports = ItemTypes;

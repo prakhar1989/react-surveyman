@@ -4,6 +4,7 @@ var Question = require('./Question');
 var SurveyActions = require('../actions/SurveyActions');
 var HelpText = require('./HelpText');
 var ToggleParam = require('./ToggleParam');
+var flow = require('lodash/function/flow');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
@@ -12,16 +13,37 @@ var ItemControl = require('./ItemControl');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var blockTarget = {
-    drop(props, monitor, component) {
-        component.handleQuestionDrop();
+    drop(props, monitor) {
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+          SurveyActions.blockDropped(props.id);
+        }
     }
 };
 
-function collect(connect, monitor) {
+function blockCollect(connect, monitor) {
     return {
-        connectDropTarget: connect.dropTarget(),
-        canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        connectBlockDropTarget: connect.dropTarget(),
+        canBlockDrop: monitor.canDrop(),
+        isBlockOver: monitor.isOver()
+        //isOverCurrent: monitor.isOver({ shallow: true})
+    }
+}
+
+var questionTarget = {
+    drop(props, monitor) {
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+            SurveyActions.toggleModal(ItemTypes.QUESTION, props.id);
+        }
+    }
+}
+
+function questionCollect(connect, monitor) {
+    return {
+        connectQuestionDropTarget: connect.dropTarget(),
+        canQuestionDrop: monitor.canDrop(),
+        isQuestionOver: monitor.isOver()
     }
 }
 
@@ -29,10 +51,9 @@ var Block = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
         id: React.PropTypes.string.isRequired,
-        questions: React.PropTypes.instanceOf(List),
-        subblocks: React.PropTypes.array.isRequired,
-        randomizable: React.PropTypes.bool.isRequired,
-        ordering: React.PropTypes.bool.isRequired
+        questions: React.PropTypes.instanceOf(List).isRequired,
+        subblocks: React.PropTypes.instanceOf(List).isRequired,
+        randomize: React.PropTypes.bool.isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
@@ -47,11 +68,15 @@ var Block = React.createClass({
         SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
     },
     render() {
-        var { canDrop, isOver, connectDropTarget } = this.props;
+        var { canQuestionDrop,
+              isQuestionOver,
+              connectQuestionDropTarget,
+              connectBlockDropTarget } = this.props;
+
         var classes = cx({
             'item block': true,
-            'dragging': canDrop,
-            'hovering': isOver
+            'dragging': canQuestionDrop,
+            'hovering': isQuestionOver
         });
 
         // render questions
@@ -72,43 +97,39 @@ var Block = React.createClass({
             </ReactCSSTransitionGroup>
         );
 
-        return connectDropTarget(
+        return connectBlockDropTarget(connectQuestionDropTarget(
             <div className={classes} id={this.props.id}>
                 <div className="controls-area">
                     <ul>
                       <li><ItemControl icon="ion-trash-b" helpText="Delete this block" handleClick={this.handleDelete}/></li>
                       <li><ItemControl icon="ion-plus-circled" helpText="Add a question" handleClick={this.handleQuestionDrop}/></li>
                       <li><ItemControl icon="ion-ios-copy" helpText="Clone this block" handleClick={this.handleCopy}/></li>
-                    </ul>  
+                    </ul>
                 </div>
 
                 { questions.count() > 0 ? questionAnimationTag : <HelpText itemType="Question" /> }
+
+                { this.props.children }
 
                 <div className="config-area">
                     <ul>
                         <li>
                             <ToggleParam
                                 icon="ion-shuffle"
-                                helpText="Toggles whether questions are randomized"
-                                toggleValue={this.props.ordering}
-                                toggleName='ordering'
-                                itemType={ItemTypes.BLOCK}
-                                itemId={this.props.id} />
-                        </li>
-                        <li>
-                            <ToggleParam
-                                icon="ion-arrow-swap"
-                                helpText="Toggles whether questions are ordered"
-                                toggleValue={this.props.randomizable}
-                                toggleName='randomizable'
+                                helpText="Toggles whether questions will be randomized"
+                                toggleValue={this.props.randomize}
+                                toggleName='randomize'
                                 itemType={ItemTypes.BLOCK}
                                 itemId={this.props.id} />
                         </li>
                     </ul>
                 </div>
             </div>
-        )
+        ))
     }
 });
 
-module.exports = DropTarget(ItemTypes.QUESTION, blockTarget, collect)(Block);
+module.exports = flow(
+  DropTarget(ItemTypes.QUESTION, questionTarget, questionCollect),
+  DropTarget(ItemTypes.BLOCK, blockTarget, blockCollect)
+)(Block);

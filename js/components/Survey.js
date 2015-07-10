@@ -11,15 +11,32 @@ var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 
 var surveyTarget = {
     drop(props, monitor, component) {
-        component.handleBlockDrop();
+        let droppedOnChild = !monitor.isOver({ shallow: true });
+        if (!droppedOnChild) {
+            component.handleBlockDrop();
+        }
     }
 };
 
 function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
-        canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        isOverCurrent: monitor.isOver({ shallow: true })
+    }
+}
+
+function renderSubblocks(block) {
+    var subblocks = block.get('subblocks');
+    if (subblocks.count() > 0) {
+        return subblocks.map(subb =>
+          <Block key={subb.get('id')}
+                 id={subb.get('id')}
+                 subblocks={subb.get('subblocks')}
+                 randomize={subb.get('randomize')}
+                 questions={subb.get('questions')}>
+                   {renderSubblocks(subb)}
+          </Block>
+        )
     }
 }
 
@@ -32,27 +49,33 @@ var Survey = React.createClass({
         SurveyActions.blockDropped();
     },
     render() {
-        var { survey, canDrop, isOver, connectDropTarget } = this.props;
+        var { survey, isOverCurrent, connectDropTarget } = this.props;
+
         var classes = cx({
             'survey': true,
-            'dragging': canDrop,
-            'hovering': isOver
+            'dragging': isOverCurrent,
+            'hovering': isOverCurrent
         });
 
-        var blocks = survey.map(block =>
-            <Block key={block.get('id')}
-                id={block.get('id')}
-                subblocks={[]}
-                ordering={block.get('ordering')}
-                randomizable={block.get('randomizable')}
-                questions={block.get('questions')} />
-        );
+        var self = this;
+        var blocks = survey.map(block => {
+            var subblocks = block.get('subblocks');
+            return (
+              <Block key={block.get('id')}
+                  id={block.get('id')}
+                  subblocks={block.get('subblocks')}
+                  randomize={block.get('randomize')}
+                  questions={block.get('questions')}>
+                    {renderSubblocks(block)}
+              </Block>
+            );
+        });
 
         // wrapping the blocks in a react transition group
         var blockAnimationTag = (
             <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
                 { blocks }
-            </ReactCSSTransitionGroup>        
+            </ReactCSSTransitionGroup>
         );
 
         return connectDropTarget(
