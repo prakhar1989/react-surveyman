@@ -70,7 +70,10 @@ module.exports = [
       {
         "id": "q_7806",
         "qtext": "q1",
-        "options": [],
+        "options": [
+            {'id': 'o_144', 'otext': "Yes"},
+            {'id': 'o_554', 'otext': "No"}
+        ],
         "ordering": false,
         "freetext": false,
         "exclusive": false

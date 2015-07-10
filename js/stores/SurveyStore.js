@@ -346,7 +346,7 @@ var SurveyStore = Reflux.createStore({
      */
     cloneQuestion(question) {
         var self = this;
-        return question
+        var newQuestion = question
                 .set('id', self.getNewId(ItemTypes.QUESTION)) // generate new ID
                 .update('options', (list) =>                  // do the same for all options
                             list.map(
@@ -356,6 +356,28 @@ var SurveyStore = Reflux.createStore({
                                 })
                             )
                         );
+        var qId = newQuestion.get('id');
+        newQuestion.get('options').forEach(o => {
+            _optionMap = _optionMap.set(o.get('id'), qId)
+        });
+        return newQuestion;
+    },
+    cloneBlock(block) {
+        var self = this;
+        var newBlock = block
+            .set('id', self.getNewId(ItemTypes.BLOCK))
+            .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
+            .update('subblocks', (list) => list.map(blk => self.cloneBlock(blk)));
+
+        var blockId = newBlock.get('id');
+
+        newBlock.get('questions').forEach(q => {
+            _questionMap = _questionMap.set(q.get('id'), blockId);
+        });
+        newBlock.get('subblocks').forEach(b => {
+            _blockMap = _blockMap.set(b.get('id'), blockId);
+        });
+        return newBlock;
     },
     /**
      * Method called when the itemCopy action is triggered.
@@ -368,55 +390,41 @@ var SurveyStore = Reflux.createStore({
         var survey = this.data.surveyData;
 
         if (itemType === ItemTypes.BLOCK) {
-            let blockIndex = this.getBlockIndex(itemId);
-            let block = survey.get(blockIndex);
-            let self = this;
-            let newBlock = block.set('id', self.getNewId(ItemTypes.BLOCK))
-                            .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-            let newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
+            let blockPath = this.getBlockPath(itemId, survey);
+            let blockIndex = blockPath[blockPath.length - 1];
+            let newBlock = this.cloneBlock(survey.getIn(blockPath));
+            let newSurvey;
+            if (_blockMap.has(itemId)) {
+                console.log("This is a subblock")
+                return;
+            } else {
+                newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
+            }
 
             // update and cache
             this.updateSurveyData(newSurvey, true);
 
-            // update the maps with the new question and new options
-            let blockId = newBlock.get('id');
-            newBlock.get('questions').forEach(function(q) {
-                var qId = q.get('id');
-                _questionMap = _questionMap.set(qId, blockId);
-
-                // set mapping for options
-                q.get('options').forEach(function(o) {
-                    _optionMap = _optionMap.set(o.get('id'), qId);
-                });
-            });
-
             // alert and focus
-            SurveyActions.showAlert("Block copied.", AlertTypes.SUCCESS);
+            SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
             SurveyActions.scrollToItem(newBlock.get('id'));
         }
 
         else if (itemType === ItemTypes.QUESTION) {
-            let blockIndex = this.getBlockIndex(_questionMap.get(itemId));
-            let block = survey.get(blockIndex);
-            let question = block.get('questions').find(q => q.get('id') === itemId);
-            let questionIndex = this.getQuestionIndex(itemId, block);
-            let newQuestion = this.cloneQuestion(question);
-            let newSurvey = survey.updateIn([blockIndex, 'questions'], list =>
-                list.splice(questionIndex + 1, 0, newQuestion)
+            let questionPath = this.getQuestionPath(itemId, survey);
+            let questionIndex = questionPath[questionPath.length - 1];
+            let newQuestion = this.cloneQuestion(survey.getIn(questionPath));
+            let newSurvey = survey.updateIn(questionPath.slice(0, -1),
+                list => list.splice(questionIndex + 1, 0, newQuestion)
             );
 
             // update and cache
-            this.updateSurveyData(newSurvey, true);
+            this.updateSurveyData(newSurvey, false);
 
-            // update the maps with new question and new options
-            let qId = newQuestion.get('id');
-            _questionMap = _questionMap.set(qId, block.get('id'));
-            newQuestion.get('options').forEach( o => {
-                _optionMap = _optionMap.set(o.get('id'), qId)
-            });
+            // update the _questionMap
+            _questionMap = _questionMap.set(newQuestion.get('id'), _blockMap.get(itemId));
 
             // alert and focus
-            SurveyActions.showAlert("Question copied.", AlertTypes.SUCCESS);
+            SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
             SurveyActions.scrollToItem(newQuestion.get('id'));
         }
 
