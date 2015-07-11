@@ -5,10 +5,12 @@ var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
 var SurveyStore = require('../stores/SurveyStore');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 var TreeView = React.createClass({
+    mixins: [PureRenderMixin],
     propTypes: {
-        survey: React.PropTypes.instanceOf(List)
+        survey: React.PropTypes.instanceOf(List).isRequired
     },
     getInitialState() {
         return {
@@ -93,6 +95,33 @@ var TreeView = React.createClass({
             });
         }
     },
+    renderSubblocks(block) {
+        var subblocks = block.get('subblocks');
+        var self = this;
+        return subblocks.map(subb =>
+                <BlockNode key={subb.get('id')} id={subb.get('id')}
+                   handleClick={self.focusOnItem.bind(this, subb.get('id'))}
+                   handleDrop={self.handleDrop}
+                   reorderBlock={self.reorderBlock} >
+
+                     {self.renderSubblocks(subb)}
+
+                     {subb.get('questions').map(ques =>
+                        <QuestionNode id={ques.get('id')}
+                                      key={ques.get('id')}
+                                      label={self.ellipsize(ques.get('qtext'))}
+                                      handleClick={self.focusOnItem.bind(this, ques.get('id'))}
+                                      handleDrop={self.handleDrop}
+                                      reorderQuestion={self.reorderQuestion}>
+                            <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
+                            <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
+                            <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
+                            <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
+                        </QuestionNode>
+                     )}
+               </BlockNode>
+       );
+    },
     render() {
         var { survey } = this.state;
         var self = this;
@@ -100,13 +129,16 @@ var TreeView = React.createClass({
         // build the tree
         var tree = survey.map((block, i) => {
             var questions = block.get('questions');
+            var subblocks = block.get('subblocks');
             return (
                 <BlockNode key={block.get('id')} id={block.get('id')}
                            handleClick={self.focusOnItem.bind(this, block.get('id'))}
                            handleDrop={self.handleDrop}
                            reorderBlock={self.reorderBlock}>
 
-                    {questions.map((ques, j) =>
+                    {self.renderSubblocks(block)}
+
+                    {questions.map(ques =>
                         <QuestionNode id={ques.get('id')}
                                       key={ques.get('id')}
                                       label={self.ellipsize(ques.get('qtext'))}

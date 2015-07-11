@@ -3,6 +3,7 @@ var cx = require('classnames');
 var { DragSource, DropTarget } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 var flow = require('lodash/function/flow');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 
 /* setup for dragging block node */
 var nodeSource = {
@@ -55,6 +56,7 @@ function sortCollect(connect, monitor) {
 }
 
 var BlockNode = React.createClass({
+    mixins: [PureRenderMixin],
     propTypes: {
         collapsed: React.PropTypes.bool,
         defaultCollapsed: React.PropTypes.bool,
@@ -95,8 +97,7 @@ var BlockNode = React.createClass({
                     </div>);
 
         return connectSortTarget(connectDragSource(connectDropTarget(
-           <div className='tree-view_node-block'
-                  style={{opacity: isDragging ? 0 : 1}} onClick={this.handleCollapse}> {arrow}
+           <div className='tree-view_node-block' style={{opacity: isDragging ? 0 : 1}}> {arrow}
                 <span className="tree-view_block-title" onClick={handleClick}>{"Block #" + id}</span>
                 { collapsed ? null : <div className="tree-view_children">{children}</div> }
            </div>
