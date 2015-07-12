@@ -2,6 +2,7 @@ var React = require('react');
 var { DragSource, DropTarget } = require('react-dnd');
 var cx = require('classnames');
 var flow = require('lodash/function/flow');
+var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var ItemTypes = require('./ItemTypes');
 
 /* setup for dragging question nodes */
@@ -40,6 +41,7 @@ function dropCollect(connect, monitor) {
 }
 
 var QuestionNode = React.createClass({
+    mixins: [PureRenderMixin],
     propTypes: {
         collapsed: React.PropTypes.bool,
         defaultCollapsed: React.PropTypes.bool,
