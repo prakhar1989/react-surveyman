@@ -22,7 +22,6 @@ var Application = React.createClass({
     render() {
         var { modalState, 
               alertState, 
-              dropTargetID,
               surveyData,
               optionGroupState } = this.state;
         return (

@@ -58,9 +58,7 @@ var Survey = React.createClass({
             'hovering': isOverCurrent
         });
 
-        var self = this;
         var blocks = survey.map((block, i) => {
-            var subblocks = block.get('subblocks');
             return (
               <Block key={block.get('id')}
                   id={block.get('id')}
