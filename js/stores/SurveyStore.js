@@ -558,17 +558,12 @@ var SurveyStore = Reflux.createStore({
         // if the question is dropped in the same block then do nothing
         if (currBlockID === blockID) return;
 
-        var currBlockIndex = this.getBlockIndex(currBlockID);
-        var newBlockIndex = this.getBlockIndex(blockID);
+        var questionPath = this.getQuestionPath(questionID, survey);
+        var newBlockPath = this.getBlockPath(blockID, survey);
+        var question = survey.getIn(questionPath);
 
-        var currBlock = survey.get(currBlockIndex);
-        var index = this.getQuestionIndex(questionID, currBlock);
-        var question = survey.getIn([currBlockIndex, 'questions', index]);
-
-        // delete the question
-        var newSurvey = survey
-                            .deleteIn([currBlockIndex, 'questions', index])
-                            .updateIn([newBlockIndex, 'questions'], list => list.push(question));
+        var newSurvey = survey.deleteIn(questionPath)
+                              .updateIn([...newBlockPath, 'questions'], list => list.push(question));
 
         // update and cache
         this.updateSurveyData(newSurvey, true);

@@ -23,7 +23,10 @@ function dragCollect(connect, monitor) {
  * for questions */
 var questionTarget = {
     drop(props, monitor) {
-        props.handleDrop(monitor.getItem().id, props.id);
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+            props.handleDrop(monitor.getItem().id, props.id);
+        }
     }
 };
 
