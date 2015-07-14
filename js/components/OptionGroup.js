@@ -22,7 +22,7 @@ var OptionGroup = React.createClass({
             <Select options={selectOptions}
                     onChange={this.handleChange}
                     clearable={false}
-                    value={selectedID.toString()} />
+                    value={selectedID.toString()} />;
 
     }
 });

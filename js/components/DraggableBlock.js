@@ -3,23 +3,21 @@ var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
 // this is the specification that describes
-// how the drag source reacts to the drag
-// and drop events
+// how the drag source reacts to the drag and drop events
 var blockSource = {
-    beginDrag(props) {
+    beginDrag() {
         return {
             item: {}
-        }
+        };
     }
 };
 
-// the collecting function that injects 
-// relevant props to the component
+// the collecting function that injects relevant props to the component
 function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         isDragging: monitor.isDragging()
-    }
+    };
 }
 
 var DraggableBlock = React.createClass({
@@ -31,7 +29,7 @@ var DraggableBlock = React.createClass({
                 <i className="ion-arrow-move"></i>
                 Block
             </div>
-        )
+        );
     }
 });
 

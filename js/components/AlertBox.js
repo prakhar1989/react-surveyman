@@ -7,8 +7,8 @@ var AlertTypes = require('./AlertTypes');
 
 var AlertBox = React.createClass({
     propTypes: {
-        level: React.PropTypes.oneOf([AlertTypes.INFO, 
-                                      AlertTypes.WARNING, 
+        level: React.PropTypes.oneOf([AlertTypes.INFO,
+                                      AlertTypes.WARNING,
                                       AlertTypes.SUCCESS]).isRequired,
         visible: React.PropTypes.bool.isRequired,
         msg: React.PropTypes.string.isRequired
@@ -22,14 +22,14 @@ var AlertBox = React.createClass({
                 <Alert>
                     <p>{this.props.msg}
                     { this.props.level === AlertTypes.INFO ? '' :
-                        <a onClick={this.handleUndo}>Undo</a>  }
+                        <a onClick={this.handleUndo}>Undo</a> }
                     </p>
                 </Alert>
             );
         }
         return (
             <div></div>
-        )
+        );
     }
 });
 

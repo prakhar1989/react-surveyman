@@ -8,7 +8,7 @@ var ItemTypes = require('./ItemTypes');
 // to get around the refs issues - https://github.com/react-bootstrap/react-bootstrap/issues/223
 var BaseModal = React.createClass({
     getInitialState() {
-        return { qtext: "" }
+        return { qtext: "" };
     },
     propTypes: {
         parentID: React.PropTypes.string
@@ -52,7 +52,7 @@ var BaseModal = React.createClass({
             <div className='modal-body'>
                 <div className="form-group">
                     <label htmlFor="qtext">Question Text</label>
-                    <input type="text" placeholder="What is value of 4 + 5?" 
+                    <input type="text" placeholder="What is value of 4 + 5?"
                         className="form-control" id="qtext" ref="qtext" onKeyPress={this.handleInput} />
                 </div>
                 <h5>Configuration</h5>
@@ -70,7 +70,7 @@ var BaseModal = React.createClass({
                 <Button onClick={this.handleClose}>Cancel</Button>
                 <Button bsStyle='primary' onClick={this.handleSubmit}>Confirm</Button>
             </div>
-        </Modal>
+        </Modal>;
     }
 });
 
@@ -84,15 +84,15 @@ var QuestionModal = React.createClass({
     render() {
         return (
             <div className='static-modal'> </div>
-        )
+        );
     },
     renderOverlay() {
         if (!this.props.isOpen) {
-            return <div></div>
+            return <div></div>;
         }
         return (
             <BaseModal parentID={this.props.parentID} />
-        )
+        );
     }
 });
 

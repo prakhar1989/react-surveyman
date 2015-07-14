@@ -30,7 +30,7 @@ var ToggleParam = React.createClass({
                     <i className={this.props.icon}></i>
                 </OverlayTrigger>
             </div>
-        )
+        );
     }
 });
 

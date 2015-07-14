@@ -25,7 +25,7 @@ function blockCollect(connect, monitor) {
     return {
         connectBlockDropTarget: connect.dropTarget(),
         isBlockOver: monitor.isOver({shallow: true})
-    }
+    };
 }
 
 var questionTarget = {
@@ -35,14 +35,14 @@ var questionTarget = {
             SurveyActions.toggleModal(ItemTypes.QUESTION, props.id);
         }
     }
-}
+};
 
 function questionCollect(connect, monitor) {
     return {
         connectQuestionDropTarget: connect.dropTarget(),
         isQuestionOver: monitor.isOver(),
         isOverChild: monitor.isOver({shallow: true})
-    }
+    };
 }
 
 var Block = React.createClass({
@@ -63,7 +63,7 @@ var Block = React.createClass({
             SurveyActions.itemDelete(ItemTypes.BLOCK, this.props.id);
         }
     },
-    handleCopy(e) {
+    handleCopy() {
         SurveyActions.itemCopy(ItemTypes.BLOCK, this.props.id);
     },
     render() {
@@ -111,7 +111,7 @@ var Block = React.createClass({
                     </ul>
                 </div>
 
-                { questions.count() > 0 ? questionAnimationTag :  help }
+                { questions.count() > 0 ? questionAnimationTag : help }
 
                 { this.props.children }
 
@@ -129,7 +129,7 @@ var Block = React.createClass({
                     </ul>
                 </div>
             </div>
-        ))
+        ));
     }
 });
 

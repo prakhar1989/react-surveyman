@@ -20,8 +20,8 @@ var Application = React.createClass({
         SurveyActions.load();
     },
     render() {
-        var { modalState, 
-              alertState, 
+        var { modalState,
+              alertState,
               surveyData,
               optionGroupState } = this.state;
         return (
@@ -37,13 +37,13 @@ var Application = React.createClass({
                     <Pallet survey={surveyData} />
                 </div>
                 <div className="col-sm-4">
-                    <Toolbox 
+                    <Toolbox
                         optionGroups={optionGroupState.get('options')}
                         optionGroupId={optionGroupState.get('selectedID')} />
                     <TreeView survey={surveyData}/>
                 </div>
             </div>
-        )
+        );
     }
 });
 

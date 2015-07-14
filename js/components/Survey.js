@@ -22,7 +22,7 @@ function collect(connect, monitor) {
     return {
         connectDropTarget: connect.dropTarget(),
         isOverCurrent: monitor.isOver({ shallow: true })
-    }
+    };
 }
 
 function renderSubblocks(block) {
@@ -31,18 +31,18 @@ function renderSubblocks(block) {
         return subblocks.map((subb, i) =>
           <Block key={subb.get('id')}
                  id={subb.get('id')}
-                 isFirst={i==0}
+                 isFirst={i === 0}
                  subblocks={subb.get('subblocks')}
                  randomize={subb.get('randomize')}
                  questions={subb.get('questions')}>
                    {renderSubblocks(subb)}
           </Block>
-        )
+        );
     }
 }
 
 var Survey = React.createClass({
-    mixins:[PureRenderMixin],
+    mixins: [PureRenderMixin],
     propTypes: {
         survey: React.PropTypes.instanceOf(List)
     },
@@ -62,7 +62,7 @@ var Survey = React.createClass({
             return (
               <Block key={block.get('id')}
                   id={block.get('id')}
-                  isFirst={i==0}
+                  isFirst={i === 0}
                   subblocks={block.get('subblocks')}
                   randomize={block.get('randomize')}
                   questions={block.get('questions')}>
@@ -82,7 +82,7 @@ var Survey = React.createClass({
             <div className={classes}>
                  { survey.count() > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
             </div>
-        )
+        );
     }
 });
 
