@@ -26,6 +26,9 @@ div.controls button {
 div#sidebar {
     width: 350px;
 }
+div#sidebar.affix-bottom {
+    position: absolute;
+}
 div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
