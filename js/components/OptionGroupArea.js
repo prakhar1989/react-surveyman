@@ -17,13 +17,13 @@ var OptionGroupArea = React.createClass({
         var { optionGroupId, optionGroups } = this.props;
         return (
             <div>
-                <h5>Select / Add Option Lists <i className="ion-plus-circled" 
+                <h5>Select / Add Option Lists <i className="ion-plus-circled"
                     style={{cursor: 'pointer'}} onClick={this.handleAdd}></i></h5>
-                <OptionGroup 
-                    options={optionGroups} 
+                <OptionGroup
+                    options={optionGroups}
                     selectedID={optionGroupId} />
             </div>
-        )
+        );
     }
 });
 

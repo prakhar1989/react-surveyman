@@ -19,7 +19,7 @@ var ItemControl = React.createClass({
                     <i className={icon}></i>
                 </OverlayTrigger>
             </div>
-        )
+        );
     }
 });
 

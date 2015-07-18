@@ -12,14 +12,14 @@ var Controls = React.createClass({
                   <h3>Pallet</h3>
                 </div>
                 <div className="col-xs-3">
-                  <button 
-                        className="btn btn-success btn-sm" 
+                  <button
+                        className="btn btn-success btn-sm"
                         onClick={this.handleDownload}>
                       <span className="ion-arrow-down-a"></span> Download
                   </button>
                 </div>
             </div>
-        )
+        );
     }
 });
 

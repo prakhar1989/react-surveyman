@@ -17,7 +17,7 @@ var Pallet = React.createClass({
                     <Survey survey={this.props.survey} />
                 </div>
             </div>
-        )
+        );
     }
 });
 

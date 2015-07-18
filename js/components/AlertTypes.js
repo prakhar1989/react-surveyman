@@ -1,7 +1,7 @@
 var AlertTypes = {
-    SUCCESS: 'success',
-    WARNING: 'warning',
-    INFO: 'info'
+    SUCCESS: "success",
+    WARNING: "warning",
+    INFO: "info"
 };
 
 module.exports = AlertTypes;

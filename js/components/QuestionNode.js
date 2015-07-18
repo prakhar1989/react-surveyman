@@ -8,15 +8,15 @@ var ItemTypes = require('./ItemTypes');
 /* setup for dragging question nodes */
 var nodeSource = {
     beginDrag(props) {
-        return { id: props.id }
+        return { id: props.id };
     }
-}
+};
 
 function dragCollect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         isDragging: monitor.isDragging()
-    }
+    };
 }
 
 /* setup for allowing questions to act as drop targets for questions.
@@ -29,15 +29,15 @@ var questionTarget = {
         }
     },
     // called when the hover ends - used to propagate changes upstream
-    drop(props, monitor) {
+    drop(props) {
         props.handleDrop(props.id, props.id);
     }
-}
+};
 
-function dropCollect(connect, monitor) {
+function dropCollect(connect) {
     return {
         connectDropTarget: connect.dropTarget()
-    }
+    };
 }
 
 var QuestionNode = React.createClass({
@@ -56,7 +56,7 @@ var QuestionNode = React.createClass({
             collapsed: this.props.defaultCollapsed || true
         };
     },
-    handleCollapse(e) {
+    handleCollapse() {
         this.setState({
             collapsed: !this.state.collapsed
         });

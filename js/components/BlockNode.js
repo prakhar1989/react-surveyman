@@ -8,7 +8,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 /* setup for dragging block node */
 var nodeSource = {
     beginDrag(props) {
-        return { id: props.id }
+        return { id: props.id };
     }
 };
 
@@ -16,21 +16,24 @@ function dragCollect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         isDragging: monitor.isDragging()
-    }
+    };
 }
 
 /* setup for allowing blocks to act as drop targets
  * for questions */
 var questionTarget = {
     drop(props, monitor) {
-        props.handleDrop(monitor.getItem().id, props.id);
+        let droppedOnChild = !monitor.isOver({shallow: false});
+        if (!droppedOnChild) {
+            props.handleDrop(monitor.getItem().id, props.id);
+        }
     }
 };
 
-function dropCollect(connect, monitor) {
+function dropCollect(connect) {
     return {
         connectDropTarget: connect.dropTarget()
-    }
+    };
 }
 
 /* setup for allowing blocks to act as drop target for other blocks.
@@ -49,10 +52,10 @@ var blockTarget = {
     }
 };
 
-function sortCollect(connect, monitor) {
+function sortCollect(connect) {
     return {
         connectSortTarget: connect.dropTarget()
-    }
+    };
 }
 
 var BlockNode = React.createClass({
@@ -70,7 +73,7 @@ var BlockNode = React.createClass({
             collapsed: this.props.defaultCollapsed || true
         };
     },
-    handleCollapse(e) {
+    handleCollapse() {
         this.setState({
             collapsed: !this.state.collapsed
         });

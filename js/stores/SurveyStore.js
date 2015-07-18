@@ -43,7 +43,7 @@ var SurveyStore = Reflux.createStore({
         var initOptionsData = Immutable.fromJS([
             { id: 0, optionLabels: ["Yes", "No"] },
             { id: 1, optionLabels: ["True", "False"] },
-            { id: 2, optionLabels: ["Strongly Disagree", "Disagree", "Neither agree or disagree","Agree", "Strongly Agree"] }
+            { id: 2, optionLabels: ["Strongly Disagree", "Disagree", "Neither agree or disagree", "Agree", "Strongly Agree"] }
         ]);
 
         this.listenTo(SurveyActions.load, () => {
@@ -63,7 +63,7 @@ var SurveyStore = Reflux.createStore({
             modalState: this.data.modalState,
             alertState: this.data.alertState,
             optionGroupState: this.data.optionGroupState
-        }
+        };
     },
     /**
      * Updates the survey data as the args provided. Triggers refresh.
@@ -74,9 +74,9 @@ var SurveyStore = Reflux.createStore({
     updateSurveyData(data, cache = false) {
         if (cache) {
             _history.push({
-                data        : this.data.surveyData,
-                optionMap   : _optionMap.toJS(),
-                questionMap : _questionMap.toJS()
+                data: this.data.surveyData,
+                optionMap: _optionMap.toJS(),
+                questionMap: _questionMap.toJS()
             });
         }
         this.data.surveyData = data;
@@ -92,25 +92,25 @@ var SurveyStore = Reflux.createStore({
      * @param questionId
      */
     getBlockId(questionId) {
-        return _questionMap.get(questionId)
+        return _questionMap.get(questionId);
     },
     getNewId(type) {
         var prefix;
         if (type === ItemTypes.QUESTION) {
-            prefix = "q"
+            prefix = "q";
         } else if (type === ItemTypes.OPTION) {
-            prefix = "o"
+            prefix = "o";
         } else {
-            prefix = "b"
+            prefix = "b";
         }
-        return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`
+        return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
     },
     getBlockPath(blockID, survey, blockMap = _blockMap) {
         // function that returns a chain of IDs from the root block
         // to the block with id - id
         var getIDsList = function getIDsList(id, path = []) {
             if (!blockMap.has(id)) {
-                return path.concat([id]).reverse()
+                return path.concat([id]).reverse();
             }
             return getIDsList(blockMap.get(id), path.concat([id]));
         };
@@ -120,15 +120,15 @@ var SurveyStore = Reflux.createStore({
 
         // initialize path with index of root node
         var [rootID, ...restIDs] = getIDsList(blockID);
-        var path = [getIndex(rootID, survey)];
+        var initPath = [getIndex(rootID, survey)];
 
         // reduce over the rest of ids by finding id at each level
         // and changing path accordingly
         return restIDs.reduce((path, id) => {
-            var path = path.concat(['subblocks']);
-            var index = getIndex(id, survey.getIn(path));
-            return path.concat([index]);
-        }, path);
+            var newPath = path.concat(['subblocks']);
+            var index = getIndex(id, survey.getIn(newPath));
+            return newPath.concat([index]);
+        }, initPath);
     },
     getQuestionPath(questionID, survey, questionMap = _questionMap) {
         var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
@@ -158,7 +158,7 @@ var SurveyStore = Reflux.createStore({
             this.updateSurveyData(newSurvey, true);
             SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
         } else {
-            let blockPath = this.getBlockPath(targetID, survey)
+            let blockPath = this.getBlockPath(targetID, survey);
             let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
                 list => list.splice(0, 0, newBlock)
             );
@@ -358,7 +358,7 @@ var SurveyStore = Reflux.createStore({
                         );
         var qId = newQuestion.get('id');
         newQuestion.get('options').forEach(o => {
-            _optionMap = _optionMap.set(o.get('id'), qId)
+            _optionMap = _optionMap.set(o.get('id'), qId);
         });
         return newQuestion;
     },
@@ -458,8 +458,8 @@ var SurveyStore = Reflux.createStore({
             survey.getIn([...blockPath, 'questions']).forEach(q => {
                 _questionMap = _questionMap.delete(q.get('id'));
                 q.get('options').forEach(o => {
-                    _optionMap = _optionMap.delete(o.get('id'))
-                })
+                    _optionMap = _optionMap.delete(o.get('id'));
+                });
             });
 
             SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
@@ -476,7 +476,7 @@ var SurveyStore = Reflux.createStore({
             // delete the mapping of the question and its options
             _questionMap = _questionMap.delete(itemId);
             survey.getIn([...questionPath, 'options']).forEach(o => {
-                _optionMap = _optionMap.delete(o.get('id'))
+                _optionMap = _optionMap.delete(o.get('id'));
             });
 
             SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
@@ -556,19 +556,16 @@ var SurveyStore = Reflux.createStore({
         var currBlockID = _questionMap.get(questionID);
 
         // if the question is dropped in the same block then do nothing
-        if (currBlockID === blockID) return;
+        if (currBlockID === blockID) {
+            return;
+        }
 
-        var currBlockIndex = this.getBlockIndex(currBlockID);
-        var newBlockIndex = this.getBlockIndex(blockID);
+        var questionPath = this.getQuestionPath(questionID, survey);
+        var newBlockPath = this.getBlockPath(blockID, survey);
+        var question = survey.getIn(questionPath);
 
-        var currBlock = survey.get(currBlockIndex);
-        var index = this.getQuestionIndex(questionID, currBlock);
-        var question = survey.getIn([currBlockIndex, 'questions', index]);
-
-        // delete the question
-        var newSurvey = survey
-                            .deleteIn([currBlockIndex, 'questions', index])
-                            .updateIn([newBlockIndex, 'questions'], list => list.push(question));
+        var newSurvey = survey.deleteIn(questionPath)
+                              .updateIn([...newBlockPath, 'questions'], list => list.push(question));
 
         // update and cache
         this.updateSurveyData(newSurvey, true);

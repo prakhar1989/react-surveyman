@@ -15,13 +15,19 @@ body {
 div.container {
   background: white;
   box-shadow: rgba(0, 0, 0, 0.03) 0 0 0 1px;
-  min-width: 960px;
+  min-width: 1170px;
   min-height: 300px;
   padding-bottom: 40px;
 }
 div.controls button {
   margin-top: 10px;
   float: right;
+}
+div#sidebar {
+    width: 350px;
+}
+div#sidebar.affix-bottom {
+    position: absolute;
 }
 div.widgets-area {
   background-color: #E0EEF8;
@@ -49,7 +55,7 @@ div.draggable {
     border: 1px dashed black;
     width: 70px;
     height: 60px;
-    margin: 10px 4px;
+    margin: 10px 15px;
     cursor: move;
     box-sizing: border-box;
     text-align: center;

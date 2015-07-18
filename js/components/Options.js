@@ -13,7 +13,7 @@ var Options = React.createClass({
     getInitialState: function() {
         return {
             suggestions: []
-        }
+        };
     },
     componentDidMount: function() {
         var optionSet = SurveyStore.getOptionsSet();
@@ -39,7 +39,7 @@ var Options = React.createClass({
                     handleDrag={this.handleDrag}
                     labelField={'otext'}
                     placeholder={"Add new option"} />
-        )
+        );
     }
 });
 

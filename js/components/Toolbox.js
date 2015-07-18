@@ -24,7 +24,7 @@ var Toolbox = React.createClass({
                         optionGroups={optionGroups} />
                 </div>
             </div>
-        )
+        );
     }
 });
 

@@ -20,9 +20,8 @@ var Application = React.createClass({
         SurveyActions.load();
     },
     render() {
-        var { modalState, 
-              alertState, 
-              dropTargetID,
+        var { modalState,
+              alertState,
               surveyData,
               optionGroupState } = this.state;
         return (
@@ -34,17 +33,19 @@ var Application = React.createClass({
                     msg={alertState.get('msg')}
                     level={alertState.get('level')}
                     visible={alertState.get('visible')} />
-                <div className="col-sm-8">
+                <div className="col-md-8">
                     <Pallet survey={surveyData} />
                 </div>
-                <div className="col-sm-4">
-                    <Toolbox 
-                        optionGroups={optionGroupState.get('options')}
-                        optionGroupId={optionGroupState.get('selectedID')} />
-                    <TreeView survey={surveyData}/>
+                <div className="col-md-4">
+                    <div id="sidebar" data-spy="affix" data-offset-top="100" data-offset-bottom="50">
+                        <Toolbox
+                            optionGroups={optionGroupState.get('options')}
+                            optionGroupId={optionGroupState.get('selectedID')} />
+                        <TreeView survey={surveyData}/>
+                     </div>
                 </div>
             </div>
-        )
+        );
     }
 });
 

@@ -20,7 +20,7 @@ function collect(connect, monitor) {
         connectDropTarget: connect.dropTarget(),
         canDrop: monitor.canDrop(),
         isOver: monitor.isOver()
-    }
+    };
 }
 
 var Question = React.createClass({
@@ -39,7 +39,7 @@ var Question = React.createClass({
     getInitialState: function() {
         return {
             editing: false
-        }
+        };
     },
     handleDelete() {
         var deleteConfirmation = confirm("Are you sure you want to delete this question and its options?");
@@ -58,19 +58,19 @@ var Question = React.createClass({
      * responsible for calling relevant action that saves the new text.
      */
     handleEdit(e) {
-        if (e.type === "blur" || 
+        if (e.type === "blur" ||
            (e.type === "keypress" && e.key === "Enter")) {
 
             this.setState({ editing: false });
 
             // if the new value is blank do nothing
             if (e.target.value.trim() === "") {
-                return; 
+                return;
             }
             SurveyActions.saveEditText(e.target.value, this.props.id);
         }
     },
-    handleCopy(e) {
+    handleCopy() {
         SurveyActions.itemCopy(ItemTypes.QUESTION, this.props.id);
     },
     render: function() {
@@ -96,7 +96,7 @@ var Question = React.createClass({
                   <span className="qtext" onClick={this.toggleInput}>
                   { this.state.editing ? input : this.props.qtext }
                   </span>
-                  
+
                   <div className="controls-area">
                       <ul>
                           <li><ItemControl icon="ion-trash-b" helpText="Delete this question" handleClick={this.handleDelete}/></li>
@@ -139,7 +139,7 @@ var Question = React.createClass({
                     </ul>
                 </div>
             </div>
-        )
+        );
     }
 });
 

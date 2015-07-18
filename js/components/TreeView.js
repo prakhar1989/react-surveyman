@@ -16,7 +16,7 @@ var TreeView = React.createClass({
         return {
             survey: this.props.survey,
             finalIndex: -1
-        }
+        };
     },
     componentWillReceiveProps(nextProps) {
         this.setState({
@@ -25,8 +25,8 @@ var TreeView = React.createClass({
         });
     },
     renderProp(label, prop) {
-        return prop ? <span><i className="ion-checkmark"></i> {label}</span> :
-                      <span><i className="ion-close"></i>  {label}</span>
+        return prop ? <span><i className="ion-checkmark"></i>{label}</span> :
+                      <span><i className="ion-close"></i>{label}</span>;
     },
     ellipsize(text) {
         return text.substr(0, 20) + (text.length > 20 ? "..." : "");
@@ -43,7 +43,7 @@ var TreeView = React.createClass({
             SurveyActions.moveQuestion(sourceID, targetID);
         } else {
             // when a question is dropped on a question or a block is dropped on a block
-            SurveyActions.reorderItem(sourceID, this.state.finalIndex, sourceType)
+            SurveyActions.reorderItem(sourceID, this.state.finalIndex, sourceType);
         }
     },
     reorderBlock(draggedBlockId, overBlockId) {
@@ -127,9 +127,8 @@ var TreeView = React.createClass({
         var self = this;
 
         // build the tree
-        var tree = survey.map((block, i) => {
+        var tree = survey.map((block) => {
             var questions = block.get('questions');
-            var subblocks = block.get('subblocks');
             return (
                 <BlockNode key={block.get('id')} id={block.get('id')}
                            handleClick={self.focusOnItem.bind(this, block.get('id'))}
@@ -153,7 +152,7 @@ var TreeView = React.createClass({
                      )}
 
                 </BlockNode>
-            )
+            );
         });
 
         return (
@@ -161,7 +160,7 @@ var TreeView = React.createClass({
                 <h3>Minimap <span className="help-text">Drag items to re-order</span></h3>
                 {tree}
             </div>
-        )
+        );
     }
 });
 

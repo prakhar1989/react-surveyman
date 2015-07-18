@@ -3,8 +3,8 @@ var { DragSource } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 
 var optionGroupSource = {
-    beginDrag(props) {
-        return { item: {} }
+    beginDrag() {
+        return { item: {} };
     }
 };
 
@@ -12,7 +12,7 @@ function collect(connect, monitor) {
     return {
         connectDragSource: connect.dragSource(),
         isDragging: monitor.isDragging()
-    }
+    };
 }
 
 var DraggableOptionGroup = React.createClass({
@@ -24,7 +24,7 @@ var DraggableOptionGroup = React.createClass({
                 <i className="ion-arrow-move"></i>
                 Option List
             </div>
-        )
+        );
     }
 });
 
