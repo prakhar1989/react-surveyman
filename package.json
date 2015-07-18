@@ -5,7 +5,7 @@
   "main": "./lib/app.js",
   "scripts": {
     "start": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 8090",
-    "build": "gulp && webpack -p",
+    "build": "webpack -p",
     "test": "mocha --compilers js:babel/register tests",
     "lint": "node node_modules/eslint/bin/eslint.js js"
   },
@@ -17,10 +17,6 @@
     "babel-core": "^5.4.3",
     "babel-loader": "^5.1.2",
     "classnames": "^2.1.2",
-    "gulp": "^3.8.11",
-    "gulp-concat": "^2.5.2",
-    "gulp-minify-css": "^1.0.0",
-    "gulp-rename": "^1.2.0",
     "immutable": "^3.7.3",
     "lodash": "^3.9.3",
     "node-libs-browser": "^0.5.0",
@@ -30,13 +26,16 @@
     "react-select": "^0.4.9",
     "react-tag-input": "1.0.2",
     "reflux": "^0.2.7",
-    "webpack": "^1.9.7",
+    "webpack": "^1.9.11",
     "webpack-dev-server": "^1.8.2"
   },
   "devDependencies": {
     "babel-eslint": "^3.1.23",
+    "css-loader": "^0.15.5",
     "eslint": "^0.24.1",
     "eslint-plugin-react": "^2.7.0",
-    "mocha": "^2.2.5"
+    "extract-text-webpack-plugin": "^0.8.2",
+    "mocha": "^2.2.5",
+    "style-loader": "^0.12.3"
   }
 }

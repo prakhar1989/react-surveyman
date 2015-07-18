@@ -1,4 +1,5 @@
-/* animation */
+@import './vendor/bootstrap.min.css';
+
 :target {
   animation: highlight 1s ease-in;
 }
@@ -6,7 +7,6 @@
   0% { background-color: #fcf1bb; }
   100% { background-color: white; }
 }
-
 body {
   margin: 50px 0;
   background: #eee;
