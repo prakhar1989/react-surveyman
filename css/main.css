@@ -21,9 +21,14 @@ div.container {
   min-height: 300px;
   padding-bottom: 40px;
 }
-div.controls button {
-  margin-top: 10px;
-  float: right;
+div.controls div.btn-group, div.controls h3 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+div.controls span.help-text {
+    color: #bbb;
+    font-style: italic;
+    font-size: 12px;
 }
 div#sidebar {
     width: 350px;
