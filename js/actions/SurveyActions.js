@@ -13,6 +13,7 @@ var SurveyActions = Reflux.createActions([
     "itemDelete",                   // when an item (option/question/block) is called to be deleted
     "itemCopy",                     // when an item (question/block) is called to be copied
     "saveEditText",                 // when question text is changed
+    "saveFreeText",                 // when freeText's default text is changed
     "undoSurvey",                   // when the undo button is clicked
     "scrollToItem",                 // when an item needs to be scrolled to
     "updateOptionGroup",            // when the default option group is changed

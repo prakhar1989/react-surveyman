@@ -384,4 +384,5 @@ div.freeText-area {
 div.freeText-area input[type=text] {
     font-size: 13px;
     padding: 4px 8px;
+    width: 250px;
 }

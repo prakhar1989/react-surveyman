@@ -30,7 +30,10 @@ var Question = React.createClass({
         id: React.PropTypes.string.isRequired,
         qtext: React.PropTypes.string.isRequired,
         ordering: React.PropTypes.bool.isRequired,
-        freetext: React.PropTypes.bool.isRequired,
+        freetext: React.PropTypes.oneOfType([
+            React.PropTypes.bool.isRequired,
+            React.PropTypes.string.isRequired
+        ]),
         exclusive: React.PropTypes.bool.isRequired
     },
     handleOptionGroupDrop() {
@@ -70,11 +73,19 @@ var Question = React.createClass({
             SurveyActions.saveEditText(e.target.value, this.props.id);
         }
     },
+    handleFreeTextEdit(e) {
+        if (e.type === "keypress" && e.key === "Enter") {
+            if (e.target.value.trim() === "") {
+                return;
+            }
+            SurveyActions.saveFreeText(e.target.value, this.props.id);
+        }
+    },
     handleCopy() {
         SurveyActions.itemCopy(ItemTypes.QUESTION, this.props.id);
     },
     render: function() {
-        var { canDrop, isOver, connectDropTarget } = this.props;
+        var { canDrop, isOver, connectDropTarget, freetext } = this.props;
 
         var classes = cx({
             'item question': true,
@@ -88,6 +99,11 @@ var Question = React.createClass({
                         style={{width: 200}}
                         onBlur={this.handleEdit}
                         onKeyPress={this.handleEdit} />;
+
+        var freeTextInput = <input type="text"
+                                placeholder="Default text (if any). Press Enter to save."
+                                defaultValue={freetext ? null : freetext}
+                                onKeyPress={this.handleFreeTextEdit} />
 
         return connectDropTarget(
             <div className={classes} id={this.props.id}>
@@ -131,13 +147,18 @@ var Question = React.createClass({
                             <ToggleParam
                                 icon="ion-document-text"
                                 helpText="Toggles whether free text can be entered"
-                                toggleValue={this.props.freetext}
+                                toggleValue={typeof(this.props.freetext) === "string"}
                                 toggleName='freetext'
                                 itemType={ItemTypes.QUESTION}
                                 itemId={this.props.id} />
                         </li>
                     </ul>
                 </div>
+
+                <div className="freeText-area">
+                    { this.props.freetext ? freeTextInput : null}
+                </div>
+
             </div>
         );
     }

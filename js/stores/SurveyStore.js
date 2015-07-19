@@ -511,6 +511,12 @@ var SurveyStore = Reflux.createStore({
         var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
         this.updateSurveyData(newSurvey, true);
     },
+    onSaveFreeText(text, questionId) {
+        var survey = this.data.surveyData;
+        var path = this.getQuestionPath(questionId, survey);
+        var newSurvey = survey.updateIn(path, q => q.set('freetext', text));
+        this.updateSurveyData(newSurvey, true);
+    },
     /**
      * Called when the undoSurvey action is triggered. Responsible for
      * setting global state to last _history item.
