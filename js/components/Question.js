@@ -103,7 +103,7 @@ var Question = React.createClass({
         var freeTextInput = <input type="text"
                                 placeholder="Default text (if any). Press Enter to save."
                                 defaultValue={freetext ? null : freetext}
-                                onKeyPress={this.handleFreeTextEdit} />
+                                onKeyPress={this.handleFreeTextEdit} />;
 
         return connectDropTarget(
             <div className={classes} id={this.props.id}>
@@ -147,7 +147,7 @@ var Question = React.createClass({
                             <ToggleParam
                                 icon="ion-document-text"
                                 helpText="Toggles whether free text can be entered"
-                                toggleValue={typeof(this.props.freetext) === "string"}
+                                toggleValue={typeof this.props.freetext === "string"}
                                 toggleName='freetext'
                                 itemType={ItemTypes.QUESTION}
                                 itemId={this.props.id} />
