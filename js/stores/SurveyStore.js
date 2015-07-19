@@ -4,6 +4,7 @@ var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
 var AlertTypes = require('../components/AlertTypes');
+var Lockr = require('lockr');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -283,6 +284,10 @@ var SurveyStore = Reflux.createStore({
         var survey = { survey: this.data.surveyData.toJS() };
         console.log("Survey:", survey);
         SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
+    },
+    onSaveSurvey() {
+        Lockr.set('survey', this.data.surveyData.toJS());
+        SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**
      * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.

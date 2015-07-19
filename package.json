@@ -18,6 +18,7 @@
     "babel-loader": "^5.1.2",
     "classnames": "^2.1.2",
     "immutable": "^3.7.3",
+    "lockr": "^0.8.2",
     "lodash": "^3.9.3",
     "node-libs-browser": "^0.5.0",
     "react": "^0.13.3",

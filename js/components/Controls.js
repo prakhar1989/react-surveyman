@@ -5,6 +5,12 @@ var Controls = React.createClass({
     handleDownload() {
         SurveyActions.downloadSurvey();
     },
+    handleSave() {
+        SurveyActions.saveSurvey();
+    },
+    handleLoad() {
+        SurveyActions.loadSurvey();
+    },
     render() {
         return (
             <div className="row controls">
@@ -15,10 +21,10 @@ var Controls = React.createClass({
                 <div className="col-xs-4">
                   <span className="help-text">Survey Actions</span>
                   <div className="btn-group btn-group-sm" role="group">
-                      <button type="button" className="btn btn-default">
+                      <button type="button" className="btn btn-default" onClick={this.handleSave}>
                           <span className="ion-android-cloud-done"></span> Save
                       </button>
-                      <button type="button" className="btn btn-default">
+                      <button type="button" className="btn btn-default" onClick={this.handleLoad}>
                           <span className="ion-android-upload"></span> Load
                       </button>
                       <button type="button" className="btn btn-default" onClick={this.handleDownload}>
