@@ -10,7 +10,7 @@
     "lint": "node node_modules/eslint/bin/eslint.js js"
   },
   "author": "Prakhar Srivastav",
-  "license": "MIT",
+  "license": "BSD",
   "repository": "https://github.com/prakhar1989/react-surveyman",
   "dependencies": {
     "babel": "^5.4.4",
