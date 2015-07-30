@@ -1,6 +1,5 @@
 var React = require('react');
-var OverlayTrigger = require('react-bootstrap').OverlayTrigger;
-var Tooltip = require('react-bootstrap').Tooltip;
+var { Tooltip, OverlayTrigger } = require('react-bootstrap');
 var SurveyActions = require('../actions/SurveyActions');
 
 var ToggleParam = React.createClass({

@@ -4,6 +4,7 @@ var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
 var AlertTypes = require('../components/AlertTypes');
+var Lockr = require('lockr');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -94,6 +95,10 @@ var SurveyStore = Reflux.createStore({
     getBlockId(questionId) {
         return _questionMap.get(questionId);
     },
+    /**
+     * Returns a new ID based on the type of object requested
+     * @param type one of ItemTypes.OPTION, ItemTypes.BLOCK, ItemTypes.QUESTION
+     */
     getNewId(type) {
         var prefix;
         if (type === ItemTypes.QUESTION) {
@@ -105,6 +110,12 @@ var SurveyStore = Reflux.createStore({
         }
         return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
     },
+    /**
+     * Helper function that returns the complete path to the block requested.
+     * @param blockID id of the block
+     * @param survey source survey object in which the block is to be found
+     * @param blockMap (optional) the block map to use for lookup
+     */
     getBlockPath(blockID, survey, blockMap = _blockMap) {
         // function that returns a chain of IDs from the root block
         // to the block with id - id
@@ -130,6 +141,12 @@ var SurveyStore = Reflux.createStore({
             return newPath.concat([index]);
         }, initPath);
     },
+    /**
+     * Helper function that returns the complete path to the question requested.
+     * @param questionID id of the question
+     * @param survey source survey object in which the question is to be found
+     * @param questionMap (optional) the question map to use for lookup
+     */
     getQuestionPath(questionID, survey, questionMap = _questionMap) {
         var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
         var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
@@ -285,6 +302,20 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
+     * Called when the clearSurvey action is called.
+     * Clears up the existing survey state, takes a copy and allows the user
+     * to start afresh.
+     */
+    onClearSurvey() {
+        var data = Immutable.fromJS(initialData);
+        this.updateSurveyData(data, true);
+        SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
+    },
+    onSaveSurvey() {
+        Lockr.set('survey', this.data.surveyData.toJS());
+        SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
+    },
+    /**
      * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.
      * @param blockId - id of the block who's index is required
      * @param parentBlock (optional) - The parent block at which to begin the search. If left out, the search starts from the top of the survey
@@ -346,16 +377,18 @@ var SurveyStore = Reflux.createStore({
      */
     cloneQuestion(question) {
         var self = this;
-        var newQuestion = question
-                .set('id', self.getNewId(ItemTypes.QUESTION)) // generate new ID
-                .update('options', (list) =>                  // do the same for all options
-                            list.map(
-                                o => Immutable.Map({
-                                    id: self.getNewId(ItemTypes.OPTION),
-                                    otext: o.get('otext')
-                                })
-                            )
-                        );
+
+        // get a new ID
+        var newQuestion = question.set('id', self.getNewId(ItemTypes.QUESTION));
+
+        // for each option, get a new option but with new ID and same otext
+        newQuestion = newQuestion.update('options',
+                            (list) => list.map(o => Immutable.Map({
+                                        id: self.getNewId(ItemTypes.OPTION),
+                                        otext: o.get('otext')
+                                      }))
+                      );
+
         var qId = newQuestion.get('id');
         newQuestion.get('options').forEach(o => {
             _optionMap = _optionMap.set(o.get('id'), qId);
@@ -509,6 +542,17 @@ var SurveyStore = Reflux.createStore({
         var survey = this.data.surveyData;
         var path = this.getQuestionPath(questionId, survey);
         var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
+        this.updateSurveyData(newSurvey, true);
+    },
+    /**
+     * Used to tag on a string value of freeText to a question
+     * @param text The value of freetext
+     * @param questionId Id of the question to which the freetext prop should be added
+     */
+    onSaveFreeText(text, questionId) {
+        var survey = this.data.surveyData;
+        var path = this.getQuestionPath(questionId, survey);
+        var newSurvey = survey.updateIn(path, q => q.set('freetext', text));
         this.updateSurveyData(newSurvey, true);
     },
     /**
