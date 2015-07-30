@@ -11,6 +11,7 @@ var SurveyActions = Reflux.createActions([
     "downloadSurvey",               // when a survey download is called
     "saveSurvey",                   // when a survey save is called
     "loadSurvey",                   // when a survey load is called
+    "clearSurvey",                  // when a survey clear is called
     "toggleParam",                  // when a config param is toggled for any type
     "itemDelete",                   // when an item (option/question/block) is called to be deleted
     "itemCopy",                     // when an item (question/block) is called to be copied

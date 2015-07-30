@@ -30,6 +30,10 @@ div.controls span.help-text {
     font-style: italic;
     font-size: 12px;
 }
+div.controls div.survey-actions,
+div.controls div.survey-actions p.help-text {
+    text-align: right;
+}
 div#sidebar {
     width: 350px;
 }

@@ -76,7 +76,7 @@ var SurveyStore = Reflux.createStore({
         if (cache) {
             _history.push({
                 data: this.data.surveyData,
-                optionMap: _optionMap.toJS(),
+                clear: _optionMap.toJS(),
                 questionMap: _questionMap.toJS()
             });
         }
@@ -284,6 +284,16 @@ var SurveyStore = Reflux.createStore({
         var survey = { survey: this.data.surveyData.toJS() };
         console.log("Survey:", survey);
         SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
+    },
+    /**
+     * Called when the clearSurvey action is called.
+     * Clears up the existing survey state, takes a copy and allows the user
+     * to start afresh.
+     */
+    onClearSurvey() {
+        var data = Immutable.fromJS(initialData);
+        this.updateSurveyData(data, true);
+        SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
     },
     onSaveSurvey() {
         Lockr.set('survey', this.data.surveyData.toJS());
