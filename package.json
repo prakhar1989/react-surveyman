@@ -5,7 +5,7 @@
   "main": "./lib/app.js",
   "scripts": {
     "start": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 8090",
-    "build": "webpack -p",
+    "build": "NODE_ENV='production' webpack -p",
     "test": "mocha --compilers js:babel/register tests",
     "lint": "node node_modules/eslint/bin/eslint.js js"
   },
