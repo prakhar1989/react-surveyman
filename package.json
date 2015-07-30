@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node node_modules/webpack-dev-server/bin/webpack-dev-server.js --progress --colors --port 8090",
     "build": "NODE_ENV='production' webpack -p",
+    "release": "./release",
     "test": "mocha --compilers js:babel/register tests",
     "lint": "node node_modules/eslint/bin/eslint.js js"
   },
