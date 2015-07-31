@@ -220,7 +220,7 @@ div.item.question div.qtext-area:hover i {
     visibility: visible;
 }
 
-div.alert {
+div.notifications.alert {
     top: 15px;
     position: fixed;
     left: 42%;
@@ -236,7 +236,7 @@ div.alert {
     text-transform: capitalize;
 }
 
-div.alert a {
+div.notifications.alert a {
     font-weight: bold;
     text-decoration: underline;
     color: #222;

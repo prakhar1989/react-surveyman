@@ -23,7 +23,7 @@ $ npm run start
 ```
 
 ### Tests
-The test suite has it stands is pretty sparse right now and is primarily built for purpose of testing the flux stores.
+The test suite as it stands is pretty sparse right now and is primarily built for purpose of testing the flux stores.
 ```
 $ npm run test
 ```
