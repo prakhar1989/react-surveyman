@@ -17,6 +17,7 @@ var _blockMap = Immutable.Map();        // subblockId => blockid
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
+const LOCALSTORAGE_KEY = 'survey'; // the key against which the survey data is stored in LS
 
 // mananging history
 var _history = [];
@@ -25,6 +26,7 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: Immutable.List(),
+        hasSavedSurvey: false,
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
@@ -50,8 +52,9 @@ var SurveyStore = Reflux.createStore({
         this.listenTo(SurveyActions.load, () => {
             window.location.hash = "";   // clear the location hash on app init
 
-            this.data.optionGroupState =
-                this.data.optionGroupState.set('options', initOptionsData);
+            this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
+            var surveyStored = Lockr.get(LOCALSTORAGE_KEY);
+            if (surveyStored) this.data.hasSavedSurvey = true;
 
             // load up survey data
             var data = Immutable.fromJS(initialData);
@@ -63,7 +66,8 @@ var SurveyStore = Reflux.createStore({
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
             alertState: this.data.alertState,
-            optionGroupState: this.data.optionGroupState
+            optionGroupState: this.data.optionGroupState,
+            hasSavedSurvey: this.data.hasSavedSurvey
         };
     },
     /**
@@ -323,7 +327,7 @@ var SurveyStore = Reflux.createStore({
      * Stores a snapshot of the survey JSON object in the localStorage.
      */
     onSaveSurvey() {
-        Lockr.set('survey', this.data.surveyData.toJS());
+        Lockr.set(LOCALSTORAGE_KEY, this.data.surveyData.toJS());
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**
@@ -332,7 +336,7 @@ var SurveyStore = Reflux.createStore({
      * application state.
      */
     onLoadSurvey() {
-        var rawData = Lockr.get('survey');
+        var rawData = Lockr.get(LOCALSTORAGE_KEY);
         if (!rawData) throw new Error("No survey found");
 
         // update the survey object

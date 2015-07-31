@@ -5,6 +5,7 @@ var AlertBox = require('./AlertBox');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var { DragDropContext } = require('react-dnd');
 var HTML5Backend = require('react-dnd/modules/backends/HTML5');
+var Alert = require('react-bootstrap').Alert;
 
 var Pallet = require('./Pallet'),
     Toolbox = require('./Toolbox'),
@@ -19,11 +20,28 @@ var Application = React.createClass({
     componentDidMount() {
         SurveyActions.load();
     },
+    handleAlertDismiss() {
+    },
+    handleLoadSurvey() {
+        SurveyActions.loadSurvey();
+    },
+    handleDeleteSurvey() {
+    },
     render() {
         var { modalState,
               alertState,
               surveyData,
-              optionGroupState } = this.state;
+              optionGroupState,
+              hasSavedSurvey } = this.state;
+
+        var loadNotification = (
+            <Alert className="survey-notification" onDismiss={this.handleAlertDismiss}>
+                <p>It seems that exists a survey that you saved previously. Do you want to load it and continue where you left off?</p>
+                <button className="btn btn-default btn-xs" onClick={this.handleLoadSurvey}>Yes</button>
+                <button className="btn btn-danger btn-xs" onClick={this.handleDeleteSurvey}>No, delete it</button>
+            </Alert>
+        );
+
         return (
             <div className="row">
                 <QuestionModal
@@ -34,6 +52,7 @@ var Application = React.createClass({
                     level={alertState.get('level')}
                     visible={alertState.get('visible')} />
                 <div className="col-md-8">
+                     { hasSavedSurvey ? loadNotification : null }
                     <Pallet survey={surveyData} />
                 </div>
                 <div className="col-md-4">
