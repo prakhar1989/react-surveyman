@@ -312,10 +312,11 @@ var SurveyStore = Reflux.createStore({
 
         SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
 
-        // clear up the maps
+        // clear up the maps and set
         _questionMap = Immutable.Map();
         _optionMap = Immutable.Map();
         _blockMap = Immutable.Map();
+        _optionsSet = Immutable.OrderedSet();
     },
     /**
      * Called when the saveSurvey action is called.
@@ -326,7 +327,9 @@ var SurveyStore = Reflux.createStore({
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**
-     * TODO: Add comment
+     * Called when the loadSurvey action is triggered.
+     * Reads the survey stored in localStorage and loads that into the
+     * application state.
      */
     onLoadSurvey() {
         var rawData = Lockr.get('survey');
@@ -341,9 +344,37 @@ var SurveyStore = Reflux.createStore({
         _optionMap = Immutable.Map();
         _blockMap = Immutable.Map();
         data.forEach((block) => this.buildMapsForBlock(block));
+
+        SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
     },
+    /**
+     * Takes a block and runs over its children recursively and
+     * populates the maps (option, question, block) with correct mappings
+     * @param block - Block of type Immutable.Map
+     */
     buildMapsForBlock(block) {
-        // build up the block
+        var blockId = block.get('id');
+        _optionsSet = Immutable.OrderedSet();
+
+        // start with the questions
+        block.get('questions').forEach((q) => {
+            var qId = q.get('id');
+            _questionMap = _questionMap.set(qId, blockId);
+
+            // tackle the questions
+            q.get('options').forEach((o) => {
+                _optionMap = _optionMap.set(o.get('id'), qId)
+                _optionsSet = _optionsSet.add(o.get('otext'));
+            });
+        });
+
+        // handle subblocks
+        block.get('subblocks').forEach((b) => {
+            _blockMap = _blockMap.set(b.get('id'), blockId);
+
+            // call this recursively for each subblock
+            this.buildMapsForBlock(b);
+        });
     },
     /**
      * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.
