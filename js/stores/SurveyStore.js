@@ -17,6 +17,7 @@ var _blockMap = Immutable.Map();        // subblockId => blockid
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
+const LOCALSTORAGE_KEY = 'survey'; // the key against which the survey data is stored in LS
 
 // mananging history
 var _history = [];
@@ -25,6 +26,7 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: Immutable.List(),
+        hasSavedSurvey: false,
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
@@ -50,8 +52,9 @@ var SurveyStore = Reflux.createStore({
         this.listenTo(SurveyActions.load, () => {
             window.location.hash = "";   // clear the location hash on app init
 
-            this.data.optionGroupState =
-                this.data.optionGroupState.set('options', initOptionsData);
+            this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
+            var surveyStored = Lockr.get(LOCALSTORAGE_KEY);
+            if (surveyStored) this.data.hasSavedSurvey = true;
 
             // load up survey data
             var data = Immutable.fromJS(initialData);
@@ -63,7 +66,8 @@ var SurveyStore = Reflux.createStore({
             surveyData: this.data.surveyData,
             modalState: this.data.modalState,
             alertState: this.data.alertState,
-            optionGroupState: this.data.optionGroupState
+            optionGroupState: this.data.optionGroupState,
+            hasSavedSurvey: this.data.hasSavedSurvey
         };
     },
     /**
@@ -309,11 +313,72 @@ var SurveyStore = Reflux.createStore({
     onClearSurvey() {
         var data = Immutable.fromJS(initialData);
         this.updateSurveyData(data, true);
+
         SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
+
+        // clear up the maps and set
+        _questionMap = Immutable.Map();
+        _optionMap = Immutable.Map();
+        _blockMap = Immutable.Map();
+        _optionsSet = Immutable.OrderedSet();
     },
+    /**
+     * Called when the saveSurvey action is called.
+     * Stores a snapshot of the survey JSON object in the localStorage.
+     */
     onSaveSurvey() {
-        Lockr.set('survey', this.data.surveyData.toJS());
+        Lockr.set(LOCALSTORAGE_KEY, this.data.surveyData.toJS());
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
+    },
+    /**
+     * Called when the loadSurvey action is triggered.
+     * Reads the survey stored in localStorage and loads that into the
+     * application state.
+     */
+    onLoadSurvey() {
+        var rawData = Lockr.get(LOCALSTORAGE_KEY);
+        if (!rawData) throw new Error("No survey found");
+
+        // update the survey object
+        var data = Immutable.fromJS(rawData);
+        this.updateSurveyData(data, true);
+
+        // clear up the maps & build them from scratch
+        _questionMap = Immutable.Map();
+        _optionMap = Immutable.Map();
+        _blockMap = Immutable.Map();
+        data.forEach((block) => this.buildMapsForBlock(block));
+
+        SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
+    },
+    /**
+     * Takes a block and runs over its children recursively and
+     * populates the maps (option, question, block) with correct mappings
+     * @param block - Block of type Immutable.Map
+     */
+    buildMapsForBlock(block) {
+        var blockId = block.get('id');
+        _optionsSet = Immutable.OrderedSet();
+
+        // start with the questions
+        block.get('questions').forEach((q) => {
+            var qId = q.get('id');
+            _questionMap = _questionMap.set(qId, blockId);
+
+            // tackle the questions
+            q.get('options').forEach((o) => {
+                _optionMap = _optionMap.set(o.get('id'), qId)
+                _optionsSet = _optionsSet.add(o.get('otext'));
+            });
+        });
+
+        // handle subblocks
+        block.get('subblocks').forEach((b) => {
+            _blockMap = _blockMap.set(b.get('id'), blockId);
+
+            // call this recursively for each subblock
+            this.buildMapsForBlock(b);
+        });
     },
     /**
      * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.

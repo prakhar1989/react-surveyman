@@ -4,7 +4,6 @@ var SurveyActions = require('../actions/SurveyActions');
 var AlertTypes = require('./AlertTypes');
 
 // Undo option is not shown for INFO alert level
-
 var AlertBox = React.createClass({
     propTypes: {
         level: React.PropTypes.oneOf([AlertTypes.INFO,
@@ -19,7 +18,7 @@ var AlertBox = React.createClass({
     render() {
         if (this.props.visible) {
             return (
-                <Alert>
+                <Alert className="notifications">
                     <p>{this.props.msg}
                     { this.props.level === AlertTypes.INFO ? '' :
                         <a onClick={this.handleUndo}>Undo</a> }
