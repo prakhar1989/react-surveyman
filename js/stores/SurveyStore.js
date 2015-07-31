@@ -309,11 +309,41 @@ var SurveyStore = Reflux.createStore({
     onClearSurvey() {
         var data = Immutable.fromJS(initialData);
         this.updateSurveyData(data, true);
+
         SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
+
+        // clear up the maps
+        _questionMap = Immutable.Map();
+        _optionMap = Immutable.Map();
+        _blockMap = Immutable.Map();
     },
+    /**
+     * Called when the saveSurvey action is called.
+     * Stores a snapshot of the survey JSON object in the localStorage.
+     */
     onSaveSurvey() {
         Lockr.set('survey', this.data.surveyData.toJS());
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
+    },
+    /**
+     * TODO: Add comment
+     */
+    onLoadSurvey() {
+        var rawData = Lockr.get('survey');
+        if (!rawData) throw new Error("No survey found");
+
+        // update the survey object
+        var data = Immutable.fromJS(rawData);
+        this.updateSurveyData(data, true);
+
+        // clear up the maps & build them from scratch
+        _questionMap = Immutable.Map();
+        _optionMap = Immutable.Map();
+        _blockMap = Immutable.Map();
+        data.forEach((block) => this.buildMapsForBlock(block));
+    },
+    buildMapsForBlock(block) {
+        // build up the block
     },
     /**
      * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.

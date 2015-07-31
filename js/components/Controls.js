@@ -9,10 +9,15 @@ var Controls = React.createClass({
         SurveyActions.saveSurvey();
     },
     handleLoad() {
-        SurveyActions.loadSurvey();
+        var choice = confirm("This will cause your current state to be replaced " +
+                             "with the loaded survey. Are you sure you want to proceed?");
+        if (choice) {
+            SurveyActions.loadSurvey();
+        }
     },
     handleClear() {
-        var choice = confirm("This will clear the survey and start a new one. Are you sure you want to proceed?");
+        var choice = confirm("This will clear the survey and start a new one. " +
+                             "Are you sure you want to proceed?");
         if (choice) {
             SurveyActions.clearSurvey();
         }
