@@ -17,7 +17,7 @@ var _blockMap = Immutable.Map();        // subblockId => blockid
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
-const LOCALSTORAGE_KEY = 'survey'; // the key against which the survey data is stored in LS
+const LOCALSTORAGE_KEY = 'savedSurveyList'; // the key against which the survey data is stored in LS
 
 // mananging history
 var _history = [];
@@ -30,7 +30,7 @@ var SurveyStore = Reflux.createStore({
             dropTargetID: null,
             isOpen: false
         }),
-        loadSurveyModalState: true,
+        loadSurveyModalState: false,
         alertState: Immutable.Map({
             msg: '',
             level: AlertTypes.INFO,
@@ -324,8 +324,14 @@ var SurveyStore = Reflux.createStore({
      * Called when the saveSurvey action is called.
      * Stores a snapshot of the survey JSON object in the localStorage.
      */
-    onSaveSurvey() {
-        Lockr.set(LOCALSTORAGE_KEY, this.data.surveyData.toJS());
+    onSaveSurvey(surveyTitle) {
+        var newSurvey = {
+            title: surveyTitle,
+            data: this.data.surveyData.toJS(),
+            createdAt: Date.now()
+        }
+        var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
+        Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**

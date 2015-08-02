@@ -6,7 +6,12 @@ var Controls = React.createClass({
         SurveyActions.downloadSurvey();
     },
     handleSave() {
-        SurveyActions.saveSurvey();
+        var title = prompt("Enter a title for the survey");
+        if (title.trim().length > 0) {
+            SurveyActions.saveSurvey(title);
+        } else {
+            alert("Please enter a title");
+        }
     },
     handleLoad() {
         SurveyActions.toggleLoadModal();
