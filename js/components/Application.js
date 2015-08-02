@@ -6,13 +6,12 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var { DragDropContext } = require('react-dnd');
 var HTML5Backend = require('react-dnd/modules/backends/HTML5');
 var Alert = require('react-bootstrap').Alert;
-
-var Pallet = require('./Pallet'),
-    Toolbox = require('./Toolbox'),
-    SurveyActions = require('../actions/SurveyActions'),
-    SurveyStore = require('../stores/SurveyStore'),
-    TreeView = require('./TreeView');
-
+var Pallet = require('./Pallet');
+var Toolbox = require('./Toolbox');
+var SurveyActions = require('../actions/SurveyActions');
+var SurveyStore = require('../stores/SurveyStore');
+var TreeView = require('./TreeView');
+var LoadSurveyModal = require('./LoadSurveyModal');
 
 var Application = React.createClass({
     // this causes setState to run whenever the store calls this.trigger
@@ -31,28 +30,20 @@ var Application = React.createClass({
         var { modalState,
               alertState,
               surveyData,
-              optionGroupState,
-              hasSavedSurvey } = this.state;
-
-        var loadNotification = (
-            <Alert className="survey-notification" onDismiss={this.handleAlertDismiss}>
-                <p>It seems that exists a survey that you saved previously. Do you want to load it and continue where you left off?</p>
-                <button className="btn btn-default btn-xs" onClick={this.handleLoadSurvey}>Yes</button>
-                <button className="btn btn-danger btn-xs" onClick={this.handleDeleteSurvey}>No, delete it</button>
-            </Alert>
-        );
+              loadSurveyModalState,
+              optionGroupState } = this.state;
 
         return (
             <div className="row">
                 <QuestionModal
                     isOpen={modalState.get('isOpen')}
                     parentID={modalState.get('dropTargetID')}/>
+                <LoadSurveyModal isOpen={loadSurveyModalState} />
                 <AlertBox
                     msg={alertState.get('msg')}
                     level={alertState.get('level')}
                     visible={alertState.get('visible')} />
                 <div className="col-md-8">
-                     { hasSavedSurvey ? loadNotification : null }
                     <Pallet survey={surveyData} />
                 </div>
                 <div className="col-md-4">
