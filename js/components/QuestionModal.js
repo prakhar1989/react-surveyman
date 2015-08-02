@@ -47,6 +47,7 @@ var BaseModal = React.createClass({
             bsStyle='primary'
             backdrop={true}
             animation={true}
+            closeButton={false}
             container={null}
             onRequestHide={this.handleClose}>
             <div className='modal-body'>

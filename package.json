@@ -11,7 +11,10 @@
     "lint": "node node_modules/eslint/bin/eslint.js js"
   },
   "author": "Prakhar Srivastav",
-  "license": "BSD",
+  "license": [{
+      "type": "BSD",
+      "url": "https://github.com/prakhar1989/react-surveyman/blob/master/LICENSE"
+  }],
   "repository": "https://github.com/prakhar1989/react-surveyman",
   "dependencies": {
     "babel": "^5.4.4",
@@ -25,6 +28,7 @@
     "react": "^0.13.3",
     "react-bootstrap": "0.20.1",
     "react-dnd": "^1.1.3",
+    "react-dropzone": "^1.2.4",
     "react-select": "^0.4.9",
     "react-tag-input": "1.0.2",
     "reflux": "^0.2.7",

@@ -10,7 +10,7 @@ var SurveyActions = Reflux.createActions([
     "showAlert",                    // when the alert box needs to be shown
     "downloadSurvey",               // when a survey download is called
     "saveSurvey",                   // when a survey save is called
-    "loadSurvey",                   // when a survey load is called
+    "toggleLoadModal",              // when the load modal is clicked
     "clearSurvey",                  // when a survey clear is called
     "toggleParam",                  // when a config param is toggled for any type
     "itemDelete",                   // when an item (option/question/block) is called to be deleted
