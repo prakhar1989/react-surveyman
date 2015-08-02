@@ -31,6 +31,7 @@ var SurveyStore = Reflux.createStore({
             isOpen: false
         }),
         loadSurveyModalState: false,
+        savedSurveys: [],
         alertState: Immutable.Map({
             msg: '',
             level: AlertTypes.INFO,
@@ -54,6 +55,9 @@ var SurveyStore = Reflux.createStore({
 
             this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
 
+            // read the saved survey data
+            this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
+
             // load up survey data
             var data = Immutable.fromJS(initialData);
             this.updateSurveyData(data, true);
@@ -65,7 +69,8 @@ var SurveyStore = Reflux.createStore({
             modalState: this.data.modalState,
             alertState: this.data.alertState,
             optionGroupState: this.data.optionGroupState,
-            loadSurveyModalState: this.data.loadSurveyModalState
+            loadSurveyModalState: this.data.loadSurveyModalState,
+            savedSurveys: this.data.savedSurveys
         };
     },
     /**
@@ -332,6 +337,10 @@ var SurveyStore = Reflux.createStore({
         }
         var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
         Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
+
+        // update the cached survey data to include the latest
+        this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY);
+
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**

@@ -13,6 +13,9 @@ var BaseModal = React.createClass({
     handleDrop() {
         console.log("file dropped");
     },
+    componentDidMount() {
+        console.log(this.props.savedSurveys);
+    },
     render() {
         return (
             <Modal title='Load Survey' bsStyle='warning' backdrop={true} 
@@ -44,8 +47,8 @@ var BaseModal = React.createClass({
 var LoadSurveyModal = React.createClass({
     mixins: [OverlayMixin],
     propTypes: {
-        isOpen: React.PropTypes.bool,
-        parentID: React.PropTypes.string
+        isOpen: React.PropTypes.bool.isRequired,
+        savedSurveys: React.PropTypes.array.isRequired
     },
     render() {
         return (
@@ -57,7 +60,7 @@ var LoadSurveyModal = React.createClass({
             return <div></div>;
         }
         return (
-            <BaseModal />
+            <BaseModal savedSurveys={this.props.savedSurveys} />
         );
     }
 });

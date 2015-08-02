@@ -7,6 +7,8 @@ var Controls = React.createClass({
     },
     handleSave() {
         var title = prompt("Enter a title for the survey");
+        if (title === null) return;
+
         if (title.trim().length > 0) {
             SurveyActions.saveSurvey(title);
         } else {
