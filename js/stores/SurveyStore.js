@@ -26,11 +26,11 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: Immutable.List(),
-        hasSavedSurvey: false,
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
         }),
+        loadSurveyModalState: true,
         alertState: Immutable.Map({
             msg: '',
             level: AlertTypes.INFO,
@@ -53,8 +53,6 @@ var SurveyStore = Reflux.createStore({
             window.location.hash = "";   // clear the location hash on app init
 
             this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
-            var surveyStored = Lockr.get(LOCALSTORAGE_KEY);
-            if (surveyStored) this.data.hasSavedSurvey = true;
 
             // load up survey data
             var data = Immutable.fromJS(initialData);
@@ -67,7 +65,7 @@ var SurveyStore = Reflux.createStore({
             modalState: this.data.modalState,
             alertState: this.data.alertState,
             optionGroupState: this.data.optionGroupState,
-            hasSavedSurvey: this.data.hasSavedSurvey
+            loadSurveyModalState: this.data.loadSurveyModalState
         };
     },
     /**
@@ -350,6 +348,10 @@ var SurveyStore = Reflux.createStore({
         data.forEach((block) => this.buildMapsForBlock(block));
 
         SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
+    },
+    onToggleLoadModal() {
+       this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
+       this.trigger(this.data);
     },
     /**
      * Takes a block and runs over its children recursively and

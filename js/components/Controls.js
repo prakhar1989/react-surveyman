@@ -9,11 +9,7 @@ var Controls = React.createClass({
         SurveyActions.saveSurvey();
     },
     handleLoad() {
-        var choice = confirm("This will cause your current state to be replaced " +
-                             "with the loaded survey. Are you sure you want to proceed?");
-        if (choice) {
-            SurveyActions.loadSurvey();
-        }
+        SurveyActions.toggleLoadModal();
     },
     handleClear() {
         var choice = confirm("This will clear the survey and start a new one. " +
