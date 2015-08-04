@@ -5,7 +5,6 @@ var AlertBox = require('./AlertBox');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var { DragDropContext } = require('react-dnd');
 var HTML5Backend = require('react-dnd/modules/backends/HTML5');
-var Alert = require('react-bootstrap').Alert;
 var Pallet = require('./Pallet');
 var Toolbox = require('./Toolbox');
 var SurveyActions = require('../actions/SurveyActions');
