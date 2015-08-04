@@ -1,9 +1,13 @@
 var React = require('react');
 var SurveyActions = require('../actions/SurveyActions');
+var SurveyStore = require('../stores/SurveyStore');
 
 var Controls = React.createClass({
-    handleDownload() {
-        SurveyActions.downloadSurvey();
+    handleDownload(e) {
+        var data = JSON.stringify({survey: SurveyStore.getSurveyData()}, null, 2);
+        var url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+        var link = this.refs.link.getDOMNode('link');
+        link.href = url;
     },
     handleSave() {
         var title = prompt("Enter a title for the survey");
@@ -44,9 +48,8 @@ var Controls = React.createClass({
                       <button type="button" className="btn btn-default" onClick={this.handleLoad}>
                           <span className="ion-android-upload"></span> Load
                       </button>
-                      <button type="button" className="btn btn-default" onClick={this.handleDownload}>
-                          <span className="ion-archive"></span> Download
-                      </button>
+                      <a ref="link" href='' download="survey.json" type="button" className="btn btn-default" onClick={this.handleDownload}> <span className="ion-archive"></span> Download
+                      </a>
                   </div>
                 </div>
             </div>

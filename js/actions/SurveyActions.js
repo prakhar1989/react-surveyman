@@ -8,7 +8,6 @@ var SurveyActions = Reflux.createActions([
     "optionAdded",                  // when option is added
     "toggleModal",                  // when a modal is toggled
     "showAlert",                    // when the alert box needs to be shown
-    "downloadSurvey",               // when a survey download is called
     "saveSurvey",                   // when a survey save is called
     "loadSurvey",                   // when a survey load is called
     "toggleLoadModal",              // when the load modal is clicked
