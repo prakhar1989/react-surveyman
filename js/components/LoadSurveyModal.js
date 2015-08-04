@@ -59,7 +59,7 @@ var BaseModal = React.createClass({
 
                     <h3>Upload a Survey file</h3>
                      <p>Try dropping some files here, or click to select files to upload.</p>
-                     <FileDropzone onDrop={this.handleDrop} className="file-dropzone">
+                     <FileDropzone onDrop={this.handleDrop} multiple={false} className="file-dropzone">
                         <i className="ion-archive"></i>
                     </FileDropzone>
                 </div>
