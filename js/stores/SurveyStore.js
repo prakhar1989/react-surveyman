@@ -90,9 +90,17 @@ var SurveyStore = Reflux.createStore({
         this.data.surveyData = data;
         this.trigger(this.data);
     },
-    // Returns the set (unique list) of options.
+    /*
+     * Returns the set (unique list) of options.
+     */
     getOptionsSet() {
         return _optionsSet;
+    },
+    /*
+     * Returns the surveyjson data
+     */
+    getSurveyData() {
+        return this.data.surveyData.toJS();
     },
     /**
      * Returns the id of the block which has the
@@ -298,15 +306,6 @@ var SurveyStore = Reflux.createStore({
             self.data.alertState = self.data.alertState.set('visible', false);
             self.trigger(self.data);
         }, ALERT_TIMEOUT, this);
-    },
-    /**
-     * Called when the downloadSurvey action is called.
-     * Logs the survey object to the console.
-     */
-    onDownloadSurvey() {
-        var survey = { survey: this.data.surveyData.toJS() };
-        console.log("Survey:", survey);
-        SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
     },
     /**
      * Called when the clearSurvey action is called.
