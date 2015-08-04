@@ -58,6 +58,10 @@ div.file-dropzone i {
     color: #eee
 }
 
+div.file-dropzone.active i {
+    color: #008148;
+}
+
 div.modal-body h3 {
     margin-top: 0;
     font-size: 16px;

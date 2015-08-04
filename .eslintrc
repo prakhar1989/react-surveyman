@@ -30,6 +30,6 @@
     "no-underscore-dangle": 0,
     "quotes": 0,
     "new-cap": 0,
-    "no-alert": 1
+    "no-alert": 0
   }
 }

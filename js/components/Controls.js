@@ -3,7 +3,7 @@ var SurveyActions = require('../actions/SurveyActions');
 var SurveyStore = require('../stores/SurveyStore');
 
 var Controls = React.createClass({
-    handleDownload(e) {
+    handleDownload() {
         var data = JSON.stringify({survey: SurveyStore.getSurveyData()}, null, 2);
         var url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
         var link = this.refs.link.getDOMNode('link');
@@ -11,9 +11,9 @@ var Controls = React.createClass({
     },
     handleSave() {
         var title = prompt("Enter a title for the survey");
-        if (title === null) return;
-
-        if (title.trim().length > 0) {
+        if (title === null) {
+            return;
+        } else if (title.trim().length > 0) {
             SurveyActions.saveSurvey(title);
         } else {
             alert("Please enter a title");

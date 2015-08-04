@@ -10,11 +10,11 @@ var BaseModal = React.createClass({
     handleClose() {
         SurveyActions.toggleLoadModal();
     },
-    handleDrop(file) {
-        if (file.length !== 1) {
+    handleDrop(files) {
+        if (files.length !== 1) {
             throw new Error("Please upload a single file");
         }
-        var file = file[0];
+        var file = files[0];
         var reader = new FileReader();
         reader.onload = (evt) => {
             try {
@@ -22,11 +22,11 @@ var BaseModal = React.createClass({
                 SurveyActions.loadSurvey(survey);
                 SurveyActions.toggleLoadModal();
             } catch (err) {
-                alert("Unable to upload file. Please make sure you upload a " +
-                      "json file in the correct format.")
+                alert("Unable to load survey. Please make sure you upload a " +
+                      "json file in the correct format.");
                 console.error(err);
             }
-        }
+        };
         reader.readAsText(file, "UTF-8");
     },
     handleClick(index) {
@@ -46,7 +46,7 @@ var BaseModal = React.createClass({
         );
 
         return (
-            <Modal title='Load Survey' bsStyle='warning' backdrop={true} 
+            <Modal title='Load Survey' bsStyle='warning' backdrop={true}
                         animation={true} container={null} closeButton={false}
                         onRequestHide={this.handleClose}>
                 <div className='modal-body'>
@@ -59,7 +59,7 @@ var BaseModal = React.createClass({
 
                     <h3>Upload a Survey file</h3>
                      <p>Try dropping some files here, or click to select files to upload.</p>
-                     <FileDropzone onDrop={this.handleDrop} className="file-dropzone">
+                     <FileDropzone onDrop={this.handleDrop} multiple={false} className="file-dropzone">
                         <i className="ion-archive"></i>
                     </FileDropzone>
                 </div>

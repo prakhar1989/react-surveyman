@@ -333,7 +333,7 @@ var SurveyStore = Reflux.createStore({
             title: surveyTitle,
             data: this.data.surveyData.toJS(),
             createdAt: Date.now()
-        }
+        };
         var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
         Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
 
@@ -384,7 +384,7 @@ var SurveyStore = Reflux.createStore({
 
             // tackle the questions
             q.get('options').forEach((o) => {
-                _optionMap = _optionMap.set(o.get('id'), qId)
+                _optionMap = _optionMap.set(o.get('id'), qId);
                 _optionsSet = _optionsSet.add(o.get('otext'));
             });
         });
