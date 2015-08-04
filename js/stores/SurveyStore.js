@@ -345,13 +345,10 @@ var SurveyStore = Reflux.createStore({
     },
     /**
      * Called when the loadSurvey action is triggered.
-     * Reads the survey stored in localStorage and loads that into the
-     * application state.
+     * Takes the survey json as param and loads that into the application state.
+     * @param rawData survey data in json
      */
-    onLoadSurvey() {
-        var rawData = Lockr.get(LOCALSTORAGE_KEY);
-        if (!rawData) throw new Error("No survey found");
-
+    onLoadSurvey(rawData) {
         // update the survey object
         var data = Immutable.fromJS(rawData);
         this.updateSurveyData(data, true);
@@ -364,6 +361,10 @@ var SurveyStore = Reflux.createStore({
 
         SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
     },
+    /**
+     * Called when the toggleLoadModal action is triggered.
+     * Toggles the visibility of the load survey modal.
+     */
     onToggleLoadModal() {
        this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
        this.trigger(this.data);

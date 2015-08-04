@@ -13,10 +13,22 @@ var BaseModal = React.createClass({
     handleDrop() {
         console.log("file dropped");
     },
-    componentDidMount() {
-        console.log(this.props.savedSurveys);
+    handleClick(index) {
+        var { data } = this.props.savedSurveys[index];
+        SurveyActions.loadSurvey(data);
+        SurveyActions.toggleLoadModal();
     },
     render() {
+        var { savedSurveys } = this.props;
+        var saves = savedSurveys.map((s, i) =>
+            <li key={i}>
+                <a title={"Saved on: " + new Date(s.createdAt)}
+                   onClick={this.handleClick.bind(this, i)}>
+                    {s.title}
+                </a>
+            </li>
+        );
+
         return (
             <Modal title='Load Survey' bsStyle='warning' backdrop={true} 
                         animation={true} container={null} closeButton={false}
@@ -24,12 +36,11 @@ var BaseModal = React.createClass({
                 <div className='modal-body'>
                     <h3>Saved Surveys</h3>
                     <p>Here are your saved surveys that we have found. Click on any to load into the pallet.</p>
-                    <ul>
-                        <li>saved on 14/12/1041</li>
-                        <li>saved on 4/10/1041</li>
-                        <li>saved on 4/2/1041</li>
-                    </ul>
+
+                    {saves.length === 0 ? <p>No saved surveys found</p> : <ul> {saves} </ul>}
+
                     <h2><span>OR</span></h2>
+
                     <h3>Upload a Survey file</h3>
                      <p>Try dropping some files here, or click to select files to upload.</p>
                      <FileDropzone onDrop={this.handleDrop} className="file-dropzone">
