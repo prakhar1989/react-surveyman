@@ -10,8 +10,24 @@ var BaseModal = React.createClass({
     handleClose() {
         SurveyActions.toggleLoadModal();
     },
-    handleDrop() {
-        console.log("file dropped");
+    handleDrop(file) {
+        if (file.length !== 1) {
+            throw new Error("Please upload a single file");
+        }
+        var file = file[0];
+        var reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                var { survey } = JSON.parse(evt.target.result);
+                SurveyActions.loadSurvey(survey);
+                SurveyActions.toggleLoadModal();
+            } catch (err) {
+                alert("Unable to upload file. Please make sure you upload a " +
+                      "json file in the correct format.")
+                console.error(err);
+            }
+        }
+        reader.readAsText(file, "UTF-8");
     },
     handleClick(index) {
         var { data } = this.props.savedSurveys[index];
