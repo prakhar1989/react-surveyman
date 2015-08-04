@@ -10,10 +10,41 @@ var BaseModal = React.createClass({
     handleClose() {
         SurveyActions.toggleLoadModal();
     },
-    handleDrop() {
-        console.log("file dropped");
+    handleDrop(file) {
+        if (file.length !== 1) {
+            throw new Error("Please upload a single file");
+        }
+        var file = file[0];
+        var reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                var { survey } = JSON.parse(evt.target.result);
+                SurveyActions.loadSurvey(survey);
+                SurveyActions.toggleLoadModal();
+            } catch (err) {
+                alert("Unable to upload file. Please make sure you upload a " +
+                      "json file in the correct format.")
+                console.error(err);
+            }
+        }
+        reader.readAsText(file, "UTF-8");
+    },
+    handleClick(index) {
+        var { data } = this.props.savedSurveys[index];
+        SurveyActions.loadSurvey(data);
+        SurveyActions.toggleLoadModal();
     },
     render() {
+        var { savedSurveys } = this.props;
+        var saves = savedSurveys.map((s, i) =>
+            <li key={i}>
+                <a title={"Saved on: " + new Date(s.createdAt)}
+                   onClick={this.handleClick.bind(this, i)}>
+                    {s.title}
+                </a>
+            </li>
+        );
+
         return (
             <Modal title='Load Survey' bsStyle='warning' backdrop={true} 
                         animation={true} container={null} closeButton={false}
@@ -21,12 +52,11 @@ var BaseModal = React.createClass({
                 <div className='modal-body'>
                     <h3>Saved Surveys</h3>
                     <p>Here are your saved surveys that we have found. Click on any to load into the pallet.</p>
-                    <ul>
-                        <li>saved on 14/12/1041</li>
-                        <li>saved on 4/10/1041</li>
-                        <li>saved on 4/2/1041</li>
-                    </ul>
+
+                    {saves.length === 0 ? <p>No saved surveys found</p> : <ul> {saves} </ul>}
+
                     <h2><span>OR</span></h2>
+
                     <h3>Upload a Survey file</h3>
                      <p>Try dropping some files here, or click to select files to upload.</p>
                      <FileDropzone onDrop={this.handleDrop} className="file-dropzone">
@@ -44,8 +74,8 @@ var BaseModal = React.createClass({
 var LoadSurveyModal = React.createClass({
     mixins: [OverlayMixin],
     propTypes: {
-        isOpen: React.PropTypes.bool,
-        parentID: React.PropTypes.string
+        isOpen: React.PropTypes.bool.isRequired,
+        savedSurveys: React.PropTypes.array.isRequired
     },
     render() {
         return (
@@ -57,7 +87,7 @@ var LoadSurveyModal = React.createClass({
             return <div></div>;
         }
         return (
-            <BaseModal />
+            <BaseModal savedSurveys={this.props.savedSurveys} />
         );
     }
 });

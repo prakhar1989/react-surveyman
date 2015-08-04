@@ -31,6 +31,7 @@ var Application = React.createClass({
               alertState,
               surveyData,
               loadSurveyModalState,
+              savedSurveys,
               optionGroupState } = this.state;
 
         return (
@@ -38,7 +39,9 @@ var Application = React.createClass({
                 <QuestionModal
                     isOpen={modalState.get('isOpen')}
                     parentID={modalState.get('dropTargetID')}/>
-                <LoadSurveyModal isOpen={loadSurveyModalState} />
+                <LoadSurveyModal
+                    isOpen={loadSurveyModalState}
+                    savedSurveys={savedSurveys} />
                 <AlertBox
                     msg={alertState.get('msg')}
                     level={alertState.get('level')}
