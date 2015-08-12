@@ -114,7 +114,7 @@ var TreeView = React.createClass({
                                       handleDrop={self.handleDrop}
                                       reorderQuestion={self.reorderQuestion}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
-                            <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
+                            <div className="tree-view_node">{self.renderProp('ordered', ques.get('ordered'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
                             <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
                         </QuestionNode>
@@ -145,7 +145,7 @@ var TreeView = React.createClass({
                                       handleDrop={self.handleDrop}
                                       reorderQuestion={self.reorderQuestion}>
                             <div className="tree-view_node">{"Options: " + ques.get('options').count()}</div>
-                            <div className="tree-view_node">{self.renderProp('ordering', ques.get('ordering'))}</div>
+                            <div className="tree-view_node">{self.renderProp('ordered', ques.get('ordered'))}</div>
                             <div className="tree-view_node">{self.renderProp('exclusive', ques.get('exclusive'))}</div>
                             <div className="tree-view_node">{self.renderProp('freetext', ques.get('freetext'))}</div>
                         </QuestionNode>

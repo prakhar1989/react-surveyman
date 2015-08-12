@@ -225,7 +225,7 @@ var SurveyStore = Reflux.createStore({
             id: this.getNewId(ItemTypes.QUESTION),
             qtext: questionObj.qtext,
             options: [],
-            ordering: questionObj.ordering,
+            ordered: questionObj.ordered,
             freetext: questionObj.freetext,
             exclusive: questionObj.exclusive
         });
