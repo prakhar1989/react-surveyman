@@ -88,7 +88,7 @@ var Block = React.createClass({
                 options={q.get('options')}
                 id={q.get('id')}
                 qtext={q.get('qtext')}
-                ordering={q.get('ordering')}
+                ordered={q.get('ordered')}
                 exclusive={q.get('exclusive')}
                 freetext={q.get('freetext')} />
         );

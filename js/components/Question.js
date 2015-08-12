@@ -29,7 +29,7 @@ var Question = React.createClass({
         options: React.PropTypes.instanceOf(List).isRequired,
         id: React.PropTypes.string.isRequired,
         qtext: React.PropTypes.string.isRequired,
-        ordering: React.PropTypes.bool.isRequired,
+        ordered: React.PropTypes.bool.isRequired,
         freetext: React.PropTypes.oneOfType([
             React.PropTypes.bool.isRequired,
             React.PropTypes.string.isRequired
@@ -129,8 +129,8 @@ var Question = React.createClass({
                             <ToggleParam
                                 icon="ion-shuffle"
                                 helpText="Toggles whether options are randomized"
-                                toggleValue={this.props.ordering}
-                                toggleName='ordering'
+                                toggleValue={this.props.ordered}
+                                toggleName='ordered'
                                 itemType={ItemTypes.QUESTION}
                                 itemId={this.props.id} />
                         </li>
