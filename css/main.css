@@ -44,6 +44,43 @@ div.widgets-area {
   background-color: #E0EEF8;
   padding: 10px;
 }
+
+div.file-dropzone {
+    width: 100%;
+    border: 1px dashed #bbb;
+    height: 120px;
+    text-align: center;
+    cursor: pointer;
+}
+
+div.file-dropzone i {
+    font-size: 81px;
+    color: #eee
+}
+
+div.file-dropzone.active i {
+    color: #008148;
+}
+
+div.modal-body h3 {
+    margin-top: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+div.modal-body h2 {
+   text-align: center; 
+   border-bottom: 1px solid #eee;
+   line-height: 10px;
+   margin: 10px 0 30px 0;
+} 
+
+div.modal-body h2 span { 
+    background:#fff; 
+    padding:0 10px; 
+    font-size: 14px;
+}
+
 div.item.dragging,
 div.survey.dragging,
 div.tree-view_node-block.dragging {
@@ -53,14 +90,6 @@ div.item.hovering,
 div.survey.hovering,
 div.tree-view_node-block.hovering {
     background: #eeeeee;
-}
-
-div.dropzone {
-  height: 80px;
-  width: 100%;
-  color: white;
-  text-align: center;
-  border: 1px dashed black;
 }
 div.draggable {
     border: 1px dashed black;

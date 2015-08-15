@@ -17,7 +17,7 @@ var _blockMap = Immutable.Map();        // subblockId => blockid
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
-const LOCALSTORAGE_KEY = 'survey'; // the key against which the survey data is stored in LS
+const LOCALSTORAGE_KEY = 'savedSurveyList'; // the key against which the survey data is stored in LS
 
 // mananging history
 var _history = [];
@@ -26,11 +26,12 @@ var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
         surveyData: Immutable.List(),
-        hasSavedSurvey: false,
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
         }),
+        loadSurveyModalState: false,
+        savedSurveys: [],
         alertState: Immutable.Map({
             msg: '',
             level: AlertTypes.INFO,
@@ -53,8 +54,9 @@ var SurveyStore = Reflux.createStore({
             window.location.hash = "";   // clear the location hash on app init
 
             this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
-            var surveyStored = Lockr.get(LOCALSTORAGE_KEY);
-            if (surveyStored) this.data.hasSavedSurvey = true;
+
+            // read the saved survey data
+            this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
 
             // load up survey data
             var data = Immutable.fromJS(initialData);
@@ -67,7 +69,8 @@ var SurveyStore = Reflux.createStore({
             modalState: this.data.modalState,
             alertState: this.data.alertState,
             optionGroupState: this.data.optionGroupState,
-            hasSavedSurvey: this.data.hasSavedSurvey
+            loadSurveyModalState: this.data.loadSurveyModalState,
+            savedSurveys: this.data.savedSurveys
         };
     },
     /**
@@ -87,9 +90,17 @@ var SurveyStore = Reflux.createStore({
         this.data.surveyData = data;
         this.trigger(this.data);
     },
-    // Returns the set (unique list) of options.
+    /*
+     * Returns the set (unique list) of options.
+     */
     getOptionsSet() {
         return _optionsSet;
+    },
+    /*
+     * Returns the surveyjson data
+     */
+    getSurveyData() {
+        return this.data.surveyData.toJS();
     },
     /**
      * Returns the id of the block which has the
@@ -214,7 +225,7 @@ var SurveyStore = Reflux.createStore({
             id: this.getNewId(ItemTypes.QUESTION),
             qtext: questionObj.qtext,
             options: [],
-            ordering: questionObj.ordering,
+            ordered: questionObj.ordered,
             freetext: questionObj.freetext,
             exclusive: questionObj.exclusive
         });
@@ -297,15 +308,6 @@ var SurveyStore = Reflux.createStore({
         }, ALERT_TIMEOUT, this);
     },
     /**
-     * Called when the downloadSurvey action is called.
-     * Logs the survey object to the console.
-     */
-    onDownloadSurvey() {
-        var survey = { survey: this.data.surveyData.toJS() };
-        console.log("Survey:", survey);
-        SurveyActions.showAlert("Survey logged in your Dev console", AlertTypes.INFO);
-    },
-    /**
      * Called when the clearSurvey action is called.
      * Clears up the existing survey state, takes a copy and allows the user
      * to start afresh.
@@ -326,19 +328,26 @@ var SurveyStore = Reflux.createStore({
      * Called when the saveSurvey action is called.
      * Stores a snapshot of the survey JSON object in the localStorage.
      */
-    onSaveSurvey() {
-        Lockr.set(LOCALSTORAGE_KEY, this.data.surveyData.toJS());
+    onSaveSurvey(surveyTitle) {
+        var newSurvey = {
+            title: surveyTitle,
+            data: this.data.surveyData.toJS(),
+            createdAt: Date.now()
+        };
+        var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
+        Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
+
+        // update the cached survey data to include the latest
+        this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY);
+
         SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
     },
     /**
      * Called when the loadSurvey action is triggered.
-     * Reads the survey stored in localStorage and loads that into the
-     * application state.
+     * Takes the survey json as param and loads that into the application state.
+     * @param rawData survey data in json
      */
-    onLoadSurvey() {
-        var rawData = Lockr.get(LOCALSTORAGE_KEY);
-        if (!rawData) throw new Error("No survey found");
-
+    onLoadSurvey(rawData) {
         // update the survey object
         var data = Immutable.fromJS(rawData);
         this.updateSurveyData(data, true);
@@ -350,6 +359,14 @@ var SurveyStore = Reflux.createStore({
         data.forEach((block) => this.buildMapsForBlock(block));
 
         SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
+    },
+    /**
+     * Called when the toggleLoadModal action is triggered.
+     * Toggles the visibility of the load survey modal.
+     */
+    onToggleLoadModal() {
+       this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
+       this.trigger(this.data);
     },
     /**
      * Takes a block and runs over its children recursively and
@@ -367,7 +384,7 @@ var SurveyStore = Reflux.createStore({
 
             // tackle the questions
             q.get('options').forEach((o) => {
-                _optionMap = _optionMap.set(o.get('id'), qId)
+                _optionMap = _optionMap.set(o.get('id'), qId);
                 _optionsSet = _optionsSet.add(o.get('otext'));
             });
         });

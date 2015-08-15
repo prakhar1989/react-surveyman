@@ -1,0 +1,36 @@
+{
+  "survey": [
+    {
+      "id": "b_10101",
+      "randomize": true,
+      "questions": [
+        {
+          "id": "q_57899",
+          "qtext": "What is the value of 4 + 5?",
+          "options": [
+            {
+              "id": "o_12747",
+              "otext": "first"
+            },
+            {
+              "id": "o_20298",
+              "otext": "second"
+            },
+            {
+              "id": "o_35255",
+              "otext": "third"
+            },
+            {
+              "id": "o_52545",
+              "otext": "fourth"
+            }
+          ],
+          "ordering": true,
+          "freetext": false,
+          "exclusive": false
+        }
+      ],
+      "subblocks": []
+    }
+  ]
+}

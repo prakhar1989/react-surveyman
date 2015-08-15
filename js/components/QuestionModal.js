@@ -30,13 +30,13 @@ var BaseModal = React.createClass({
     },
     handleSubmit() {
         var qtext = this.refs.qtext.getDOMNode().value;
-        var ordering = this.refs.ordering.getDOMNode().checked;
+        var ordered = this.refs.ordered.getDOMNode().checked;
         var freetext = this.refs.freetext.getDOMNode().checked;
         var exclusive = this.refs.exclusive.getDOMNode().checked;
         SurveyActions.questionDropped({
             parentID: this.props.parentID,
             qtext: qtext,
-            ordering: ordering,
+            ordered: ordered,
             freetext: freetext,
             exclusive: exclusive
         });
@@ -47,6 +47,7 @@ var BaseModal = React.createClass({
             bsStyle='primary'
             backdrop={true}
             animation={true}
+            closeButton={false}
             container={null}
             onRequestHide={this.handleClose}>
             <div className='modal-body'>
@@ -57,7 +58,7 @@ var BaseModal = React.createClass({
                 </div>
                 <h5>Configuration</h5>
                 <div className="checkbox">
-                    <label><input type="checkbox" ref="ordering" /> Preserve ordering of the options</label>
+                    <label><input type="checkbox" ref="ordered" /> Preserve ordering of the options</label>
                 </div>
                 <div className="checkbox">
                     <label> <input type="checkbox" ref="exclusive" /> Present options as radio-buttons (default is checkbox)</label>
