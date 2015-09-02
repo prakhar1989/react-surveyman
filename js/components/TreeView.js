@@ -127,7 +127,7 @@ var TreeView = React.createClass({
         var self = this;
 
         // build the tree
-        var tree = survey.map((block) => {
+        var tree = survey.topLevelBlocks.map((block) => {
             var questions = block.get('questions');
             return (
                 <BlockNode key={block.get('id')} id={block.get('id')}

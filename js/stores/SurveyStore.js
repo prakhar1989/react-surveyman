@@ -5,6 +5,8 @@ var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
 var AlertTypes = require('../components/AlertTypes');
 var Lockr = require('lockr');
+// Replace when we update the surveyman module.
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/survey');
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -25,7 +27,7 @@ var _history = [];
 var SurveyStore = Reflux.createStore({
     listenables: [SurveyActions],
     data: {
-        surveyData: Immutable.List(),
+        surveyData: SurveyMan.new_survey(),
         modalState: Immutable.Map({
             dropTargetID: null,
             isOpen: false
@@ -729,7 +731,7 @@ var SurveyStore = Reflux.createStore({
             this.updateSurveyData(newSurvey, false);
         }
         else {
-          throw new ('Invalid item type');
+          throw 'Invalid item type';
         }
     }
 });
