@@ -25,195 +25,207 @@ const LOCALSTORAGE_KEY = 'savedSurveyList'; // the key against which the survey 
 var _history = [];
 
 var SurveyStore = Reflux.createStore({
-    listenables: [SurveyActions],
-    data: {
-        surveyData: SurveyMan.new_survey(),
-        modalState: Immutable.Map({
-            dropTargetID: null,
-            isOpen: false
-        }),
-        loadSurveyModalState: false,
-        savedSurveys: [],
-        alertState: Immutable.Map({
-            msg: '',
-            level: AlertTypes.INFO,
-            visible: false
-        }),
-        optionGroupState: Immutable.Map({
-            selectedID: 1,
-            options: Immutable.List()
-        })
-    },
-    // called when the app component is loaded
-    init() {
-        var initOptionsData = Immutable.fromJS([
-            { id: 0, optionLabels: ["Yes", "No"] },
-            { id: 1, optionLabels: ["True", "False"] },
-            { id: 2, optionLabels: ["Strongly Disagree", "Disagree", "Neither agree or disagree", "Agree", "Strongly Agree"] }
-        ]);
+  listenables: [SurveyActions],
+  data: {
+    // surveyData: Immutable.List().
+    surveyData: SurveyMan.new_survey(),
+    modalState: Immutable.Map({
+      dropTargetID: null,
+      isOpen: false
+    }),
+    loadSurveyModalState: false,
+    savedSurveys: [],
+    alertState: Immutable.Map({
+      msg: '',
+      level: AlertTypes.INFO,
+      visible: false
+    }),
+    optionGroupState: Immutable.Map({
+      selectedID: 1,
+      options: Immutable.List()
+    })
+  },
+  // called when the app component is loaded
+  init() {
+    let default_options = [
+      ["Yes", "No"],
+      ["True", "False"],
+      ["Strongly Disagree", "Disagree", "Neither agree or disagree", "Agree", "Strongly Agree"]
+    ];
+    var initOptionsData = Immutable.fromJS([
+      { id: 0, optionLabels: default_options[0], option: SurveyMan.new_option(default_options[0], this.getNewId(ItemTypes.OPTION))},
+      { id: 1, optionLabels: default_options[1], option: SurveyMan.new_option(default_options[1], this.getNewId(ItemTypes.OPTION))},
+      { id: 2, optionLabels: default_options[2], option: SurveyMan.new_option(default_options[2], this.getNewId(ItemTypes.OPTION))}
+    ]);
 
-        this.listenTo(SurveyActions.load, () => {
-            window.location.hash = "";   // clear the location hash on app init
+    this.listenTo(SurveyActions.load, () => {
+      window.location.hash = "";   // clear the location hash on app init
 
-            this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
+      this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
 
-            // read the saved survey data
-            this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
+      // read the saved survey data
+      this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
 
-            // load up survey data
-            var data = Immutable.fromJS(initialData);
-            this.updateSurveyData(data, true);
-        });
-    },
-    getInitialState() {
-        return {
-            surveyData: this.data.surveyData,
-            modalState: this.data.modalState,
-            alertState: this.data.alertState,
-            optionGroupState: this.data.optionGroupState,
-            loadSurveyModalState: this.data.loadSurveyModalState,
-            savedSurveys: this.data.savedSurveys
-        };
-    },
+      // load up survey data
+      var data = Immutable.fromJS(initialData);
+      this.updateSurveyData(data, true);
+    });
+  },
+  getInitialState() {
+    return {
+      surveyData: this.data.surveyData,
+      modalState: this.data.modalState,
+      alertState: this.data.alertState,
+      optionGroupState: this.data.optionGroupState,
+      loadSurveyModalState: this.data.loadSurveyModalState,
+      savedSurveys: this.data.savedSurveys
+    };
+  },
     /**
-     * Updates the survey data as the args provided. Triggers refresh.
-     * Stores prev state in history, if second param is true
-     * @param data surveydata
-     * @param cache - boolean
-     */
-    updateSurveyData(data, cache = false) {
-        if (cache) {
-            _history.push({
-                data: this.data.surveyData,
-                optionMap: _optionMap.toJS(),
-                questionMap: _questionMap.toJS()
-            });
-        }
-        this.data.surveyData = data;
-        this.trigger(this.data);
-    },
-    /*
-     * Returns the set (unique list) of options.
-     */
-    getOptionsSet() {
-        return _optionsSet;
-    },
-    /*
-     * Returns the surveyjson data
-     */
-    getSurveyData() {
-        return this.data.surveyData.toJS();
-    },
-    /**
-     * Returns the id of the block which has the
-     * question with questionId
-     * @param questionId
-     */
-    getBlockId(questionId) {
-        return _questionMap.get(questionId);
-    },
-    /**
-     * Returns a new ID based on the type of object requested
-     * @param type one of ItemTypes.OPTION, ItemTypes.BLOCK, ItemTypes.QUESTION
-     */
-    getNewId(type) {
-        var prefix;
-        if (type === ItemTypes.QUESTION) {
-            prefix = "q";
-        } else if (type === ItemTypes.OPTION) {
-            prefix = "o";
-        } else {
-            prefix = "b";
-        }
-        return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
-    },
-    /**
-     * Helper function that returns the complete path to the block requested.
-     * @param blockID id of the block
-     * @param survey source survey object in which the block is to be found
-     * @param blockMap (optional) the block map to use for lookup
-     */
-    getBlockPath(blockID, survey, blockMap = _blockMap) {
-        // function that returns a chain of IDs from the root block
-        // to the block with id - id
-        var getIDsList = function getIDsList(id, path = []) {
-            if (!blockMap.has(id)) {
-                return path.concat([id]).reverse();
-            }
-            return getIDsList(blockMap.get(id), path.concat([id]));
-        };
+   * Updates the survey data as the args provided. Triggers refresh.
+   * Stores prev state in history, if second param is true
+   * @param {SurveyMan.survey.Survey} data surveydata
+   * @param cache - boolean
+   */
+  updateSurveyData(data, cache = false) {
+    if (cache) {
+      _history.push({
+        data: this.data.surveyData,
+        optionMap: _optionMap.toJS(),
+        questionMap: _questionMap.toJS()
+      });
+    }
+    this.data.surveyData = data;
+    this.trigger(this.data);
+  },
+  /*
+   * Returns the set (unique list) of options.
+   */
+  getOptionsSet() {
+    return _optionsSet;
+  },
+  /*
+   * Returns the surveyjson data
+   */
+  getSurveyData() {
+    return this.data.surveyData.toJSON();
+  },
+  /**
+   * Returns the id of the block which has the
+   * question with questionId
+   * @param questionId
+   */
+  getBlockId(questionId) {
+    return _questionMap.get(questionId);
+  },
+  /**
+   * Returns a new ID based on the type of object requested
+   * @param type one of ItemTypes.OPTION, ItemTypes.BLOCK, ItemTypes.QUESTION
+   */
+  getNewId(type) {
+    var prefix;
+    if (type === ItemTypes.QUESTION) {
+      prefix = "q";
+    } else if (type === ItemTypes.OPTION) {
+      prefix = "o";
+    } else {
+      prefix = "b";
+    }
+    return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
+  },
+  /**
+   * Helper function that returns the complete path to the block requested.
+   * @param blockID id of the block
+   * @param survey source survey object in which the block is to be found
+   * @param blockMap (optional) the block map to use for lookup
+   */
+  getBlockPath(blockID, survey, blockMap = _blockMap) {
+    // function that returns a chain of IDs from the root block
+    // to the block with id - id
+    var getIDsList = function getIDsList(id, path = []) {
+      if (!blockMap.has(id)) {
+        return path.concat([id]).reverse();
+      }
+      return getIDsList(blockMap.get(id), path.concat([id]));
+    };
 
-        // function that returns the index of block id within the list of blocks
-        var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
+    // function that returns the index of block id within the list of blocks
+    var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
 
-        // initialize path with index of root node
-        var [rootID, ...restIDs] = getIDsList(blockID);
-        var initPath = [getIndex(rootID, survey)];
+    // initialize path with index of root node
+    var [rootID, ...restIDs] = getIDsList(blockID);
+    var initPath = [getIndex(rootID, survey)];
 
-        // reduce over the rest of ids by finding id at each level
-        // and changing path accordingly
-        return restIDs.reduce((path, id) => {
-            var newPath = path.concat(['subblocks']);
-            var index = getIndex(id, survey.getIn(newPath));
-            return newPath.concat([index]);
-        }, initPath);
-    },
-    /**
-     * Helper function that returns the complete path to the question requested.
-     * @param questionID id of the question
-     * @param survey source survey object in which the question is to be found
-     * @param questionMap (optional) the question map to use for lookup
-     */
-    getQuestionPath(questionID, survey, questionMap = _questionMap) {
-        var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
-        var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
-        return [...blockPath, 'questions', index];
-    },
-    /**
-     * Runs when the blockDropped action is called by the view.
-     * Adds a new block to the end of the survey object.
-     * @param targetID: targetId of the target on which the block is dropped.
-     * If this is undefined, then block is assumed to have dropped on the survey
-     */
-    onBlockDropped(targetID) {
-        var survey = this.data.surveyData;
-        var newBlock = Immutable.fromJS({
-            id: this.getNewId(ItemTypes.BLOCK),
-            questions: [],
-            subblocks: [],
-            randomize: true
-        });
+    // reduce over the rest of ids by finding id at each level
+    // and changing path accordingly
+    return restIDs.reduce((path, id) => {
+      var newPath = path.concat(['subblocks']);
+      var index = getIndex(id, survey.getIn(newPath));
+      return newPath.concat([index]);
+    }, initPath);
+  },
+  /**
+   * Helper function that returns the complete path to the question requested.
+   * @param questionID id of the question
+   * @param survey source survey object in which the question is to be found
+   * @param questionMap (optional) the question map to use for lookup
+   */
+  getQuestionPath(questionID, survey, questionMap = _questionMap) {
+    var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
+    var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
+    return [...blockPath, 'questions', index];
+  },
+  /**
+   * Runs when the blockDropped action is called by the view.
+   * Adds a new block to the end of the survey object.
+   * @param targetID: targetId of the target on which the block is dropped.
+   * If this is undefined, then block is assumed to have dropped on the survey
+   */
+  onBlockDropped(targetID) {
+    var survey = this.data.surveyData;
+    //var newBlock = Immutable.fromJS({
+    //    id: this.getNewId(ItemTypes.BLOCK),
+    //    questions: [],
+    //    subblocks: [],
+    //    randomize: true
+    //});
+    var newBlock = SurveyMan.empty_block(this.getNewId(ItemTypes.BLOCK));
 
-        if (targetID === undefined) {
-            // block is dropped on the survey
-            let newSurvey = survey.splice(0, 0, newBlock);
-
-            // update and cache
-            this.updateSurveyData(newSurvey, true);
-            SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
-        } else {
-            let blockPath = this.getBlockPath(targetID, survey);
-            let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
-                list => list.splice(0, 0, newBlock)
-            );
-            this.updateSurveyData(newSurvey, true);
-
-            // update block map with new subblock
-            _blockMap = _blockMap.set(newBlock.get('id'), targetID);
-            SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
-        }
-    },
-    /**
-     * Runs when the optiongroup is dropped on a question
-     * @param questionId - ID of the question on which
-     * the option group is dropped
-     */
-    onOptionGroupDropped(questionId) {
-        var selectedID = this.data.optionGroupState.get('selectedID');
-        var optionLabels = this.data.optionGroupState
-                                .getIn(['options', selectedID, 'optionLabels']);
-        optionLabels.forEach(op => this.onOptionAdded(questionId, op));
-    },
+    if (targetID === undefined) {
+      // block is dropped on the survey
+      // let newSurvey = survey.splice(0, 0, newBlock);
+      // update and cache
+      let newSurvey = SurveyMan.add_block(newBlock, survey, false);
+      this.updateSurveyData(newSurvey, true);
+      SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
+    } else {
+      // update existing survey.
+      // let blockPath = this.getBlockPath(targetID, survey);
+      //let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
+      //    list => list.splice(0, 0, newBlock)
+      //);
+      let targetBlock = _blockMap.get(targetID);
+      console.assert(targetBlock instanceof SurveyMan.survey.Block);
+      let newSurvey = SurveyMan.add_block(targetBlock, survey, false);
+      this.updateSurveyData(newSurvey, true);
+      // update block map with new subblock
+      // the randomly generated id from the instantiation of newBlock should be updated
+      // to the semantically correct id via SurveyMan.survey.Block's add_block method.
+      _blockMap = _blockMap.set(newBlock.get('id'), targetID);
+      SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
+    }
+  },
+  /**
+   * Runs when the optiongroup is dropped on a question
+   * @param questionId - ID of the question on which
+   * the option group is dropped
+   */
+  onOptionGroupDropped(questionId) {
+    var selectedID = this.data.optionGroupState.get('selectedID');
+    var optionLabels = this.data.optionGroupState
+        .getIn(['options', selectedID, 'optionLabels']);
+    optionLabels.forEach(op => this.onOptionAdded(questionId, op));
+  },
     /**
      * Runs when the questionDropped action is called by the view.
      * Adds a question to the block who's id is provided as param
@@ -221,16 +233,10 @@ var SurveyStore = Reflux.createStore({
      * with the following keys - parentID, qtext, config
      */
     onQuestionDropped(questionObj) {
-        var survey = this.data.surveyData;
+      var survey = this.data.surveyData;
 
-        var newQuestion = Immutable.fromJS({
-            id: this.getNewId(ItemTypes.QUESTION),
-            qtext: questionObj.qtext,
-            options: [],
-            ordered: questionObj.ordered,
-            freetext: questionObj.freetext,
-            exclusive: questionObj.exclusive
-        });
+      var newQuestion = SurveyMan.copy_question(questionObj);
+      newQuestion.clear_options();
 
         var blockPath = this.getBlockPath(questionObj.parentID, survey);
         var newSurvey = survey.updateIn([...blockPath, 'questions'],
@@ -246,30 +252,30 @@ var SurveyStore = Reflux.createStore({
 
         SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
     },
-    /**
-     * Runs when the optionAdded action is called by the view.
-     * Adds an option with text as otext to the question whose id is provided as an argument.
-     * @param questionId (int) of the question to which the option will be added.
-     * @param otext (string) the text of the option to be added
-     */
-    onOptionAdded(questionId, otext) {
-        // template for new Option
-        var newOption = Immutable.Map({
-            id: this.getNewId(ItemTypes.OPTION),
-            otext: otext
-        });
+  /**
+   * Runs when the optionAdded action is called by the view.
+   * Adds an option with text as otext to the question whose id is provided as an argument.
+   * @param questionId (int) of the question to which the option will be added.
+   * @param otext (string) the text of the option to be added
+   */
+  onOptionAdded(questionId, otext) {
+    // template for new Option
+    //var newOption = Immutable.Map({
+    //    id: this.getNewId(ItemTypes.OPTION),
+    //    otext: otext
+    //});
+    var newOption = SurveyMan.new_option(otext, questionId);
+    var survey = this.data.surveyData;
+    //var questionPath = this.getQuestionPath(questionId, survey);
+    //var newSurvey = survey.updateIn([...questionPath, 'options'],
+    //    list => list.push(newOption)
+    //);
 
-        var survey = this.data.surveyData;
-        var questionPath = this.getQuestionPath(questionId, survey);
-        var newSurvey = survey.updateIn([...questionPath, 'options'],
-            list => list.push(newOption)
-        );
+    // update the option map and options set
+    _optionMap = _optionMap.set(newOption.get('id'), questionId);
+    _optionsSet = _optionsSet.add(otext);
 
-        // update the option map and options set
-        _optionMap = _optionMap.set(newOption.get('id'), questionId);
-        _optionsSet = _optionsSet.add(otext);
-
-        this.updateSurveyData(newSurvey, true);
+    this.updateSurveyData(newSurvey, true);
     },
     /**
      * Run when the action toggleModal is called by the view
