@@ -136,7 +136,8 @@ var SurveyStore = Reflux.createStore({
   /**
    * Helper function that returns the complete path to the block requested.
    * @param blockID id of the block
-   * @param survey source survey object in which the block is to be found
+   * @param {SurveyMan.survey.Survey} survey source survey object in which the
+   * block is to be found
    * @param blockMap (optional) the block map to use for lookup
    */
   getBlockPath(blockID, survey, blockMap = _blockMap) {
@@ -226,32 +227,26 @@ var SurveyStore = Reflux.createStore({
         .getIn(['options', selectedID, 'optionLabels']);
     optionLabels.forEach(op => this.onOptionAdded(questionId, op));
   },
-    /**
-     * Runs when the questionDropped action is called by the view.
-     * Adds a question to the block who's id is provided as param
-     * @param questionObj A POJO containing data the for the new question.
-     * with the following keys - parentID, qtext, config
-     */
-    onQuestionDropped(questionObj) {
-      var survey = this.data.surveyData;
+  /**
+   * Runs when the questionDropped action is called by the view.
+   * Adds a question to the block whose id is provided as param
+   * @param questionObj A POJO containing data the for the new question.
+   * with the following keys - parentID, qtext, config
+   */
+  onQuestionDropped(questionObj) {
+    var survey = this.data.surveyData;
 
-      var newQuestion = SurveyMan.copy_question(questionObj);
-      newQuestion.clear_options();
+    var newQuestion = SurveyMan.copy_question(questionObj);
+    newQuestion.clear_options();
+    var newSurvey = SurveyMan.copy_survey(survey);
+    // update and cache
+    this.updateSurveyData(newSurvey, true);
+    // update question map with new question
+    var block = newQuestion.block;
+    _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
 
-        var blockPath = this.getBlockPath(questionObj.parentID, survey);
-        var newSurvey = survey.updateIn([...blockPath, 'questions'],
-            list => list.splice(0, 0, newQuestion)
-        );
-
-        // update and cache
-        this.updateSurveyData(newSurvey, true);
-
-        // update question map with new question
-        var block = survey.getIn(blockPath);
-        _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
-
-        SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
-    },
+    SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
+  },
   /**
    * Runs when the optionAdded action is called by the view.
    * Adds an option with text as otext to the question whose id is provided as an argument.
@@ -266,6 +261,8 @@ var SurveyStore = Reflux.createStore({
     //});
     var newOption = SurveyMan.new_option(otext, questionId);
     var survey = this.data.surveyData;
+    var question = survey.get_question_by_id(questionId);
+    var newSurvey = SurveyMan.add_option(question, newOption, survey, false);
     //var questionPath = this.getQuestionPath(questionId, survey);
     //var newSurvey = survey.updateIn([...questionPath, 'options'],
     //    list => list.push(newOption)
@@ -276,183 +273,200 @@ var SurveyStore = Reflux.createStore({
     _optionsSet = _optionsSet.add(otext);
 
     this.updateSurveyData(newSurvey, true);
-    },
-    /**
-     * Run when the action toggleModal is called by the view
-     * @param modalType - Refer to the type of object that was dropped
-     * @param dropTargetID - Refers to the ID on which the object was dropped
-     */
-    onToggleModal(modalType, dropTargetID) {
-        var modalState = this.data.modalState;
+  },
+  /**
+   * Run when the action toggleModal is called by the view
+   * @param modalType - Refer to the type of object that was dropped
+   * @param dropTargetID - Refers to the ID on which the object was dropped
+   */
+  onToggleModal(modalType, dropTargetID) {
+    var modalState = this.data.modalState;
 
-        // TODO: this handles the modal for question separately, although
-        // this is not really required. deal with it later.
-        if (modalType === ItemTypes.QUESTION) {
-            modalState = modalState.set('isOpen', !modalState.get('isOpen'));
-        }
+    // TODO: this handles the modal for question separately, although
+    // this is not really required. deal with it later.
+    if (modalType === ItemTypes.QUESTION) {
+      modalState = modalState.set('isOpen', !modalState.get('isOpen'));
+    }
 
-        // sets the correct dropTarget to pass down to component
-        this.data.modalState = modalState.set('dropTargetID', dropTargetID);
-        this.trigger(this.data);
-    },
-    /**
-     * Run when the action showAlert is called. Responsible for displaying
-     * alert in the app
-     * @param msg - the msg to be displayed
-     * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
-     */
-    onShowAlert(msg, level=AlertTypes.INFO) {
-        this.data.alertState = Immutable.Map({
-            msg: msg,
-            level: level,
-            visible: true
-        });
-        this.trigger(this.data);
+      // sets the correct dropTarget to pass down to component
+      this.data.modalState = modalState.set('dropTargetID', dropTargetID);
+      this.trigger(this.data);
+  },
+  /**
+   * Run when the action showAlert is called. Responsible for displaying
+   * alert in the app
+   * @param msg - the msg to be displayed
+   * @param level - the level. defaults to 'info'. See Bootstrap alerts for more.
+   */
+  onShowAlert(msg, level=AlertTypes.INFO) {
+    this.data.alertState = Immutable.Map({
+        msg: msg,
+        level: level,
+        visible: true
+    });
+    this.trigger(this.data);
 
-        // Hides the alert box
-        setTimeout(function(self) {
-            self.data.alertState = self.data.alertState.set('visible', false);
-            self.trigger(self.data);
-        }, ALERT_TIMEOUT, this);
-    },
-    /**
-     * Called when the clearSurvey action is called.
-     * Clears up the existing survey state, takes a copy and allows the user
-     * to start afresh.
-     */
-    onClearSurvey() {
-        var data = Immutable.fromJS(initialData);
-        this.updateSurveyData(data, true);
+    // Hides the alert box
+    setTimeout(function(self) {
+        self.data.alertState = self.data.alertState.set('visible', false);
+        self.trigger(self.data);
+    }, ALERT_TIMEOUT, this);
+  },
+  /**
+   * Called when the clearSurvey action is called.
+   * Clears up the existing survey state, takes a copy and allows the user
+   * to start afresh.
+   */
+  onClearSurvey() {
+    var data = new SurveyMan.survey.Survey(initialData);
+    this.updateSurveyData(data, true);
 
-        SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
+    SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
 
-        // clear up the maps and set
-        _questionMap = Immutable.Map();
-        _optionMap = Immutable.Map();
-        _blockMap = Immutable.Map();
-        _optionsSet = Immutable.OrderedSet();
-    },
-    /**
-     * Called when the saveSurvey action is called.
-     * Stores a snapshot of the survey JSON object in the localStorage.
-     */
-    onSaveSurvey(surveyTitle) {
-        var newSurvey = {
-            title: surveyTitle,
-            data: this.data.surveyData.toJS(),
-            createdAt: Date.now()
-        };
-        var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
-        Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
+    // clear up the maps and set
+    _questionMap = Immutable.Map();
+    _optionMap = Immutable.Map();
+    _blockMap = Immutable.Map();
+    _optionsSet = Immutable.OrderedSet();
+  },
+  /**
+   * Called when the saveSurvey action is called.
+   * Stores a snapshot of the survey JSON object in the localStorage.
+   */
+  onSaveSurvey(surveyTitle) {
+    var newSurvey = {
+        title: surveyTitle,
+        data: this.data.surveyData.toJSON(),
+        createdAt: Date.now()
+    };
+    var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
+    Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
 
-        // update the cached survey data to include the latest
-        this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY);
+    // update the cached survey data to include the latest
+    this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY);
 
-        SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
-    },
-    /**
-     * Called when the loadSurvey action is triggered.
-     * Takes the survey json as param and loads that into the application state.
-     * @param rawData survey data in json
-     */
-    onLoadSurvey(rawData) {
-        // update the survey object
-        var data = Immutable.fromJS(rawData);
-        this.updateSurveyData(data, true);
+    SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
+  },
+  /**
+   * Called when the loadSurvey action is triggered.
+   * Takes the survey json as param and loads that into the application state.
+   * @param rawData survey data in json
+   */
+  onLoadSurvey(rawData) {
+    // update the survey object
+    var data = new SurveyMan.survey.Survey(rawData);
+    this.updateSurveyData(data, true);
 
-        // clear up the maps & build them from scratch
-        _questionMap = Immutable.Map();
-        _optionMap = Immutable.Map();
-        _blockMap = Immutable.Map();
-        data.forEach((block) => this.buildMapsForBlock(block));
+    // clear up the maps & build them from scratch
+    _questionMap = Immutable.Map();
+    _optionMap = Immutable.Map();
+    _blockMap = Immutable.Map();
+    data.topLevelBlocks.forEach((block) => this.buildMapsForBlock(block));
+    data.questions.forEach((question) => this.buildMapsForQuestionsAndOptions(question));
 
-        SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
-    },
-    /**
-     * Called when the toggleLoadModal action is triggered.
-     * Toggles the visibility of the load survey modal.
-     */
-    onToggleLoadModal() {
-       this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
-       this.trigger(this.data);
-    },
+    SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
+  },
+  /**
+   * Called when the toggleLoadModal action is triggered.
+   * Toggles the visibility of the load survey modal.
+   */
+  onToggleLoadModal() {
+     this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
+     this.trigger(this.data);
+  },
+  /**
+   *
+   */
+  buildMapsForQuestionsAndOptions(question) {
+    _optionsSet = Immutable.OrderedSet();
+    // Basically just ported from @prakhar1989 wrote in buildMapsForBlock
+    let qId = q.id;
+    _questionMap = _questionMap.set(qId, q.block.id);
+    q.options.forEach((o) => {
+      _optionMap = _optionMap.set(o.id, qId);
+      _optionsSet = _optionsSet.add(o.otext);
+    });
+  },
     /**
      * Takes a block and runs over its children recursively and
      * populates the maps (option, question, block) with correct mappings
      * @param block - Block of type Immutable.Map
      */
     buildMapsForBlock(block) {
-        var blockId = block.get('id');
-        _optionsSet = Immutable.OrderedSet();
+      //var blockId = block.get('id');
+      let blockId = block.id;
+      //_optionsSet = Immutable.OrderedSet();
 
-        // start with the questions
-        block.get('questions').forEach((q) => {
-            var qId = q.get('id');
-            _questionMap = _questionMap.set(qId, blockId);
+      //// start with the questions
+      //block.get('questions').forEach((q) => {
+      //    var qId = q.get('id');
+      //    _questionMap = _questionMap.set(qId, blockId);
+      //
+      //    // tackle the questions
+      //    q.get('options').forEach((o) => {
+      //        _optionMap = _optionMap.set(o.get('id'), qId);
+      //        _optionsSet = _optionsSet.add(o.get('otext'));
+      //    });
+      //});
 
-            // tackle the questions
-            q.get('options').forEach((o) => {
-                _optionMap = _optionMap.set(o.get('id'), qId);
-                _optionsSet = _optionsSet.add(o.get('otext'));
-            });
-        });
+      // handle subblocks
+      block.subblocks.forEach((b) => {
+        _blockMap = _blockMap.set(b.id, blockId);
 
-        // handle subblocks
-        block.get('subblocks').forEach((b) => {
-            _blockMap = _blockMap.set(b.get('id'), blockId);
+        // call this recursively for each subblock
+        this.buildMapsForBlock(b);
+    });
+  },
+  /**
+   * Returns an array of indices that can be directly go in first arguments to
+   * Immutable deep persistent functions.
+   * @param blockId - id of the block who's index is required
+   * @param parentBlock (optional) - The parent block at which to begin the
+   * search. If left out, the search starts from the top of the survey within
+   * the `parentBlock`
+   */
+  getBlockIndex(blockId, parentBlock = false) {
+    // find in the survey
+    if (!parentBlock) {
+        return this.data.surveyData.topLevelBlocks.findIndex(b => b.id === blockId);
+    } else {
+      return parentBlock.subblocks.findIndex(b => b.id === blockId);
+    }
+  },
+  /**
+   * Returns the index of a question in a block
+   * @param questionId - id of the question
+   * @param {SurveyMan.survey.Block} block - obj (Immutable.Map) of the container block
+   */
+  getQuestionIndex(questionId, block) {
+    return block.questions.findIndex(q => q.id === questionId);
+  },
+ /**
+  * Called when the toggleParam action is called.
+  * Toggles the property on the item.
+  * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
+  * @param itemId - Id of the item for which toggle button is clicked
+  * @param toggleName - string name of property that is toggled.
+  */
+ onToggleParam(itemType, itemId, toggleName) {
+   var survey = this.data.surveyData;
 
-            // call this recursively for each subblock
-            this.buildMapsForBlock(b);
-        });
-    },
-    /**
-     * Returns an array of indices that can be directly go in first arguments to Immutable deep persistent functions.
-     * @param blockId - id of the block who's index is required
-     * @param parentBlock (optional) - The parent block at which to begin the search. If left out, the search starts from the top of the survey
-     * within the `parentBlock`
-     */
-    getBlockIndex(blockId, parentBlock = false) {
-        // find in the survey
-        if (!parentBlock) {
-            return this.data.surveyData.findIndex(b => b.get('id') === blockId);
-        } else {
-            return parentBlock.get('subblocks').findIndex(b => b.get('id') === blockId);
-        }
-    },
-    /**
-     * Returns the index of a question in a block
-     * @param id - id of the question
-     * @param block - obj (Immutable.Map) of the container block
-     */
-    getQuestionIndex(questionId, block) {
-        return block.get('questions').findIndex(q => q.get('id') === questionId);
-    },
-    /**
-     * Called when the toggleParam action is called.
-     * Toggles the property on the item.
-     * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
-     * @param itemId - Id of the item for which toggle button is clicked
-     * @param toggleName - string name of property that is toggled.
-     */
-    onToggleParam(itemType, itemId, toggleName) {
-        var survey = this.data.surveyData;
+   // handle the case when a param on a block is toggled
+   if (itemType === ItemTypes.BLOCK) {
+     let blockPath = this.getBlockPath(itemId, survey);
+     let newSurvey = survey.updateIn(blockPath,
+             b => b.set(toggleName, !b.get(toggleName))
+     );
+     this.updateSurveyData(newSurvey);
+   }
 
-        // handle the case when a param on a block is toggled
-        if (itemType === ItemTypes.BLOCK) {
-            let blockPath = this.getBlockPath(itemId, survey);
-            let newSurvey = survey.updateIn(blockPath,
-                b => b.set(toggleName, !b.get(toggleName))
-            );
-            this.updateSurveyData(newSurvey);
-        }
-
-        // handle the case when a param on a question is toggled
-        else if (itemType === ItemTypes.QUESTION) {
-            let questionPath = this.getQuestionPath(itemId, survey);
-            let newSurvey = survey.updateIn(questionPath,
-                q => q.set(toggleName, !q.get(toggleName))
-            );
-            this.updateSurveyData(newSurvey);
+    // handle the case when a param on a question is toggled
+   else if (itemType === ItemTypes.QUESTION) {
+     let questionPath = this.getQuestionPath(itemId, survey);
+     let newSurvey = survey.updateIn(questionPath,
+             q => q.set(toggleName, !q.get(toggleName))
+     );
+     this.updateSurveyData(newSurvey);
         }
 
         // throw exception
@@ -567,14 +581,13 @@ var SurveyStore = Reflux.createStore({
      * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
      * @param itemId - Id of item to be deleted.
      */
-    onItemDelete(itemType, itemId) {
-        var survey = this.data.surveyData;
-
+   onItemDelete(itemType, itemId) {
+     var survey = this.data.surveyData;
         // handle block delete
-        if (itemType === ItemTypes.BLOCK) {
-            let blockPath = this.getBlockPath(itemId, survey);
-            let newSurvey = survey.deleteIn(blockPath);
-
+     if (itemType === ItemTypes.BLOCK) {
+       //let blockPath = this.getBlockPath(itemId, survey);
+       //let newSurvey = survey.deleteIn(blockPath);
+       let newSurvey = SurveyMan.remove_block()
             this.updateSurveyData(newSurvey, true);
 
             // delete the mapping of question and options

@@ -4,6 +4,7 @@ var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('./ItemTypes');
 var SurveyStore = require('../stores/SurveyStore');
 var { List } = require('immutable');
+// var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var Options = React.createClass({
     propTypes: {
@@ -27,10 +28,10 @@ var Options = React.createClass({
         SurveyActions.itemDelete(ItemTypes.OPTION, id);
     },
     handleDrag: function() {
-        // TODO: to be implemeeted
+        // TODO: to be implemented
     },
     render: function() {
-        var options = this.props.options.toJS();
+        var options = this.props.options.map((o) => o.toJSON()).toJS();
         return (
             <Tags tags={options}
                     suggestions={this.state.suggestions}
