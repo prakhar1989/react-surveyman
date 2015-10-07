@@ -6,7 +6,8 @@ var Immutable = require('immutable');
 var AlertTypes = require('../components/AlertTypes');
 var Lockr = require('lockr');
 // Replace when we update the surveyman module.
-var SurveyMan = require('../sub/surveyman.js/SurveyMan/survey');
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
+var {Survey, Block} = SurveyMan.survey;
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -47,6 +48,7 @@ var SurveyStore = Reflux.createStore({
   },
   // called when the app component is loaded
   init() {
+    console.log('fdsafdsa');
     let default_options = [
       ["Yes", "No"],
       ["True", "False"],
@@ -60,14 +62,11 @@ var SurveyStore = Reflux.createStore({
 
     this.listenTo(SurveyActions.load, () => {
       window.location.hash = "";   // clear the location hash on app init
-
       this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
-
       // read the saved survey data
       this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
-
       // load up survey data
-      var data = Immutable.fromJS(initialData);
+      var data = new Survey(initialData);
       this.updateSurveyData(data, true);
     });
   },
@@ -81,7 +80,7 @@ var SurveyStore = Reflux.createStore({
       savedSurveys: this.data.savedSurveys
     };
   },
-    /**
+  /**
    * Updates the survey data as the args provided. Triggers refresh.
    * Stores prev state in history, if second param is true
    * @param {SurveyMan.survey.Survey} data surveydata
@@ -140,42 +139,42 @@ var SurveyStore = Reflux.createStore({
    * block is to be found
    * @param blockMap (optional) the block map to use for lookup
    */
-  getBlockPath(blockID, survey, blockMap = _blockMap) {
-    // function that returns a chain of IDs from the root block
-    // to the block with id - id
-    var getIDsList = function getIDsList(id, path = []) {
-      if (!blockMap.has(id)) {
-        return path.concat([id]).reverse();
-      }
-      return getIDsList(blockMap.get(id), path.concat([id]));
-    };
-
-    // function that returns the index of block id within the list of blocks
-    var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
-
-    // initialize path with index of root node
-    var [rootID, ...restIDs] = getIDsList(blockID);
-    var initPath = [getIndex(rootID, survey)];
-
-    // reduce over the rest of ids by finding id at each level
-    // and changing path accordingly
-    return restIDs.reduce((path, id) => {
-      var newPath = path.concat(['subblocks']);
-      var index = getIndex(id, survey.getIn(newPath));
-      return newPath.concat([index]);
-    }, initPath);
-  },
+  //getBlockPath(blockID, survey, blockMap = _blockMap) {
+  //  // function that returns a chain of IDs from the root block
+  //  // to the block with id - id
+  //  var getIDsList = function getIDsList(id, path = []) {
+  //    if (!blockMap.has(id)) {
+  //      return path.concat([id]).reverse();
+  //    }
+  //    return getIDsList(blockMap.get(id), path.concat([id]));
+  //  };
+  //
+  //  // function that returns the index of block id within the list of blocks
+  //  var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
+  //
+  //  // initialize path with index of root node
+  //  var [rootID, ...restIDs] = getIDsList(blockID);
+  //  var initPath = [getIndex(rootID, survey)];
+  //
+  //  // reduce over the rest of ids by finding id at each level
+  //  // and changing path accordingly
+  //  return restIDs.reduce((path, id) => {
+  //    var newPath = path.concat(['subblocks']);
+  //    var index = getIndex(id, survey.getIn(newPath));
+  //    return newPath.concat([index]);
+  //  }, initPath);
+  //},
   /**
    * Helper function that returns the complete path to the question requested.
    * @param questionID id of the question
    * @param survey source survey object in which the question is to be found
    * @param questionMap (optional) the question map to use for lookup
    */
-  getQuestionPath(questionID, survey, questionMap = _questionMap) {
-    var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
-    var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
-    return [...blockPath, 'questions', index];
-  },
+  //getQuestionPath(questionID, survey, questionMap = _questionMap) {
+  //  var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
+  //  var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
+  //  return [...blockPath, 'questions', index];
+  //},
   /**
    * Runs when the blockDropped action is called by the view.
    * Adds a new block to the end of the survey object.
@@ -184,14 +183,7 @@ var SurveyStore = Reflux.createStore({
    */
   onBlockDropped(targetID) {
     var survey = this.data.surveyData;
-    //var newBlock = Immutable.fromJS({
-    //    id: this.getNewId(ItemTypes.BLOCK),
-    //    questions: [],
-    //    subblocks: [],
-    //    randomize: true
-    //});
-    var newBlock = SurveyMan.empty_block(this.getNewId(ItemTypes.BLOCK));
-
+    var newBlock = SurveyMan.new_block(this.getNewId(ItemTypes.BLOCK));
     if (targetID === undefined) {
       // block is dropped on the survey
       // let newSurvey = survey.splice(0, 0, newBlock);
@@ -206,7 +198,7 @@ var SurveyStore = Reflux.createStore({
       //    list => list.splice(0, 0, newBlock)
       //);
       let targetBlock = _blockMap.get(targetID);
-      console.assert(targetBlock instanceof SurveyMan.survey.Block);
+      console.assert(targetBlock instanceof Block);
       let newSurvey = SurveyMan.add_block(targetBlock, survey, false);
       this.updateSurveyData(newSurvey, true);
       // update block map with new subblock
@@ -318,7 +310,7 @@ var SurveyStore = Reflux.createStore({
    * to start afresh.
    */
   onClearSurvey() {
-    var data = new SurveyMan.survey.Survey(initialData);
+    var data = new Survey(initialData);
     this.updateSurveyData(data, true);
 
     SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
@@ -353,8 +345,9 @@ var SurveyStore = Reflux.createStore({
    * @param rawData survey data in json
    */
   onLoadSurvey(rawData) {
+    console.log('onLoadSurvey');
     // update the survey object
-    var data = new SurveyMan.survey.Survey(rawData);
+    var data = new Survey(rawData);
     this.updateSurveyData(data, true);
 
     // clear up the maps & build them from scratch
@@ -387,34 +380,34 @@ var SurveyStore = Reflux.createStore({
       _optionsSet = _optionsSet.add(o.otext);
     });
   },
-    /**
-     * Takes a block and runs over its children recursively and
-     * populates the maps (option, question, block) with correct mappings
-     * @param block - Block of type Immutable.Map
-     */
-    buildMapsForBlock(block) {
-      //var blockId = block.get('id');
-      let blockId = block.id;
-      //_optionsSet = Immutable.OrderedSet();
+  /**
+   * Takes a block and runs over its children recursively and
+   * populates the maps (option, question, block) with correct mappings
+   * @param block - Block of type Immutable.Map
+   */
+  buildMapsForBlock(block) {
+    //var blockId = block.get('id');
+    let blockId = block.id;
+    //_optionsSet = Immutable.OrderedSet();
 
-      //// start with the questions
-      //block.get('questions').forEach((q) => {
-      //    var qId = q.get('id');
-      //    _questionMap = _questionMap.set(qId, blockId);
-      //
-      //    // tackle the questions
-      //    q.get('options').forEach((o) => {
-      //        _optionMap = _optionMap.set(o.get('id'), qId);
-      //        _optionsSet = _optionsSet.add(o.get('otext'));
-      //    });
-      //});
+    //// start with the questions
+    //block.get('questions').forEach((q) => {
+    //    var qId = q.get('id');
+    //    _questionMap = _questionMap.set(qId, blockId);
+    //
+    //    // tackle the questions
+    //    q.get('options').forEach((o) => {
+    //        _optionMap = _optionMap.set(o.get('id'), qId);
+    //        _optionsSet = _optionsSet.add(o.get('otext'));
+    //    });
+    //});
 
-      // handle subblocks
-      block.subblocks.forEach((b) => {
-        _blockMap = _blockMap.set(b.id, blockId);
+    // handle subblocks
+    block.subblocks.forEach((b) => {
+      _blockMap = _blockMap.set(b.id, blockId);
 
-        // call this recursively for each subblock
-        this.buildMapsForBlock(b);
+      // call this recursively for each subblock
+      this.buildMapsForBlock(b);
     });
   },
   /**
@@ -441,318 +434,341 @@ var SurveyStore = Reflux.createStore({
   getQuestionIndex(questionId, block) {
     return block.questions.findIndex(q => q.id === questionId);
   },
- /**
-  * Called when the toggleParam action is called.
-  * Toggles the property on the item.
-  * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
-  * @param itemId - Id of the item for which toggle button is clicked
-  * @param toggleName - string name of property that is toggled.
-  */
- onToggleParam(itemType, itemId, toggleName) {
-   var survey = this.data.surveyData;
+  /**
+   * Called when the toggleParam action is called.
+   * Toggles the property on the item.
+   * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
+   * @param itemId - Id of the item for which toggle button is clicked
+   * @param toggleName - string name of property that is toggled.
+   */
+  onToggleParam(itemType, itemId, toggleName) {
+    var survey = this.data.surveyData;
 
-   // handle the case when a param on a block is toggled
-   if (itemType === ItemTypes.BLOCK) {
-     let blockPath = this.getBlockPath(itemId, survey);
-     let newSurvey = survey.updateIn(blockPath,
-             b => b.set(toggleName, !b.get(toggleName))
-     );
-     this.updateSurveyData(newSurvey);
-   }
+    // handle the case when a param on a block is toggled
+    if (itemType === ItemTypes.BLOCK) {
+      console.log('onToggleParam for BLOCK -- dontknow what this does.');
+     //let blockPath = this.getBlockPath(itemId, survey);
+     //let newSurvey = survey.updateIn(blockPath,
+     //        b => b.set(toggleName, !b.get(toggleName))
+     //);
+     //this.updateSurveyData(newSurvey);
+    }
 
     // handle the case when a param on a question is toggled
-   else if (itemType === ItemTypes.QUESTION) {
-     let questionPath = this.getQuestionPath(itemId, survey);
-     let newSurvey = survey.updateIn(questionPath,
-             q => q.set(toggleName, !q.get(toggleName))
-     );
-     this.updateSurveyData(newSurvey);
-        }
-
-        // throw exception
-        else {
-            throw new Error("Not a valid item type");
-        }
-    },
-    /**
-     * Returns a clone of Question passed as a parameter.
-     * Updates _optionMap with all new options
-     * @param question - type of Immutable.Map. The question to be cloned
-     */
-    cloneQuestion(question) {
-        var self = this;
-
-        // get a new ID
-        var newQuestion = question.set('id', self.getNewId(ItemTypes.QUESTION));
-
-        // for each option, get a new option but with new ID and same otext
-        newQuestion = newQuestion.update('options',
-                            (list) => list.map(o => Immutable.Map({
-                                        id: self.getNewId(ItemTypes.OPTION),
-                                        otext: o.get('otext')
-                                      }))
-                      );
-
-        var qId = newQuestion.get('id');
-        newQuestion.get('options').forEach(o => {
-            _optionMap = _optionMap.set(o.get('id'), qId);
-        });
-        return newQuestion;
-    },
-    /**
-     * Returns a clone of Block passed as a parameter.
-     * Updates _blockMap and _questionMap with the new subblocks and questions
-     * @param block - type of Immutable.Map. The block to be cloned.
-     */
-    cloneBlock(block) {
-        var self = this;
-        var newBlock = block
-            .set('id', self.getNewId(ItemTypes.BLOCK))
-            .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-            .update('subblocks', (list) => list.map(blk => self.cloneBlock(blk)));
-
-        var blockId = newBlock.get('id');
-
-        newBlock.get('questions').forEach(q => {
-            _questionMap = _questionMap.set(q.get('id'), blockId);
-        });
-        newBlock.get('subblocks').forEach(b => {
-            _blockMap = _blockMap.set(b.get('id'), blockId);
-        });
-        return newBlock;
-    },
-    /**
-     * Method called when the itemCopy action is triggered.
-     * Responsible for creating a new copy of an ItemType - works only for
-     * question and block.
-     * @param itemType type of ItemType
-     * @param itemId id of the item to be cloned
-     */
-    onItemCopy(itemType, itemId) {
-        var survey = this.data.surveyData;
-
-        if (itemType === ItemTypes.BLOCK) {
-            let blockPath = this.getBlockPath(itemId, survey);
-            let blockIndex = blockPath[blockPath.length - 1];
-            let newBlock = this.cloneBlock(survey.getIn(blockPath));
-            let newSurvey;
-            if (_blockMap.has(itemId)) { // if subblock, append in parent
-                let parentId = _blockMap.get(itemId);
-                let parentblockPath = this.getBlockPath(parentId, survey);
-                newSurvey = survey.updateIn([...parentblockPath, 'subblocks'],
-                    list => list.splice(blockIndex + 1, 0, newBlock)
-                );
-                _blockMap = _blockMap.set(newBlock.get('id'), parentId);
-            } else { // else simply put in survey array
-                newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
-            }
-
-            // update
-            this.updateSurveyData(newSurvey, false);
-
-            // alert and focus
-            SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
-            SurveyActions.scrollToItem(newBlock.get('id'));
-        }
-
-        else if (itemType === ItemTypes.QUESTION) {
-            let questionPath = this.getQuestionPath(itemId, survey);
-            let questionIndex = questionPath[questionPath.length - 1];
-            let newQuestion = this.cloneQuestion(survey.getIn(questionPath));
-            let newSurvey = survey.updateIn(questionPath.slice(0, -1),
-                list => list.splice(questionIndex + 1, 0, newQuestion)
-            );
-            _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
-
-            // update and cache
-            this.updateSurveyData(newSurvey, false);
-
-            // alert and focus
-            SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
-            SurveyActions.scrollToItem(newQuestion.get('id'));
-        }
-
-        else {
-            throw new Error("Not a valid item type");
-        }
-    },
-    /**
-     * Called when an item has to be deleted.
-     * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
-     * @param itemId - Id of item to be deleted.
-     */
-   onItemDelete(itemType, itemId) {
-     var survey = this.data.surveyData;
-        // handle block delete
-     if (itemType === ItemTypes.BLOCK) {
-       //let blockPath = this.getBlockPath(itemId, survey);
-       //let newSurvey = survey.deleteIn(blockPath);
-       let newSurvey = SurveyMan.remove_block()
-            this.updateSurveyData(newSurvey, true);
-
-            // delete the mapping of question and options
-            survey.getIn([...blockPath, 'questions']).forEach(q => {
-                _questionMap = _questionMap.delete(q.get('id'));
-                q.get('options').forEach(o => {
-                    _optionMap = _optionMap.delete(o.get('id'));
-                });
-            });
-
-            SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
-        }
-
-        // handle question delete
-        else if (itemType === ItemTypes.QUESTION) {
-            let questionPath = this.getQuestionPath(itemId, survey);
-            let newSurvey = survey.deleteIn(questionPath);
-
-            // update and cache
-            this.updateSurveyData(newSurvey, true);
-
-            // delete the mapping of the question and its options
-            _questionMap = _questionMap.delete(itemId);
-            survey.getIn([...questionPath, 'options']).forEach(o => {
-                _optionMap = _optionMap.delete(o.get('id'));
-            });
-
-            SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
-        }
-
-        // handle option delete
-        else if (itemType === ItemTypes.OPTION) {
-            let questionPath = this.getQuestionPath(_optionMap.get(itemId), survey);
-            let index = survey.getIn([...questionPath, 'options'])
-                              .findIndex(op => op.get('id') === itemId);
-
-            let newSurvey = survey.deleteIn([...questionPath, 'options', index]);
-
-            // delete the mapping
-            _optionMap = _optionMap.delete(itemId);
-            this.updateSurveyData(newSurvey);
-        }
-
-        // throw exception
-        else {
-            throw new Error("Not a valid item type");
-        }
-    },
-    /**
-     * Called when the question text is edited. Sets qtext to new value.
-     * @param text - new text value
-     * @param questionId - id of the question that needs to be changed
-     */
-    onSaveEditText(text, questionId) {
-        var survey = this.data.surveyData;
-        var path = this.getQuestionPath(questionId, survey);
-        var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
-        this.updateSurveyData(newSurvey, true);
-    },
-    /**
-     * Used to tag on a string value of freeText to a question
-     * @param text The value of freetext
-     * @param questionId Id of the question to which the freetext prop should be added
-     */
-    onSaveFreeText(text, questionId) {
-        var survey = this.data.surveyData;
-        var path = this.getQuestionPath(questionId, survey);
-        var newSurvey = survey.updateIn(path, q => q.set('freetext', text));
-        this.updateSurveyData(newSurvey, true);
-    },
-    /**
-     * Called when the undoSurvey action is triggered. Responsible for
-     * setting global state to last _history item.
-     */
-    onUndoSurvey() {
-        // hide the alert
-        this.data.alertState = this.data.alertState.set('visible', false);
-
-        // retrieve cached data
-        var { data, optionMap, questionMap } = _history.pop();
-        _questionMap = Immutable.Map(questionMap);
-        _optionMap = Immutable.Map(optionMap);
-        this.updateSurveyData(data);
-    },
-    /**
-     * Called when the scrolltoItem action is triggered. Scrolls the item
-     * into view
-     * @param id - id of the item that needs to be scrolled to
-     */
-    onScrollToItem(id) {
-        window.location.hash = id;
-    },
-    // called when a new optiongroup is selected as the default in the optionlist selectbox
-    onUpdateOptionGroup(id) {
-        this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
-        this.trigger(this.data);
-    },
-    /**
-     * @param options - array of options
-     */
-    onAddOptionGroup(options) {
-        var { optionGroupState } = this.data;
-        var newId = optionGroupState.get('options').count();
-        this.data.optionGroupState = optionGroupState
-                                        .set('selectedID', newId)
-                                        .updateIn(['options'], list => list.push(
-                                            Immutable.Map({id: newId, optionLabels: options})
-                                        ));
-        this.trigger(this.data);
-    },
-    onMoveQuestion(questionID, blockID) {
-        var survey = this.data.surveyData;
-        var currBlockID = _questionMap.get(questionID);
-
-        // if the question is dropped in the same block then do nothing
-        if (currBlockID === blockID) {
-            return;
-        }
-
-        var questionPath = this.getQuestionPath(questionID, survey);
-        var newBlockPath = this.getBlockPath(blockID, survey);
-        var question = survey.getIn(questionPath);
-
-        var newSurvey = survey.deleteIn(questionPath)
-                              .updateIn([...newBlockPath, 'questions'], list => list.push(question));
-
-        // update and cache
-        this.updateSurveyData(newSurvey, true);
-
-        // update the mappings of the question
-        _questionMap = _questionMap.set(questionID, blockID);
-
-        SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
-    },
-    /**
-     * Called when an item is dragged to be re-ordered in the treeview.
-     * This works on the assumption that the item is ordered within its parent container.
-     * @param draggedItemId: id of the block being dragged
-     * @param finalIndex: final location where the item needs to be moved to within the container
-     */
-    onReorderItem(draggedItemId, finalIndex, itemType) {
-        var survey = this.data.surveyData;
-
-        if (itemType === ItemTypes.BLOCK) {
-            let draggedBlockIndex = this.getBlockIndex(draggedItemId);
-            let block = survey.get(draggedBlockIndex);
-            let newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
-            this.updateSurveyData(newSurvey, false);
-        }
-        else if (itemType === ItemTypes.QUESTION) {
-            let draggedBlockId = _questionMap.get(draggedItemId);
-            let draggedBlockIndex = this.getBlockIndex(draggedBlockId);
-            let block = survey.get(draggedBlockIndex);
-            let draggedQuestionIndex = this.getQuestionIndex(draggedItemId, block);
-            let draggedQuestion = block.getIn(['questions', draggedQuestionIndex]);
-            let newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
-              (questions) => questions.delete(draggedQuestionIndex)
-                                      .splice(finalIndex, 0, draggedQuestion)
-            );
-            this.updateSurveyData(newSurvey, false);
-        }
-        else {
-          throw 'Invalid item type';
-        }
+    else if (itemType === ItemTypes.QUESTION) {
+      console.log('onToggleParam for QUESTION -- dontknow what this does.');
+      //let questionPath = this.getQuestionPath(itemId, survey);
+      //let newSurvey = survey.updateIn(questionPath,
+      //        q => q.set(toggleName, !q.get(toggleName))
+      //);
+      //this.updateSurveyData(newSurvey);
     }
+    // throw exception
+    else {
+        throw new Error("Not a valid item type");
+    }
+  },
+  /**
+   * Returns a clone of Question passed as a parameter.
+   * Updates _optionMap with all new options
+   * @param question - type of Immutable.Map. The question to be cloned
+   */
+  cloneQuestion(question) {
+    var self = this;
+
+    // get a new ID
+    var newQuestion = question.set('id', self.getNewId(ItemTypes.QUESTION));
+
+    // for each option, get a new option but with new ID and same otext
+    newQuestion = newQuestion.update('options',
+                        (list) => list.map(o => Immutable.Map({
+                                    id: self.getNewId(ItemTypes.OPTION),
+                                    otext: o.get('otext')
+                                  }))
+                  );
+
+    var qId = newQuestion.get('id');
+    newQuestion.get('options').forEach(o => {
+        _optionMap = _optionMap.set(o.get('id'), qId);
+    });
+    return newQuestion;
+  },
+  /**
+   * Returns a clone of Block passed as a parameter.
+   * Updates _blockMap and _questionMap with the new subblocks and questions
+   * @param block - type of Immutable.Map. The block to be cloned.
+   */
+  cloneBlock(block) {
+    var self = this;
+    var newBlock = block
+        .set('id', self.getNewId(ItemTypes.BLOCK))
+        .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
+        .update('subblocks', (list) => list.map(blk => self.cloneBlock(blk)));
+
+    var blockId = newBlock.get('id');
+
+    newBlock.get('questions').forEach(q => {
+        _questionMap = _questionMap.set(q.get('id'), blockId);
+    });
+    newBlock.get('subblocks').forEach(b => {
+        _blockMap = _blockMap.set(b.get('id'), blockId);
+    });
+    return newBlock;
+  },
+  /**
+   * Method called when the itemCopy action is triggered.
+   * Responsible for creating a new copy of an ItemType - works only for
+   * question and block.
+   * @param itemType type of ItemType
+   * @param itemId id of the item to be cloned
+   */
+  onItemCopy(itemType, itemId) {
+    var survey = this.data.surveyData;
+    if (itemType === ItemTypes.BLOCK) {
+      //let blockPath = this.getBlockPath(itemId, survey);
+      //let blockIndex = blockPath[blockPath.length - 1];
+      let newBlock = SurveyMan.copy_block(survey.get_block_by_id(itemId));
+      let newSurvey = SurveyMan.add_block(newBlock, false);
+      //if (_blockMap.has(itemId)) { // if subblock, append in parent
+      //  let parentId = _blockMap.get(itemId);
+      //  let parentblockPath = this.getBlockPath(parentId, survey);
+      //  var newSurvey = survey.updateIn([...parentblockPath, 'subblocks'],
+      //          list => list.splice(blockIndex + 1, 0, newBlock)
+      //  );
+        _blockMap = _blockMap.set(newBlock.get('id'), parentId);
+      //} else { // else simply put in survey array
+      //  newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
+      //}
+      // update
+      this.updateSurveyData(newSurvey, false);
+
+      // alert and focus
+      SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
+      SurveyActions.scrollToItem(newBlock.get('id'));
+    }
+
+    else if (itemType === ItemTypes.QUESTION) {
+
+      //let questionPath = this.getQuestionPath(itemId, survey);
+      //let questionIndex = questionPath[questionPath.length - 1];
+      //let newQuestion = this.cloneQuestion(survey.getIn(questionPath));
+      let newQuestion = SurveyMan.copy_question(survey);
+      let newSurvey = SurveyMan.add_question(newQuestion, newQuestion.block, false);
+      //let newSurvey = survey.updateIn(questionPath.slice(0, -1),
+      //    list => list.splice(questionIndex + 1, 0, newQuestion)
+      //);
+      _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
+
+      // update and cache
+      this.updateSurveyData(newSurvey, false);
+
+      // alert and focus
+      SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
+      SurveyActions.scrollToItem(newQuestion.get('id'));
+    }
+
+    else {
+        throw new Error("Not a valid item type");
+    }
+  },
+  /**
+   * Called when an item has to be deleted.
+   * @param itemType - refers to the type of item to be deleted. One of ItemTypes.
+   * @param itemId - Id of item to be deleted.
+   */
+  onItemDelete(itemType, itemId) {
+    var survey = this.data.surveyData;
+    // handle block delete
+    if (itemType === ItemTypes.BLOCK) {
+      //let newSurvey = survey.deleteIn(blockPath);
+      let block = _blockMap.get(itemId);
+      let newSurvey = SurveyMan.remove_block(block, true);
+      this.updateSurveyData(newSurvey, true);
+
+      let blockPath = this.getBlockPath(itemId, survey);
+      // delete the mapping of question and options
+      survey.getIn([...blockPath, 'questions']).forEach(q => {
+      _questionMap = _questionMap.delete(q.get('id'));
+        q.get('options').forEach(o => {
+          _optionMap = _optionMap.delete(o.get('id'));
+        });
+      });
+      SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
+    }
+    // handle question delete
+    else if (itemType === ItemTypes.QUESTION) {
+       //let newSurvey = survey.deleteIn(questionPath);
+       let question = _questionMap.get(itemId);
+       let newSurvey = SurveyMan.remove_question(question, survey);
+       // update and cache
+       this.updateSurveyData(newSurvey, true);
+
+       // delete the mapping of the question and its options
+       let questionPath = this.getQuestionPath(itemId, survey);
+       _questionMap = _questionMap.delete(itemId);
+       survey.getIn([...questionPath, 'options']).forEach(o => {
+           _optionMap = _optionMap.delete(o.get('id'));
+       });
+       SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
+     }
+    // handle option delete
+    else if (itemType === ItemTypes.OPTION) {
+      //let questionPath = this.getQuestionPath(_optionMap.get(itemId), survey);
+      //let index = survey.getIn([...questionPath, 'options'])
+      //    .findIndex(op => op.get('id') === itemId);
+      //let newSurvey = survey.deleteIn([...questionPath, 'options', index]);
+      let option = _optionMap.get(itemId);
+      let newSurvey = SurveyMan.remove_option(option, survey);
+      this.updateSurveyData(newSurvey);
+      // delete the mapping
+      _optionMap = _optionMap.delete(itemId);
+    }
+    // throw exception
+    else {
+      throw new Error("Not a valid item type");
+    }
+  },
+  /**
+   * Called when the question text is edited. Sets qtext to new value.
+   * @param text - new text value
+   * @param questionId - id of the question that needs to be changed
+   */
+  onSaveEditText(text, questionId) {
+    var survey = this.data.surveyData;
+    var newSurvey = SurveyMan.copy_survey(survey);
+    var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
+    newQuestion.qtext = text;
+    newSurvey.replace_question(newQuestion);
+    //var path = this.getQuestionPath(questionId, survey);
+    //var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
+    this.updateSurveyData(newSurvey, true);
+  },
+  /**
+   * Used to tag on a string value of freeText to a question
+   * @param text The value of freetext
+   * @param questionId Id of the question to which the freetext prop should be added
+   */
+  onSaveFreeText(text, questionId) {
+    var survey = this.data.surveyData;
+    //var path = this.getQuestionPath(questionId, survey);
+    //var newSurvey = survey.updateIn(path, q => q.set('freetext', text));
+    let newSurvey = SurveyMan.copy_survey(survey);
+    var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
+    // TODO(etosch): test whether this sets default and regex correctly.
+    newQuestion.setFreetext(text);
+    newSurvey.replace_question(newQuestion);
+    this.updateSurveyData(newSurvey, true);
+  },
+  /**
+   * Called when the undoSurvey action is triggered. Responsible for
+   * setting global state to last _history item.
+   */
+  onUndoSurvey() {
+    // hide the alert
+    this.data.alertState = this.data.alertState.set('visible', false);
+
+    // retrieve cached data
+    var { data, optionMap, questionMap } = _history.pop();
+    _questionMap = Immutable.Map(questionMap);
+    _optionMap = Immutable.Map(optionMap);
+    this.updateSurveyData(data);
+  },
+  /**
+   * Called when the scrolltoItem action is triggered. Scrolls the item
+   * into view
+   * @param id - id of the item that needs to be scrolled to
+   */
+  onScrollToItem(id) {
+    window.location.hash = id;
+  },
+  // called when a new optiongroup is selected as the default in the optionlist selectbox
+  onUpdateOptionGroup(id) {
+    this.data.optionGroupState = this.data.optionGroupState.set('selectedID', id);
+    this.trigger(this.data);
+  },
+  /**
+   * @param options - array of options
+   */
+  onAddOptionGroup(options) {
+    var { optionGroupState } = this.data;
+    var newId = optionGroupState.get('options').count();
+    this.data.optionGroupState = optionGroupState
+        .set('selectedID', newId)
+        .updateIn(['options'], list => list.push(
+            Immutable.Map({id: newId, optionLabels: options})
+        ));
+    this.trigger(this.data);
+  },
+  onMoveQuestion(questionID, blockID) {
+    var survey = this.data.surveyData;
+    //var currBlockID = _questionMap.get(questionID);
+    var currBlockID = survey.get_question_by_id(questionID).block.id;
+    // if the question is dropped in the same block then do nothing
+    if (currBlockID === blockID) {
+      return;
+    }
+
+    //var questionPath = this.getQuestionPath(questionID, survey);
+    //var newBlockPath = this.getBlockPath(blockID, survey);
+    //var question = survey.getIn(questionPath);
+    //
+    //var newSurvey = survey.deleteIn(questionPath)
+    //                      .updateIn([...newBlockPath, 'questions'], list => list.push(question));
+
+    // update and cache
+    var newSurvey = SurveyMan.copy_survey(survey);
+    var question = newSurvey.get_question_by_id(questionId);
+    var block = newSurvey.get_block_by_id(blockID);
+    SurveyMan.remove_question(question, newSurve);
+    SurveyMan.add_question(question, block, newSurvey);
+    this.updateSurveyData(newSurvey, true);
+
+    // update the mappings of the question
+    _questionMap = _questionMap.set(questionID, blockID);
+
+    SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
+  },
+  /**
+   * Called when an item is dragged to be re-ordered in the treeview.
+   * This works on the assumption that the item is ordered within its parent container.
+   * @param draggedItemId: id of the block being dragged
+   * @param finalIndex: final location where the item needs to be moved to within the container
+   */
+  onReorderItem(draggedItemId, finalIndex, itemType) {
+    // TODO(etosch): test this -- what happens when you drag an item into a region not on
+    // the appropriate level?
+    var survey = this.data.surveyData;
+
+    if (itemType === ItemTypes.BLOCK) {
+      // TODO(etosch): find out where finalIndex is coming from.
+      console.log('Draggable reordering not yet implemented.');
+      //let draggedBlockIndex = this.getBlockIndex(draggedItemId);
+      ////let block = survey.get(draggedBlockIndex);
+      //let block = SurveyMan.copy_block(survey.get_block_by_id(draggedItemId));
+      //let newSurvey = SurveyMan.remove_block(block, survey, false);
+      //newSurvey.add_block(block, finalIndex);
+      ////let newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
+      //this.updateSurveyData(newSurvey, false);
+    }
+    else if (itemType === ItemTypes.QUESTION) {
+      // TODO(etosch): same
+      console.log('Draggable reordering not yet implemented.');
+      //let draggedBlockId = _questionMap.get(draggedItemId);
+      //let draggedBlockIndex = this.getBlockIndex(draggedBlockId);
+      ////let block = survey.get(draggedBlockIndex);
+      //let block
+      //let draggedQuestionIndex = this.getQuestionIndex(draggedItemId, block);
+      //let draggedQuestion = block.getIn(['questions', draggedQuestionIndex]);
+      //let newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
+      //  (questions) => questions.delete(draggedQuestionIndex)
+      //                          .splice(finalIndex, 0, draggedQuestion)
+      //);
+      //this.updateSurveyData(newSurvey, false);
+    }
+    else {
+      throw 'Invalid item type';
+    }
+  }
 });
 
 module.exports = SurveyStore;

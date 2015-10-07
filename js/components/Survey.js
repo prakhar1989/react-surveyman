@@ -8,6 +8,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
+var {survey} = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var surveyTarget = {
     drop(props, monitor, component) {
@@ -45,9 +46,10 @@ var Survey = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
         survey: React.PropTypes.instanceOf(List)
+      //survey: survey.Survey
     },
     handleBlockDrop() {
-        SurveyActions.blockDropped();
+      SurveyActions.blockDropped();
     },
     render() {
         var { survey, isOverCurrent, connectDropTarget } = this.props;
