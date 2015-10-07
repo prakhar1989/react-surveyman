@@ -8,6 +8,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
+var {survey} = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var surveyTarget = {
     drop(props, monitor, component) {
@@ -26,7 +27,7 @@ function collect(connect, monitor) {
 }
 
 function renderSubblocks(block) {
-    var subblocks = block.get('subblocks');
+    var subblocks = block.subblocks;
     if (subblocks.count() > 0) {
         return subblocks.map((subb, i) =>
           <Block key={subb.get('id')}
@@ -45,9 +46,10 @@ var Survey = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
         survey: React.PropTypes.instanceOf(List)
+      //survey: survey.Survey
     },
     handleBlockDrop() {
-        SurveyActions.blockDropped();
+      SurveyActions.blockDropped();
     },
     render() {
         var { survey, isOverCurrent, connectDropTarget } = this.props;
@@ -58,7 +60,7 @@ var Survey = React.createClass({
             'hovering': isOverCurrent
         });
 
-        var blocks = survey.map((block, i) => {
+        var blocks = survey.topLevelBlocks.map((block, i) => {
             return (
               <Block key={block.get('id')}
                   id={block.get('id')}
@@ -80,7 +82,7 @@ var Survey = React.createClass({
 
         return connectDropTarget(
             <div className={classes}>
-                 { survey.count() > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
+                 { survey.topLevelBlocks.length > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
             </div>
         );
     }
