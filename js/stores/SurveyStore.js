@@ -9,15 +9,6 @@ var Lockr = require('lockr');
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 var {Survey, Block} = SurveyMan.survey;
 
-// a set of option texts - helps in generating suggestions
-var _optionsSet = Immutable.OrderedSet();
-
-// initialize question, option, block maps that will help in
-// faster retrieval of associated blocks and questions.
-var _questionMap = Immutable.Map();     // questionId => blockId
-var _optionMap = Immutable.Map();       // optionId   => questionId
-var _blockMap = Immutable.Map();        // subblockId => blockid
-
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
 const LOCALSTORAGE_KEY = 'savedSurveyList'; // the key against which the survey data is stored in LS
@@ -90,9 +81,7 @@ var SurveyStore = Reflux.createStore({
   updateSurveyData(data, cache = false) {
     if (cache) {
       _history.push({
-        data: this.data.surveyData,
-        optionMap: _optionMap.toJS(),
-        questionMap: _questionMap.toJS()
+        data: this.data.surveyData
       });
     }
     this.data.surveyData = data;
@@ -143,15 +132,14 @@ var SurveyStore = Reflux.createStore({
     var survey = this.data.surveyData;
     var newBlock = SurveyMan.new_block(this.getNewId(ItemTypes.BLOCK));
     if (targetID === undefined) {
-      let newSurvey = SurveyMan.add_block(newBlock, survey, false);
+      let newSurvey = SurveyMan.add_block(survey, newBlock, null, false);
       this.updateSurveyData(newSurvey, true);
       SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     } else {
-      let targetBlock = _blockMap.get(targetID);
-      console.assert(targetBlock instanceof Block);
-      let newSurvey = SurveyMan.add_block(targetBlock, survey, false);
-      this.updateSurveyData(newSurvey, true);
-      _blockMap = _blockMap.set(newBlock.id, targetID);
+      try {
+        let newSurvey = SurveyMan.add_block(survey, newBlock, survey.get_block_by_id(targetID), false);
+        this.updateSurveyData(newSurvey, true);
+      } catch (e) { console.log(e); return; }
       SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
     }
   },
@@ -197,10 +185,6 @@ var SurveyStore = Reflux.createStore({
     var survey = this.data.surveyData;
     var question = survey.get_question_by_id(questionId);
     var newSurvey = SurveyMan.add_option(question, newOption, survey, false);
-    // update the option map and options set
-    _optionMap = _optionMap.set(newOption.get('id'), questionId);
-    _optionsSet = _optionsSet.add(otext);
-
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -247,14 +231,7 @@ var SurveyStore = Reflux.createStore({
     console.assert(initialData !== undefined);
     var data = new Survey(initialData);
     this.updateSurveyData(data, true);
-
     SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
-
-    // clear up the maps and set
-    _questionMap = Immutable.Map();
-    _optionMap = Immutable.Map();
-    _blockMap = Immutable.Map();
-    _optionsSet = Immutable.OrderedSet();
   },
   /**
    * Called when the saveSurvey action is called.
@@ -278,18 +255,10 @@ var SurveyStore = Reflux.createStore({
    * @param rawData survey data in json
    */
   onLoadSurvey(rawData) {
-    console.assert(rawData !== undefined);
+    console.assert(rawData !== undefined, 'survey json data should be defined');
     // update the survey object
     var data = new Survey(rawData);
     this.updateSurveyData(data, true);
-
-    // clear up the maps & build them from scratch
-    _questionMap = Immutable.Map();
-    _optionMap = Immutable.Map();
-    _blockMap = Immutable.Map();
-    data.topLevelBlocks.forEach((block) => this.buildMapsForBlock(block));
-    data.questions.forEach((question) => this.buildMapsForQuestionsAndOptions(question));
-
     SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
   },
   /**
@@ -297,21 +266,9 @@ var SurveyStore = Reflux.createStore({
    * Toggles the visibility of the load survey modal.
    */
   onToggleLoadModal() {
-     this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
-     this.trigger(this.data);
-  },
-  /**
-   *
-   */
-  buildMapsForQuestionsAndOptions(question) {
-    _optionsSet = Immutable.OrderedSet();
-    // Basically just ported from @prakhar1989 wrote in buildMapsForBlock
-    let qId = q.id;
-    _questionMap = _questionMap.set(qId, q.block.id);
-    q.options.forEach((o) => {
-      _optionMap = _optionMap.set(o.id, qId);
-      _optionsSet = _optionsSet.add(o.otext);
-    });
+    this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
+    console.log('triggering onToggleLoadModal');
+    this.trigger(this.data);
   },
   /**
    * Takes a block and runs over its children recursively and
@@ -386,28 +343,10 @@ var SurveyStore = Reflux.createStore({
   },
   /**
    * Returns a clone of Question passed as a parameter.
-   * Updates _optionMap with all new options
    * @param question - type of Immutable.Map. The question to be cloned
    */
   cloneQuestion(question) {
-    var self = this;
-
-    // get a new ID
-    var newQuestion = question.set('id', self.getNewId(ItemTypes.QUESTION));
-
-    // for each option, get a new option but with new ID and same otext
-    newQuestion = newQuestion.update('options',
-                        (list) => list.map(o => Immutable.Map({
-                                    id: self.getNewId(ItemTypes.OPTION),
-                                    otext: o.get('otext')
-                                  }))
-                  );
-
-    var qId = newQuestion.get('id');
-    newQuestion.get('options').forEach(o => {
-        _optionMap = _optionMap.set(o.get('id'), qId);
-    });
-    return newQuestion;
+    return SurveyMan.copy_question(question);
   },
   /**
    * Returns a clone of Block passed as a parameter.
@@ -415,21 +354,7 @@ var SurveyStore = Reflux.createStore({
    * @param block - type of Immutable.Map. The block to be cloned.
    */
   cloneBlock(block) {
-    var self = this;
-    var newBlock = block
-        .set('id', self.getNewId(ItemTypes.BLOCK))
-        .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-        .update('subblocks', (list) => list.map(blk => self.cloneBlock(blk)));
-
-    var blockId = newBlock.id;
-
-    newBlock.topLevelQuestions.forEach(q => {
-        _questionMap = _questionMap.set(q.get('id'), blockId);
-    });
-    newBlock.subblocks.forEach(b => {
-        _blockMap = _blockMap.set(b.get('id'), blockId);
-    });
-    return newBlock;
+    return SurveyMan.copy_block(block);
   },
   /**
    * Method called when the itemCopy action is triggered.
@@ -445,7 +370,6 @@ var SurveyStore = Reflux.createStore({
       //let blockIndex = blockPath[blockPath.length - 1];
       let newBlock = SurveyMan.copy_block(survey.get_block_by_id(itemId));
       let newSurvey = SurveyMan.add_block(newBlock, false);
-      _blockMap = _blockMap.set(newBlock.id, parentId);
       this.updateSurveyData(newSurvey, false);
 
       // alert and focus

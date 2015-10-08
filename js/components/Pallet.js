@@ -6,20 +6,20 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var Pallet = React.createClass({
-    mixins: [PureRenderMixin],
-    propTypes: {
-        survey: SurveyMan.survey.Survey
-    },
-    render: function() {
-        return (
-            <div>
-                <Controls />
-                <div className="survey-area">
-                    <Survey survey={this.props.survey} />
-                </div>
-            </div>
-        );
-    }
+  mixins: [PureRenderMixin],
+  propTypes: {
+    survey: React.PropTypes.instanceOf(SurveyMan.survey.Survey).isRequired
+  },
+  render: function() {
+    return (
+        <div>
+          <Controls />
+          <div className="survey-area">
+            <Survey survey={this.props.survey} />
+          </div>
+        </div>
+    );
+  }
 });
 
 module.exports = Pallet;

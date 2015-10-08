@@ -11,70 +11,80 @@ var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var surveyTarget = {
-    drop(props, monitor, component) {
-        let droppedOnChild = !monitor.isOver({ shallow: true });
-        if (!droppedOnChild) {
-            component.handleBlockDrop();
-        }
+  drop(props, monitor, component) {
+    let droppedOnChild = !monitor.isOver({ shallow: true });
+    if (!droppedOnChild) {
+      component.handleBlockDrop();
     }
+  }
 };
 
 function collect(connect, monitor) {
-    return {
-        connectDropTarget: connect.dropTarget(),
-        isOverCurrent: monitor.isOver({ shallow: true })
-    };
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOverCurrent: monitor.isOver({ shallow: true })
+  };
 }
 
 function renderSubblocks(block) {
-    var subblocks = block.subblocks;
-    if (subblocks.length > 0) {
-        return subblocks.map(subb =>
-          <Block block={subb}>
+  var subblocks = block.subblocks;
+  if (subblocks.length > 0) {
+    return subblocks.map(subb =>
+            <Block
+                block={subb}
+                id={subb.id}
+                key={subb.id}
+                >
               {renderSubblocks(subb)}
-          </Block>
-        );
-    }
+            </Block>
+    );
+  }
 }
 
 var Survey = React.createClass({
-    mixins: [PureRenderMixin],
-    propTypes: {
-      survey: React.PropTypes.instanceOf(SurveyMan.survey.Survey).isRequired
-    },
-    handleBlockDrop() {
-      SurveyActions.blockDropped();
-    },
-    render() {
-        var { survey, isOverCurrent, connectDropTarget } = this.props;
+  mixins: [PureRenderMixin],
+  propTypes: {
+    survey: React.PropTypes.instanceOf(SurveyMan.survey.Survey).isRequired
+  },
+  handleBlockDrop() {
+    SurveyActions.blockDropped();
+  },
+  render() {
+    var { survey, isOverCurrent, connectDropTarget } = this.props;
 
-        var classes = cx({
-            'survey': true,
-            'dragging': isOverCurrent,
-            'hovering': isOverCurrent
-        });
+    console.assert(survey !== undefined);
 
-        var blocks = survey.topLevelBlocks.map(block => {
-            return (
-              <Block block={block}>
-                    {renderSubblocks(block)}
-              </Block>
-            );
-        });
+    var classes = cx({
+      'survey': true,
+      'dragging': isOverCurrent,
+      'hovering': isOverCurrent
+    });
 
-        // wrapping the blocks in a react transition group
-        var blockAnimationTag = (
-            <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
-                { blocks }
-            </ReactCSSTransitionGroup>
-        );
+    var blocks = survey.topLevelBlocks.map(block => {
+      return (
+          <Block
+              block={block}
+              id={block.id}
+              key={block.id}
+              >
+            {renderSubblocks(block)}
+          </Block>
+      );
+    });
 
-        return connectDropTarget(
-            <div className={classes}>
-                 { survey.topLevelBlocks.length > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
-            </div>
-        );
-    }
+    // wrapping the blocks in a react transition group
+    var blockAnimationTag = (
+        <ReactCSSTransitionGroup transitionName="itemTransition" transitionEnter={false}>
+          { blocks }
+        </ReactCSSTransitionGroup>
+    );
+
+    return connectDropTarget(
+        <div className={classes}>
+          { survey.topLevelBlocks.length > 0 ? blockAnimationTag : <HelpText itemType="Block" /> }
+        </div>
+    );
+  }
 });
 
 module.exports = DropTarget(ItemTypes.BLOCK, surveyTarget, collect)(Survey);

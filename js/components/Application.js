@@ -11,19 +11,20 @@ var SurveyActions = require('../actions/SurveyActions');
 var SurveyStore = require('../stores/SurveyStore');
 var TreeView = require('./TreeView');
 var LoadSurveyModal = require('./LoadSurveyModal');
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var Application = React.createClass({
 // this causes setState to run whenever the store calls this.trigger
   mixins: [Reflux.connect(SurveyStore), PureRenderMixin],
   componentDidMount() {
     console.log('Not sure what the difference between load and loadSurvey is.');
-    //SurveyActions.load();
+    //SurveyActions.load(SurveyMan.new_survey().toJSON());
   },
   handleAlertDismiss() {
   },
   handleLoadSurvey() {
     // TODO(etosch): loadSurvey should take an argument?
-    SurveyActions.loadSurvey();
+    SurveyActions.loadSurvey(SurveyMan.new_survey().toJSON());
   },
   handleDeleteSurvey() {
   },
