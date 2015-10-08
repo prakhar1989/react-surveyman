@@ -7,7 +7,10 @@ var AlertTypes = require('../components/AlertTypes');
 var Lockr = require('lockr');
 // Replace when we update the surveyman module.
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
-var {Survey, Block} = SurveyMan.survey;
+var {Survey, Block, Question} = SurveyMan.survey;
+
+// a set of option texts - helps in generating suggestions
+var _optionsSet = Immutable.OrderedSet();
 
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
@@ -19,7 +22,6 @@ var _history = [];
 var SurveyStore = Reflux.createStore({
   listenables: [SurveyActions],
   data: {
-    // surveyData: Immutable.List().
     surveyData: SurveyMan.new_survey(),
     modalState: Immutable.Map({
       dropTargetID: null,
@@ -39,7 +41,6 @@ var SurveyStore = Reflux.createStore({
   },
   // called when the app component is loaded
   init() {
-    console.log('fdsafdsa');
     let default_options = [
       ["Yes", "No"],
       ["True", "False"],
@@ -105,7 +106,9 @@ var SurveyStore = Reflux.createStore({
    * @param questionId
    */
   getBlockId(questionId) {
-    return _questionMap.get(questionId);
+    let survey = this.data.surveyData;
+    let question = survey.get_question_by_id(questionId);
+    return question.block.id;
   },
   /**
    * Returns a new ID based on the type of object requested
@@ -139,7 +142,7 @@ var SurveyStore = Reflux.createStore({
       try {
         let newSurvey = SurveyMan.add_block(survey, newBlock, survey.get_block_by_id(targetID), false);
         this.updateSurveyData(newSurvey, true);
-      } catch (e) { console.log(e); return; }
+      } catch (e) { console.log('Error in SurveyStore.onBlockDropped', e); return; }
       SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
     }
   },
@@ -161,18 +164,16 @@ var SurveyStore = Reflux.createStore({
    * with the following keys - parentID, qtext, config
    */
   onQuestionDropped(questionObj) {
-    var survey = this.data.surveyData;
-
-    var newQuestion = SurveyMan.copy_question(questionObj);
-    newQuestion.clear_options();
-    var newSurvey = SurveyMan.copy_survey(survey);
-    // update and cache
-    this.updateSurveyData(newSurvey, true);
-    // update question map with new question
-    var block = newQuestion.block;
-    _questionMap = _questionMap.set(newQuestion.get('id'), block.id);
-
-    SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
+    let survey = this.data.surveyData;
+    questionObj.id = this.getNewId(ItemTypes.QUESTION);
+    let question = new Question(questionObj);
+    let block = survey.get_block_by_id(questionObj.parentID);
+    try {
+      let newSurvey = SurveyMan.add_question(question, block, survey, false);
+      // update and cache
+      this.updateSurveyData(newSurvey, true);
+      SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
+    } catch (e) { console.warn(e); }
   },
   /**
    * Runs when the optionAdded action is called by the view.
@@ -181,11 +182,14 @@ var SurveyStore = Reflux.createStore({
    * @param otext (string) the text of the option to be added
    */
   onOptionAdded(questionId, otext) {
-    var newOption = SurveyMan.new_option(otext, questionId);
     var survey = this.data.surveyData;
+    var newOption = SurveyMan.new_option(otext);
     var question = survey.get_question_by_id(questionId);
-    var newSurvey = SurveyMan.add_option(question, newOption, survey, false);
+    var newSurvey = SurveyMan.add_option(newOption, question, survey, false);
     this.updateSurveyData(newSurvey, true);
+
+    // update the option map and options set
+    _optionsSet = _optionsSet.add(otext);
   },
   /**
    * Run when the action toggleModal is called by the view
@@ -232,6 +236,8 @@ var SurveyStore = Reflux.createStore({
     var data = new Survey(initialData);
     this.updateSurveyData(data, true);
     SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
+
+    _optionsSet = Immutable.OrderedSet();
   },
   /**
    * Called when the saveSurvey action is called.
@@ -305,7 +311,7 @@ var SurveyStore = Reflux.createStore({
    * @param {SurveyMan.survey.Block} block - obj (Immutable.Map) of the container block
    */
   getQuestionIndex(questionId, block) {
-    return block.questions.findIndex(q => q.id === questionId);
+    return block.topLevelQuestions.findIndex(q => q.id === questionId);
   },
   /**
    * Called when the toggleParam action is called.
@@ -317,24 +323,38 @@ var SurveyStore = Reflux.createStore({
   onToggleParam(itemType, itemId, toggleName) {
     var survey = this.data.surveyData;
 
-    // handle the case when a param on a block is toggled
     if (itemType === ItemTypes.BLOCK) {
-      console.log('onToggleParam for BLOCK -- dontknow what this does.');
-     //let blockPath = this.getBlockPath(itemId, survey);
-     //let newSurvey = survey.updateIn(blockPath,
-     //        b => b.set(toggleName, !b.get(toggleName))
-     //);
-     //this.updateSurveyData(newSurvey);
+      let oldBlock = survey.get_block_by_id(itemId);
+      let newBlock = SurveyMan.copy_block(oldBlock);
+      console.log(toggleName);
+      switch (toggleName) {
+        case 'randomizable':
+          newBlock.randomizable = !newBlock.randomizable;
+      }
+      let newSurvey = SurveyMan.remove_block(oldBlock, survey, false);
+      newSurvey.add_block(survey, newBlock);
+     this.updateSurveyData(newSurvey);
     }
 
     // handle the case when a param on a question is toggled
     else if (itemType === ItemTypes.QUESTION) {
-      console.log('onToggleParam for QUESTION -- dontknow what this does.');
-      //let questionPath = this.getQuestionPath(itemId, survey);
-      //let newSurvey = survey.updateIn(questionPath,
-      //        q => q.set(toggleName, !q.get(toggleName))
-      //);
-      //this.updateSurveyData(newSurvey);
+      let oldQuestion = survey.get_question_by_id(itemId);
+      let block = oldQuestion.block;
+      let newQuestion = SurveyMan.copy_question(oldQuestion);
+      switch(toggleName) {
+        case 'exclusive':
+          newQuestion.exclusive = !newQuestion.exclusive;
+          break;
+        case 'ordered':
+          newQuestion.ordered = !newQuestion.ordered;
+          break;
+        case 'freetext':
+          newQuestion.freetext = !newQuestion.freetext;
+          break;
+      }
+      let newSurvey = SurveyMan.remove_question(oldQuestion, survey, false);
+      SurveyMan.add_question(newQuestion, block, newSurvey);
+      this.updateSurveyData(newSurvey);
     }
     // throw exception
     else {
@@ -365,11 +385,12 @@ var SurveyStore = Reflux.createStore({
    */
   onItemCopy(itemType, itemId) {
     var survey = this.data.surveyData;
+
     if (itemType === ItemTypes.BLOCK) {
-      //let blockPath = this.getBlockPath(itemId, survey);
-      //let blockIndex = blockPath[blockPath.length - 1];
-      let newBlock = SurveyMan.copy_block(survey.get_block_by_id(itemId));
-      let newSurvey = SurveyMan.add_block(newBlock, false);
+      let oldBlock = survey.get_block_by_id(itemId);
+      let newBlock = SurveyMan.copy_block(oldBlock);
+      newBlock.id = this.getNewId(ItemTypes.BLOCK);
+      let newSurvey = SurveyMan.add_block(survey, newBlock, newBlock.parent, false);
       this.updateSurveyData(newSurvey, false);
 
       // alert and focus
@@ -378,18 +399,15 @@ var SurveyStore = Reflux.createStore({
     }
 
     else if (itemType === ItemTypes.QUESTION) {
-
-      //let questionPath = this.getQuestionPath(itemId, survey);
-      //let questionIndex = questionPath[questionPath.length - 1];
-      //let newQuestion = this.cloneQuestion(survey.getIn(questionPath));
-      let newQuestion = SurveyMan.copy_question(survey);
-      let newSurvey = SurveyMan.add_question(newQuestion, newQuestion.block, false);
-      _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
+      let oldQuestion = survey.get_question_by_id(itemId);
+      let newQuestion = SurveyMan.copy_question(oldQuestion);
+      newQuestion.id = this.getNewId(ItemTypes.QUESTION);
+      let newSurvey = SurveyMan.add_question(newQuestion, oldQuestion.block, survey, false);
       // update and cache
       this.updateSurveyData(newSurvey, false);
       // alert and focus
       SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
-      SurveyActions.scrollToItem(newQuestion.get('id'));
+      SurveyActions.scrollToItem(newQuestion.id);
     }
 
     else {
@@ -405,43 +423,27 @@ var SurveyStore = Reflux.createStore({
     var survey = this.data.surveyData;
     // handle block delete
     if (itemType === ItemTypes.BLOCK) {
-      //let newSurvey = survey.deleteIn(blockPath);
-      let block = _blockMap.get(itemId);
-      let newSurvey = SurveyMan.remove_block(block, true);
+      let block = survey.get_block_by_id(itemId);
+      let newSurvey = SurveyMan.remove_block(block, survey, false);
       this.updateSurveyData(newSurvey, true);
-
-      let blockPath = this.getBlockPath(itemId, survey);
-      // delete the mapping of question and options
-      survey.getIn([...blockPath, 'questions']).forEach(q => {
-      _questionMap = _questionMap.delete(q.get('id'));
-        q.get('options').forEach(o => {
-          _optionMap = _optionMap.delete(o.get('id'));
-        });
-      });
       SurveyActions.showAlert("Block deleted successfully.", AlertTypes.SUCCESS);
     }
+
     // handle question delete
     else if (itemType === ItemTypes.QUESTION) {
-       let question = _questionMap.get(itemId);
-       let newSurvey = SurveyMan.remove_question(question, survey);
-       // update and cache
-       this.updateSurveyData(newSurvey, true);
+      let question = survey.get_question_by_id(itemId);
+      let newSurvey = SurveyMan.remove_question(question, survey, false);
+      // update and cache
+      this.updateSurveyData(newSurvey, true);
+      SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
+    }
 
-       // delete the mapping of the question and its options
-       let questionPath = this.getQuestionPath(itemId, survey);
-       _questionMap = _questionMap.delete(itemId);
-       survey.getIn([...questionPath, 'options']).forEach(o => {
-           _optionMap = _optionMap.delete(o.get('id'));
-       });
-       SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
-     }
     // handle option delete
     else if (itemType === ItemTypes.OPTION) {
-      let option = _optionMap.get(itemId);
-      let newSurvey = SurveyMan.remove_option(option, survey);
-      this.updateSurveyData(newSurvey);
-      // delete the mapping
-      _optionMap = _optionMap.delete(itemId);
+      let option = survey.get_option_by_id(itemId);
+      let newSurvey = SurveyMan.remove_option(option, survey, null, false);
+      this.updateSurveyData(newSurvey, true);
+      SurveyActions.showAlert("Options deleted successfully.", AlertTypes.SUCCESS);
     }
     // throw exception
     else {
@@ -455,10 +457,10 @@ var SurveyStore = Reflux.createStore({
    */
   onSaveEditText(text, questionId) {
     var survey = this.data.surveyData;
-    var newSurvey = SurveyMan.copy_survey(survey);
-    var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
+    var oldQuestion = survey.get_question_by_id(questionId);
+    var newQuestion = SurveyMan.copy_question(oldQuestion);
     newQuestion.qtext = text;
-    newSurvey.replace_question(newQuestion);
+    let newSurvey = SurveyMan.replace_question(newQuestion);
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -483,9 +485,7 @@ var SurveyStore = Reflux.createStore({
     // hide the alert
     this.data.alertState = this.data.alertState.set('visible', false);
     // retrieve cached data
-    var { data, optionMap, questionMap } = _history.pop();
-    _questionMap = Immutable.Map(questionMap);
-    _optionMap = Immutable.Map(optionMap);
+    var { data } = _history.pop();
     this.updateSurveyData(data);
   },
   /**
@@ -515,24 +515,18 @@ var SurveyStore = Reflux.createStore({
     this.trigger(this.data);
   },
   onMoveQuestion(questionID, blockID) {
-    var survey = this.data.surveyData;
-    //var currBlockID = _questionMap.get(questionID);
-    var currBlockID = survey.get_question_by_id(questionID).block.id;
+    let survey = this.data.surveyData;
+    let question = survey.get_question_by_id(questionID);
+    let currBlock = question.block;
+    var currBlockID = currBlock.id;
     // if the question is dropped in the same block then do nothing
     if (currBlockID === blockID) {
       return;
     }
     // update and cache
-    var newSurvey = SurveyMan.copy_survey(survey);
-    var question = newSurvey.get_question_by_id(questionId);
-    var block = newSurvey.get_block_by_id(blockID);
-    SurveyMan.remove_question(question, newSurve);
+    let newSurvey = SurveyMan.remove_question(question, survey, false);
     SurveyMan.add_question(question, block, newSurvey);
     this.updateSurveyData(newSurvey, true);
-
-    // update the mappings of the question
-    _questionMap = _questionMap.set(questionID, blockID);
-
     SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
   },
   /**
@@ -542,16 +536,16 @@ var SurveyStore = Reflux.createStore({
    * @param finalIndex: final location where the item needs to be moved to within the container
    */
   onReorderItem(draggedItemId, finalIndex, itemType) {
-    // TODO(etosch): test this -- what happens when you drag an item into a region not on the appropriate level?
+    // TODO: test this -- what happens when you drag an item into a region not on the appropriate level?
     var survey = this.data.surveyData;
 
     if (itemType === ItemTypes.BLOCK) {
-      // TODO(etosch): find out where finalIndex is coming from.
-      console.log('Draggable reordering not yet implemented.');
+      // TODO: find out where finalIndex is coming from.
+      console.warn('Draggable reordering not yet implemented.');
     }
     else if (itemType === ItemTypes.QUESTION) {
-      // TODO(etosch): same
-      console.log('Draggable reordering not yet implemented.');
+      // TODO: same
+      console.warn('Draggable reordering not yet implemented.');
     }
     else {
       throw 'Invalid item type';
