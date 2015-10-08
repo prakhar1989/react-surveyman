@@ -17,11 +17,12 @@ var Application = React.createClass({
   mixins: [Reflux.connect(SurveyStore), PureRenderMixin],
   componentDidMount() {
     console.log('Not sure what the difference between load and loadSurvey is.');
-    SurveyActions.load();
+    //SurveyActions.load();
   },
   handleAlertDismiss() {
   },
   handleLoadSurvey() {
+    // TODO(etosch): loadSurvey should take an argument?
     SurveyActions.loadSurvey();
   },
   handleDeleteSurvey() {

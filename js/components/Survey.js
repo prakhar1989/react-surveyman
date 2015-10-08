@@ -8,7 +8,7 @@ var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
-var {survey} = require('../sub/surveyman.js/SurveyMan/surveyman');
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var surveyTarget = {
     drop(props, monitor, component) {
@@ -28,15 +28,10 @@ function collect(connect, monitor) {
 
 function renderSubblocks(block) {
     var subblocks = block.subblocks;
-    if (subblocks.count() > 0) {
-        return subblocks.map((subb, i) =>
-          <Block key={subb.get('id')}
-                 id={subb.get('id')}
-                 isFirst={i === 0}
-                 subblocks={subb.get('subblocks')}
-                 randomize={subb.get('randomize')}
-                 questions={subb.get('questions')}>
-                   {renderSubblocks(subb)}
+    if (subblocks.length > 0) {
+        return subblocks.map(subb =>
+          <Block block={subb}>
+              {renderSubblocks(subb)}
           </Block>
         );
     }
@@ -45,8 +40,7 @@ function renderSubblocks(block) {
 var Survey = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
-        survey: React.PropTypes.instanceOf(List)
-      //survey: survey.Survey
+      survey: React.PropTypes.instanceOf(SurveyMan.survey.Survey).isRequired
     },
     handleBlockDrop() {
       SurveyActions.blockDropped();
@@ -60,14 +54,9 @@ var Survey = React.createClass({
             'hovering': isOverCurrent
         });
 
-        var blocks = survey.topLevelBlocks.map((block, i) => {
+        var blocks = survey.topLevelBlocks.map(block => {
             return (
-              <Block key={block.get('id')}
-                  id={block.get('id')}
-                  isFirst={i === 0}
-                  subblocks={block.get('subblocks')}
-                  randomize={block.get('randomize')}
-                  questions={block.get('questions')}>
+              <Block block={block}>
                     {renderSubblocks(block)}
               </Block>
             );

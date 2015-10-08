@@ -71,11 +71,11 @@ var TreeView = React.createClass({
         var overBlock = survey.get(overBlockIndex);
 
         // get indices of the drop and drag targets (questions) themselves
-        var draggedQuestionIndex = draggedBlock.get('questions')
+        var draggedQuestionIndex = draggedBlock.questions
                                       .findIndex(q => q.get('id') === draggedQuestionId);
 
         // this gives an error - q is undefined
-        var overQuestionIndex = overBlock.get('questions')
+        var overQuestionIndex = overBlock.questions
                                       .findIndex(q => q.get('id') === overQuestionId);
 
         // cache the question being dragged
@@ -96,7 +96,7 @@ var TreeView = React.createClass({
         }
     },
     renderSubblocks(block) {
-        var subblocks = block.get('subblocks');
+        var subblocks = block.subblocks;
         var self = this;
         return subblocks.map(subb =>
                 <BlockNode key={subb.get('id')} id={subb.get('id')}
@@ -128,10 +128,10 @@ var TreeView = React.createClass({
 
         // build the tree
         var tree = survey.topLevelBlocks.map((block) => {
-            var questions = block.get('questions');
+            var questions = block.questions;
             return (
-                <BlockNode key={block.get('id')} id={block.get('id')}
-                           handleClick={self.focusOnItem.bind(this, block.get('id'))}
+                <BlockNode key={block.id} id={block.id}
+                           handleClick={self.focusOnItem.bind(this, block.id)}
                            handleDrop={self.handleDrop}
                            reorderBlock={self.reorderBlock}>
 

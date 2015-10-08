@@ -3,11 +3,12 @@ var Survey = require('./Survey');
 var Controls = require('./Controls');
 var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var Pallet = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
-        survey: React.PropTypes.instanceOf(List)
+        survey: SurveyMan.survey.Survey
     },
     render: function() {
         return (

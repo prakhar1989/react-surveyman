@@ -11,6 +11,7 @@ var cx = require('classnames');
 var { DropTarget } = require('react-dnd');
 var ItemControl = require('./ItemControl');
 var ReactCSSTransitionGroup = require('react/addons').addons.CSSTransitionGroup;
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var blockTarget = {
     drop(props, monitor) {
@@ -48,11 +49,7 @@ function questionCollect(connect, monitor) {
 var Block = React.createClass({
     mixins: [PureRenderMixin],
     propTypes: {
-        id: React.PropTypes.string.isRequired,
-        questions: React.PropTypes.instanceOf(List).isRequired,
-        subblocks: React.PropTypes.instanceOf(List).isRequired,
-        randomize: React.PropTypes.bool.isRequired,
-        isFirst: React.PropTypes.bool.isRequired
+        block: React.PropTypes.instanceOf(SurveyMan.survey.Block).isRequired
     },
     handleQuestionDrop() {
         SurveyActions.toggleModal(ItemTypes.QUESTION, this.props.id);
@@ -81,16 +78,16 @@ var Block = React.createClass({
             'first': isFirst
         });
 
-
+        console.log(this.props);
         // render questions
-        var questions = this.props.questions.map(q =>
-            <Question key={q.get('id')}
-                options={q.get('options')}
-                id={q.get('id')}
-                qtext={q.get('qtext')}
-                ordered={q.get('ordered')}
-                exclusive={q.get('exclusive')}
-                freetext={q.get('freetext')} />
+        var questions = this.props.block.topLevelQuestions.map(q =>
+            <Question key={q.id}
+                options={q.options}
+                id={q.id}
+                qtext={q.qtext}
+                ordered={q.ordered}
+                exclusive={q.exclusive}
+                freetext={q.freetext} />
         );
 
         // wrapping the questions in a react transition group
@@ -99,7 +96,7 @@ var Block = React.createClass({
                 { questions }
             </ReactCSSTransitionGroup>
         );
-        var help = subblocks.count() > 0 ? null : <HelpText itemType="Question" />;
+        var help = subblocks.length > 0 ? null : <HelpText itemType="Question" />;
 
         return connectBlockDropTarget(connectQuestionDropTarget(
             <div className={classes} id={this.props.id}>
