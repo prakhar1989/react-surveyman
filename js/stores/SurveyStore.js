@@ -9,15 +9,6 @@ var Lockr = require('lockr');
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 var {Survey, Block} = SurveyMan.survey;
 
-// a set of option texts - helps in generating suggestions
-var _optionsSet = Immutable.OrderedSet();
-
-// initialize question, option, block maps that will help in
-// faster retrieval of associated blocks and questions.
-var _questionMap = Immutable.Map();     // questionId => blockId
-var _optionMap = Immutable.Map();       // optionId   => questionId
-var _blockMap = Immutable.Map();        // subblockId => blockid
-
 // CONSTS
 const ALERT_TIMEOUT = 5 * 1000; // toggles how quickly the alert hides
 const LOCALSTORAGE_KEY = 'savedSurveyList'; // the key against which the survey data is stored in LS
@@ -66,6 +57,7 @@ var SurveyStore = Reflux.createStore({
       // read the saved survey data
       this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
       // load up survey data
+      console.assert(initialData !== undefined);
       var data = new Survey(initialData);
       this.updateSurveyData(data, true);
     });
@@ -89,9 +81,7 @@ var SurveyStore = Reflux.createStore({
   updateSurveyData(data, cache = false) {
     if (cache) {
       _history.push({
-        data: this.data.surveyData,
-        optionMap: _optionMap.toJS(),
-        questionMap: _questionMap.toJS()
+        data: this.data.surveyData
       });
     }
     this.data.surveyData = data;
@@ -133,49 +123,6 @@ var SurveyStore = Reflux.createStore({
     return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
   },
   /**
-   * Helper function that returns the complete path to the block requested.
-   * @param blockID id of the block
-   * @param {SurveyMan.survey.Survey} survey source survey object in which the
-   * block is to be found
-   * @param blockMap (optional) the block map to use for lookup
-   */
-  //getBlockPath(blockID, survey, blockMap = _blockMap) {
-  //  // function that returns a chain of IDs from the root block
-  //  // to the block with id - id
-  //  var getIDsList = function getIDsList(id, path = []) {
-  //    if (!blockMap.has(id)) {
-  //      return path.concat([id]).reverse();
-  //    }
-  //    return getIDsList(blockMap.get(id), path.concat([id]));
-  //  };
-  //
-  //  // function that returns the index of block id within the list of blocks
-  //  var getIndex = (id, list) => list.findIndex(b => b.get('id') === id);
-  //
-  //  // initialize path with index of root node
-  //  var [rootID, ...restIDs] = getIDsList(blockID);
-  //  var initPath = [getIndex(rootID, survey)];
-  //
-  //  // reduce over the rest of ids by finding id at each level
-  //  // and changing path accordingly
-  //  return restIDs.reduce((path, id) => {
-  //    var newPath = path.concat(['subblocks']);
-  //    var index = getIndex(id, survey.getIn(newPath));
-  //    return newPath.concat([index]);
-  //  }, initPath);
-  //},
-  /**
-   * Helper function that returns the complete path to the question requested.
-   * @param questionID id of the question
-   * @param survey source survey object in which the question is to be found
-   * @param questionMap (optional) the question map to use for lookup
-   */
-  //getQuestionPath(questionID, survey, questionMap = _questionMap) {
-  //  var blockPath = this.getBlockPath(questionMap.get(questionID), survey);
-  //  var index = survey.getIn([...blockPath, 'questions']).findIndex(q => q.get('id') === questionID);
-  //  return [...blockPath, 'questions', index];
-  //},
-  /**
    * Runs when the blockDropped action is called by the view.
    * Adds a new block to the end of the survey object.
    * @param targetID: targetId of the target on which the block is dropped.
@@ -185,26 +132,14 @@ var SurveyStore = Reflux.createStore({
     var survey = this.data.surveyData;
     var newBlock = SurveyMan.new_block(this.getNewId(ItemTypes.BLOCK));
     if (targetID === undefined) {
-      // block is dropped on the survey
-      // let newSurvey = survey.splice(0, 0, newBlock);
-      // update and cache
-      let newSurvey = SurveyMan.add_block(newBlock, survey, false);
+      let newSurvey = SurveyMan.add_block(survey, newBlock, null, false);
       this.updateSurveyData(newSurvey, true);
       SurveyActions.showAlert("New block added.", AlertTypes.SUCCESS);
     } else {
-      // update existing survey.
-      // let blockPath = this.getBlockPath(targetID, survey);
-      //let newSurvey = survey.updateIn([...blockPath, 'subblocks'],
-      //    list => list.splice(0, 0, newBlock)
-      //);
-      let targetBlock = _blockMap.get(targetID);
-      console.assert(targetBlock instanceof Block);
-      let newSurvey = SurveyMan.add_block(targetBlock, survey, false);
-      this.updateSurveyData(newSurvey, true);
-      // update block map with new subblock
-      // the randomly generated id from the instantiation of newBlock should be updated
-      // to the semantically correct id via SurveyMan.survey.Block's add_block method.
-      _blockMap = _blockMap.set(newBlock.get('id'), targetID);
+      try {
+        let newSurvey = SurveyMan.add_block(survey, newBlock, survey.get_block_by_id(targetID), false);
+        this.updateSurveyData(newSurvey, true);
+      } catch (e) { console.log(e); return; }
       SurveyActions.showAlert("New subblock added.", AlertTypes.SUCCESS);
     }
   },
@@ -235,7 +170,7 @@ var SurveyStore = Reflux.createStore({
     this.updateSurveyData(newSurvey, true);
     // update question map with new question
     var block = newQuestion.block;
-    _questionMap = _questionMap.set(newQuestion.get('id'), block.get('id'));
+    _questionMap = _questionMap.set(newQuestion.get('id'), block.id);
 
     SurveyActions.showAlert("New Question added.", AlertTypes.SUCCESS);
   },
@@ -246,24 +181,10 @@ var SurveyStore = Reflux.createStore({
    * @param otext (string) the text of the option to be added
    */
   onOptionAdded(questionId, otext) {
-    // template for new Option
-    //var newOption = Immutable.Map({
-    //    id: this.getNewId(ItemTypes.OPTION),
-    //    otext: otext
-    //});
     var newOption = SurveyMan.new_option(otext, questionId);
     var survey = this.data.surveyData;
     var question = survey.get_question_by_id(questionId);
     var newSurvey = SurveyMan.add_option(question, newOption, survey, false);
-    //var questionPath = this.getQuestionPath(questionId, survey);
-    //var newSurvey = survey.updateIn([...questionPath, 'options'],
-    //    list => list.push(newOption)
-    //);
-
-    // update the option map and options set
-    _optionMap = _optionMap.set(newOption.get('id'), questionId);
-    _optionsSet = _optionsSet.add(otext);
-
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -273,16 +194,13 @@ var SurveyStore = Reflux.createStore({
    */
   onToggleModal(modalType, dropTargetID) {
     var modalState = this.data.modalState;
-
-    // TODO: this handles the modal for question separately, although
-    // this is not really required. deal with it later.
+    // TODO: this handles the modal for question separately, although this is not really required. Deal with it later.
     if (modalType === ItemTypes.QUESTION) {
       modalState = modalState.set('isOpen', !modalState.get('isOpen'));
     }
-
-      // sets the correct dropTarget to pass down to component
-      this.data.modalState = modalState.set('dropTargetID', dropTargetID);
-      this.trigger(this.data);
+    // sets the correct dropTarget to pass down to component
+    this.data.modalState = modalState.set('dropTargetID', dropTargetID);
+    this.trigger(this.data);
   },
   /**
    * Run when the action showAlert is called. Responsible for displaying
@@ -310,16 +228,10 @@ var SurveyStore = Reflux.createStore({
    * to start afresh.
    */
   onClearSurvey() {
+    console.assert(initialData !== undefined);
     var data = new Survey(initialData);
     this.updateSurveyData(data, true);
-
     SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
-
-    // clear up the maps and set
-    _questionMap = Immutable.Map();
-    _optionMap = Immutable.Map();
-    _blockMap = Immutable.Map();
-    _optionsSet = Immutable.OrderedSet();
   },
   /**
    * Called when the saveSurvey action is called.
@@ -333,10 +245,8 @@ var SurveyStore = Reflux.createStore({
     };
     var savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
     Lockr.set(LOCALSTORAGE_KEY, savedSurveys.concat([newSurvey]));
-
     // update the cached survey data to include the latest
     this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY);
-
     SurveyActions.showAlert("Survey saved!", AlertTypes.INFO);
   },
   /**
@@ -345,18 +255,10 @@ var SurveyStore = Reflux.createStore({
    * @param rawData survey data in json
    */
   onLoadSurvey(rawData) {
-    console.log('onLoadSurvey');
+    console.assert(rawData !== undefined, 'survey json data should be defined');
     // update the survey object
     var data = new Survey(rawData);
     this.updateSurveyData(data, true);
-
-    // clear up the maps & build them from scratch
-    _questionMap = Immutable.Map();
-    _optionMap = Immutable.Map();
-    _blockMap = Immutable.Map();
-    data.topLevelBlocks.forEach((block) => this.buildMapsForBlock(block));
-    data.questions.forEach((question) => this.buildMapsForQuestionsAndOptions(question));
-
     SurveyActions.showAlert("Survey loaded.", AlertTypes.SUCCESS);
   },
   /**
@@ -364,21 +266,9 @@ var SurveyStore = Reflux.createStore({
    * Toggles the visibility of the load survey modal.
    */
   onToggleLoadModal() {
-     this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
-     this.trigger(this.data);
-  },
-  /**
-   *
-   */
-  buildMapsForQuestionsAndOptions(question) {
-    _optionsSet = Immutable.OrderedSet();
-    // Basically just ported from @prakhar1989 wrote in buildMapsForBlock
-    let qId = q.id;
-    _questionMap = _questionMap.set(qId, q.block.id);
-    q.options.forEach((o) => {
-      _optionMap = _optionMap.set(o.id, qId);
-      _optionsSet = _optionsSet.add(o.otext);
-    });
+    this.data.loadSurveyModalState = !this.data.loadSurveyModalState;
+    console.log('triggering onToggleLoadModal');
+    this.trigger(this.data);
   },
   /**
    * Takes a block and runs over its children recursively and
@@ -386,27 +276,10 @@ var SurveyStore = Reflux.createStore({
    * @param block - Block of type Immutable.Map
    */
   buildMapsForBlock(block) {
-    //var blockId = block.get('id');
     let blockId = block.id;
-    //_optionsSet = Immutable.OrderedSet();
-
-    //// start with the questions
-    //block.get('questions').forEach((q) => {
-    //    var qId = q.get('id');
-    //    _questionMap = _questionMap.set(qId, blockId);
-    //
-    //    // tackle the questions
-    //    q.get('options').forEach((o) => {
-    //        _optionMap = _optionMap.set(o.get('id'), qId);
-    //        _optionsSet = _optionsSet.add(o.get('otext'));
-    //    });
-    //});
-
     // handle subblocks
     block.subblocks.forEach((b) => {
       _blockMap = _blockMap.set(b.id, blockId);
-
-      // call this recursively for each subblock
       this.buildMapsForBlock(b);
     });
   },
@@ -470,28 +343,10 @@ var SurveyStore = Reflux.createStore({
   },
   /**
    * Returns a clone of Question passed as a parameter.
-   * Updates _optionMap with all new options
    * @param question - type of Immutable.Map. The question to be cloned
    */
   cloneQuestion(question) {
-    var self = this;
-
-    // get a new ID
-    var newQuestion = question.set('id', self.getNewId(ItemTypes.QUESTION));
-
-    // for each option, get a new option but with new ID and same otext
-    newQuestion = newQuestion.update('options',
-                        (list) => list.map(o => Immutable.Map({
-                                    id: self.getNewId(ItemTypes.OPTION),
-                                    otext: o.get('otext')
-                                  }))
-                  );
-
-    var qId = newQuestion.get('id');
-    newQuestion.get('options').forEach(o => {
-        _optionMap = _optionMap.set(o.get('id'), qId);
-    });
-    return newQuestion;
+    return SurveyMan.copy_question(question);
   },
   /**
    * Returns a clone of Block passed as a parameter.
@@ -499,21 +354,7 @@ var SurveyStore = Reflux.createStore({
    * @param block - type of Immutable.Map. The block to be cloned.
    */
   cloneBlock(block) {
-    var self = this;
-    var newBlock = block
-        .set('id', self.getNewId(ItemTypes.BLOCK))
-        .update('questions', (list) => list.map(ques => self.cloneQuestion(ques)))
-        .update('subblocks', (list) => list.map(blk => self.cloneBlock(blk)));
-
-    var blockId = newBlock.get('id');
-
-    newBlock.get('questions').forEach(q => {
-        _questionMap = _questionMap.set(q.get('id'), blockId);
-    });
-    newBlock.get('subblocks').forEach(b => {
-        _blockMap = _blockMap.set(b.get('id'), blockId);
-    });
-    return newBlock;
+    return SurveyMan.copy_block(block);
   },
   /**
    * Method called when the itemCopy action is triggered.
@@ -529,22 +370,11 @@ var SurveyStore = Reflux.createStore({
       //let blockIndex = blockPath[blockPath.length - 1];
       let newBlock = SurveyMan.copy_block(survey.get_block_by_id(itemId));
       let newSurvey = SurveyMan.add_block(newBlock, false);
-      //if (_blockMap.has(itemId)) { // if subblock, append in parent
-      //  let parentId = _blockMap.get(itemId);
-      //  let parentblockPath = this.getBlockPath(parentId, survey);
-      //  var newSurvey = survey.updateIn([...parentblockPath, 'subblocks'],
-      //          list => list.splice(blockIndex + 1, 0, newBlock)
-      //  );
-        _blockMap = _blockMap.set(newBlock.get('id'), parentId);
-      //} else { // else simply put in survey array
-      //  newSurvey = survey.splice(blockIndex + 1, 0, newBlock);
-      //}
-      // update
       this.updateSurveyData(newSurvey, false);
 
       // alert and focus
       SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
-      SurveyActions.scrollToItem(newBlock.get('id'));
+      SurveyActions.scrollToItem(newBlock.id);
     }
 
     else if (itemType === ItemTypes.QUESTION) {
@@ -554,14 +384,9 @@ var SurveyStore = Reflux.createStore({
       //let newQuestion = this.cloneQuestion(survey.getIn(questionPath));
       let newQuestion = SurveyMan.copy_question(survey);
       let newSurvey = SurveyMan.add_question(newQuestion, newQuestion.block, false);
-      //let newSurvey = survey.updateIn(questionPath.slice(0, -1),
-      //    list => list.splice(questionIndex + 1, 0, newQuestion)
-      //);
       _questionMap = _questionMap.set(newQuestion.get('id'), _questionMap.get(itemId));
-
       // update and cache
       this.updateSurveyData(newSurvey, false);
-
       // alert and focus
       SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
       SurveyActions.scrollToItem(newQuestion.get('id'));
@@ -597,7 +422,6 @@ var SurveyStore = Reflux.createStore({
     }
     // handle question delete
     else if (itemType === ItemTypes.QUESTION) {
-       //let newSurvey = survey.deleteIn(questionPath);
        let question = _questionMap.get(itemId);
        let newSurvey = SurveyMan.remove_question(question, survey);
        // update and cache
@@ -613,10 +437,6 @@ var SurveyStore = Reflux.createStore({
      }
     // handle option delete
     else if (itemType === ItemTypes.OPTION) {
-      //let questionPath = this.getQuestionPath(_optionMap.get(itemId), survey);
-      //let index = survey.getIn([...questionPath, 'options'])
-      //    .findIndex(op => op.get('id') === itemId);
-      //let newSurvey = survey.deleteIn([...questionPath, 'options', index]);
       let option = _optionMap.get(itemId);
       let newSurvey = SurveyMan.remove_option(option, survey);
       this.updateSurveyData(newSurvey);
@@ -639,8 +459,6 @@ var SurveyStore = Reflux.createStore({
     var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
     newQuestion.qtext = text;
     newSurvey.replace_question(newQuestion);
-    //var path = this.getQuestionPath(questionId, survey);
-    //var newSurvey = survey.updateIn(path, q => q.set('qtext', text));
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -650,8 +468,6 @@ var SurveyStore = Reflux.createStore({
    */
   onSaveFreeText(text, questionId) {
     var survey = this.data.surveyData;
-    //var path = this.getQuestionPath(questionId, survey);
-    //var newSurvey = survey.updateIn(path, q => q.set('freetext', text));
     let newSurvey = SurveyMan.copy_survey(survey);
     var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
     // TODO(etosch): test whether this sets default and regex correctly.
@@ -666,7 +482,6 @@ var SurveyStore = Reflux.createStore({
   onUndoSurvey() {
     // hide the alert
     this.data.alertState = this.data.alertState.set('visible', false);
-
     // retrieve cached data
     var { data, optionMap, questionMap } = _history.pop();
     _questionMap = Immutable.Map(questionMap);
@@ -707,14 +522,6 @@ var SurveyStore = Reflux.createStore({
     if (currBlockID === blockID) {
       return;
     }
-
-    //var questionPath = this.getQuestionPath(questionID, survey);
-    //var newBlockPath = this.getBlockPath(blockID, survey);
-    //var question = survey.getIn(questionPath);
-    //
-    //var newSurvey = survey.deleteIn(questionPath)
-    //                      .updateIn([...newBlockPath, 'questions'], list => list.push(question));
-
     // update and cache
     var newSurvey = SurveyMan.copy_survey(survey);
     var question = newSurvey.get_question_by_id(questionId);
@@ -735,35 +542,16 @@ var SurveyStore = Reflux.createStore({
    * @param finalIndex: final location where the item needs to be moved to within the container
    */
   onReorderItem(draggedItemId, finalIndex, itemType) {
-    // TODO(etosch): test this -- what happens when you drag an item into a region not on
-    // the appropriate level?
+    // TODO(etosch): test this -- what happens when you drag an item into a region not on the appropriate level?
     var survey = this.data.surveyData;
 
     if (itemType === ItemTypes.BLOCK) {
       // TODO(etosch): find out where finalIndex is coming from.
       console.log('Draggable reordering not yet implemented.');
-      //let draggedBlockIndex = this.getBlockIndex(draggedItemId);
-      ////let block = survey.get(draggedBlockIndex);
-      //let block = SurveyMan.copy_block(survey.get_block_by_id(draggedItemId));
-      //let newSurvey = SurveyMan.remove_block(block, survey, false);
-      //newSurvey.add_block(block, finalIndex);
-      ////let newSurvey = survey.delete(draggedBlockIndex).splice(finalIndex, 0, block);
-      //this.updateSurveyData(newSurvey, false);
     }
     else if (itemType === ItemTypes.QUESTION) {
       // TODO(etosch): same
       console.log('Draggable reordering not yet implemented.');
-      //let draggedBlockId = _questionMap.get(draggedItemId);
-      //let draggedBlockIndex = this.getBlockIndex(draggedBlockId);
-      ////let block = survey.get(draggedBlockIndex);
-      //let block
-      //let draggedQuestionIndex = this.getQuestionIndex(draggedItemId, block);
-      //let draggedQuestion = block.getIn(['questions', draggedQuestionIndex]);
-      //let newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
-      //  (questions) => questions.delete(draggedQuestionIndex)
-      //                          .splice(finalIndex, 0, draggedQuestion)
-      //);
-      //this.updateSurveyData(newSurvey, false);
     }
     else {
       throw 'Invalid item type';
