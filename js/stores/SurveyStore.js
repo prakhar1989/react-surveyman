@@ -133,7 +133,7 @@ var SurveyStore = Reflux.createStore({
    */
   onBlockDropped(targetID) {
     var survey = this.data.surveyData;
-    var newBlock = SurveyMan.new_block(this.getNewId(ItemTypes.BLOCK));
+    var newBlock = SurveyMan.new_block();
     if (targetID === undefined) {
       let newSurvey = SurveyMan.add_block(survey, newBlock, null, false);
       this.updateSurveyData(newSurvey, true);
@@ -316,9 +316,9 @@ var SurveyStore = Reflux.createStore({
   /**
    * Called when the toggleParam action is called.
    * Toggles the property on the item.
-   * @param itemType - type of Item the toggle button is clicked. one of ItemTypes
-   * @param itemId - Id of the item for which toggle button is clicked
-   * @param toggleName - string name of property that is toggled.
+   * @param itemType The type of Item the toggle button is clicked. one of ItemTypes
+   * @param itemId The id of the item for which toggle button is clicked
+   * @param toggleName The string name of property that is toggled.
    */
   onToggleParam(itemType, itemId, toggleName) {
     var survey = this.data.surveyData;
@@ -434,7 +434,7 @@ var SurveyStore = Reflux.createStore({
       let question = survey.get_question_by_id(itemId);
       let newSurvey = SurveyMan.remove_question(question, survey, false);
       // update and cache
-      this.updateSurveyData(newSurvey, true);
+      this.updateSurveyData(newSurvey);
       SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
     }
 
