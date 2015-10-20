@@ -1,5 +1,4 @@
 var React = require('react');
-var { List } = require('immutable');
 var BlockNode = require('./BlockNode');
 var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
@@ -7,6 +6,7 @@ var ItemTypes = require('./ItemTypes');
 var SurveyStore = require('../stores/SurveyStore');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
+var {Question, Block} = SurveyMan.survey;
 
 var TreeView = React.createClass({
   mixins: [PureRenderMixin],
@@ -16,7 +16,7 @@ var TreeView = React.createClass({
   getInitialState() {
     return {
       survey: this.props.survey,
-      finalIndex: -1
+      finalIndex: 0
     };
   },
   componentWillReceiveProps(nextProps) {
@@ -35,91 +35,64 @@ var TreeView = React.createClass({
   focusOnItem(id) {
     SurveyActions.scrollToItem(id);
   },
-  handleDrop(sourceID, targetID) {
-    var sourceType = sourceID[0] === "q" ? ItemTypes.QUESTION : ItemTypes.BLOCK;
-    var targetType = targetID[0] === "b" ? ItemTypes.BLOCK : ItemTypes.QUESTION;
-
-    if (sourceType === ItemTypes.QUESTION && targetType === ItemTypes.BLOCK) {
-      // when a question is dropped in a block
-      SurveyActions.moveQuestion(sourceID, targetID);
-    } else {
-      // when a question is dropped on a question or a block is dropped on a block
-      // TODO(etosch): Figure out where state is bound
-      SurveyActions.reorderItem(sourceID, this.state.finalIndex, sourceType);
-    }
+  handleDrop(sourceObj, targetObj) {
+    console.log('TreeView.handleDrop doesn\'t do anything');
   },
-  reorderBlock(draggedBlockId, overBlockId) {
-    // TODO(etosch): figure out where state is coming from.
-    var survey = this.state.survey;
-    // TODO: This is only reordering over top level blocks -- previously hierarchy was represented differently.
-    var draggedBlockIndex = survey.topLevelBlocks.findIndex(b => b.id === draggedBlockId);
-    var overBlockIndex = survey.topLevelBlocks.findIndex(b => b.id === overBlockId);
-
-    var block = SurveyMan.copy_block(survey.topLevelBlocks[draggedBlockIndex]);
-    var newSurvey = SurveyMan.delete_block(block, survey, false);
-    SurveyMan.add_block(block, survey, true, overBlockIndex);
-    this.setState({
-      survey: newSurvey,
-      finalIndex: overBlockIndex
-    });
+  moveBlock(draggedBlockId, overBlockId) {
+    console.log('TreeView.moveBlock');
+    SurveyActions.moveBlock(draggedBlockId, overBlockId);
+    // TODO: explicitly allow indices to be reordered.
+    //let survey = this.state.survey;
+    //let draggedBlock = survey.get_block_by_id(draggedBlockId);
+    //let overBlock = survey.get_block_by_id(overBlockId);
+    //let newSurvey = SurveyMan.add_block(
+    //    SurveyMan.remove_block(draggedBlock, survey, false),
+    //    draggedBlock,
+    //    overBlock,
+    //    false);
+    //this.setState({
+    //  survey: newSurvey,
+    //  finalIndex: -1 // get rid of this?
+    //});
   },
-  reorderQuestion(draggedQuestionId, overQuestionId) {
-    var survey = this.state.survey;
-    var newSurvey;
-
-    // get indices of the blocks holding the drag and drop targets (questions)
-    var draggedBlockId = SurveyStore.getBlockId(draggedQuestionId);
-    var overBlockId = SurveyStore.getBlockId(overQuestionId);
-    // TODO: again this only works for top level blocks
-    var draggedBlockIndex = survey.topLevelBlocks.findIndex(b => b.id === draggedBlockId);
-    var overBlockIndex = survey.topLevelBlocks.findIndex(b => b.id === overBlockId);
-    var draggedBlock = survey.topLevelBlocks[draggedBlockIndex];
-    var overBlock = survey.topLevelBlocks[overBlockIndex];
-
-    // get indices of the drop and drag targets (questions) themselves
-
-    var draggedQuestionIndex = draggedBlock.block.topLevelQuestions
-        .findIndex(q => q.id === draggedQuestionId);
-
-    console.log('TreeView.reorderQuestion NYI');
-        //// this gives an error - q is undefined
-        //var overQuestionIndex = overBlock.questions
-        //                              .findIndex(q => q.get('id') === overQuestionId);
-        //
-        //// cache the question being dragged
-        //var draggedQuestion = draggedBlock.getIn(['questions', draggedQuestionIndex]);
-        //
-        //// ensure that the question is being ordered withtin the same block
-        //if (draggedBlockId === overBlockId) {
-        //    newSurvey = survey.updateIn([draggedBlockIndex, 'questions'],
-        //        (questions) => questions.delete(draggedQuestionIndex)
-        //                                .splice(overQuestionIndex, 0, draggedQuestion)
-        //    );
-        //
-        //    // change the state
-        //    this.setState({
-        //        survey: newSurvey,
-        //        finalIndex: overQuestionIndex
-        //    });
-        //}
-    },
+  moveQuestion(draggedQuestionId, overBlockId) {
+    // questions cannot be reordered within blocks because they
+    // are not truly ordered to begin with.
+    console.log('TreeView.moveQuestion');
+    SurveyActions.moveQuestion(draggedQuestionId, overBlockId);
+    //let survey = this.state.survey;
+    //let draggedQuestion = survey.get_question_by_id(draggedQuestionId);
+    //let overBlock = survey.get_block_by_id(overBlockId);
+    //let newSurvey = SurveyMan.add_question(
+    //    draggedQuestion,
+    //    overBlock,
+    //    SurveyMan.remove_question(draggedQuestion, survey, false),
+    //    false);
+    //this.setState({
+    //  survey: newSurvey,
+    //  finalIndex: -1 // get rid of this?
+    //});
+  },
   renderSubblocks(block) {
     var subblocks = block.subblocks;
     var self = this;
     return subblocks.map(subb =>
-            <BlockNode key={subb.id} id={subb.id}
+            <BlockNode key={subb.id}
+                       id={subb.id}
+                       block={subb}
                        handleClick={self.focusOnItem.bind(this, subb.id)}
                        handleDrop={self.handleDrop}
-                       reorderBlock={self.reorderBlock} >
+                       moveBlock={self.moveBlock} >
                {self.renderSubblocks(subb)}
 
               {subb.topLevelQuestions.map(ques =>
                       <QuestionNode id={ques.id}
                                     key={ques.id}
+                                    question={ques}
                                     label={self.ellipsize(ques.qtext)}
                                     handleClick={self.focusOnItem.bind(this, ques.id)}
                                     handleDrop={self.handleDrop}
-                                    reorderQuestion={self.reorderQuestion}>
+                                    moveQuestion={self.moveQuestion}>
                         <div className="tree-view_node">{"Options: " + ques.options.length}</div>
                         <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
                         <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
@@ -137,20 +110,23 @@ var TreeView = React.createClass({
     var tree = survey.topLevelBlocks.map((block) => {
       var questions = block.topLevelQuestions;
       return (
-          <BlockNode key={block.id} id={block.id}
+          <BlockNode key={block.id}
+                     id={block.id}
+                     block={block}
                      handleClick={self.focusOnItem.bind(this, block.id)}
                      handleDrop={self.handleDrop}
-                     reorderBlock={self.reorderBlock}>
+                     moveBlock={self.moveBlock}>
 
             {self.renderSubblocks(block)}
 
             {questions.map(ques =>
                     <QuestionNode id={ques.id}
                                   key={ques.id}
+                                  question={ques}
                                   label={self.ellipsize(ques.qtext)}
                                   handleClick={self.focusOnItem.bind(this, ques.id)}
                                   handleDrop={self.handleDrop}
-                                  reorderQuestion={self.reorderQuestion}>
+                                  moveQuestion={self.moveQuestion}>
                       <div className="tree-view_node">{"Options: " + ques.options.length}</div>
                       <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
                       <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>

@@ -42,7 +42,7 @@ var blockTarget = {
   hover(props, monitor) {
     var draggedId = monitor.getItem().id;
     if (draggedId !== props.id) {
-      props.reorderBlock(draggedId, props.id);
+      props.moveBlock(draggedId, props.id);
     }
   },
   drop(props) {
@@ -65,7 +65,6 @@ var BlockNode = React.createClass({
     defaultCollapsed: React.PropTypes.bool,
     id: React.PropTypes.string.isRequired,
     handleClick: React.PropTypes.func.isRequired,
-    reorderBlock: React.PropTypes.func.isRequired,
     moveBlock: React.PropTypes.func
   },
   getInitialState() {

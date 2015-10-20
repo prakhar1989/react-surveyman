@@ -3,7 +3,6 @@ var Options = require('./Options');
 var ItemTypes = require('./ItemTypes');
 var SurveyActions = require('../actions/SurveyActions');
 var ToggleParam = require('./ToggleParam');
-var { List } = require('immutable');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var cx = require('classnames');
 var ItemControl = require('./ItemControl');

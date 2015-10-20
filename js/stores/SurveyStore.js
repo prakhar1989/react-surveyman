@@ -7,7 +7,7 @@ var AlertTypes = require('../components/AlertTypes');
 var Lockr = require('lockr');
 // Replace when we update the surveyman module.
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
-var {Survey, Block, Question} = SurveyMan.survey;
+var {Survey, Question} = SurveyMan.survey;
 
 // a set of option texts - helps in generating suggestions
 var _optionsSet = Immutable.OrderedSet();
@@ -277,19 +277,6 @@ var SurveyStore = Reflux.createStore({
     this.trigger(this.data);
   },
   /**
-   * Takes a block and runs over its children recursively and
-   * populates the maps (option, question, block) with correct mappings
-   * @param block - Block of type Immutable.Map
-   */
-  buildMapsForBlock(block) {
-    let blockId = block.id;
-    // handle subblocks
-    block.subblocks.forEach((b) => {
-      _blockMap = _blockMap.set(b.id, blockId);
-      this.buildMapsForBlock(b);
-    });
-  },
-  /**
    * Returns an array of indices that can be directly go in first arguments to
    * Immutable deep persistent functions.
    * @param blockId - id of the block who's index is required
@@ -515,41 +502,35 @@ var SurveyStore = Reflux.createStore({
     this.trigger(this.data);
   },
   onMoveQuestion(questionID, blockID) {
+    console.log('SurveyStore.onMoveQuestion');
     let survey = this.data.surveyData;
     let question = survey.get_question_by_id(questionID);
-    let currBlock = question.block;
-    var currBlockID = currBlock.id;
+    let block = question.block;
     // if the question is dropped in the same block then do nothing
-    if (currBlockID === blockID) {
+    if (block.id === blockID) {
       return;
     }
     // update and cache
-    let newSurvey = SurveyMan.remove_question(question, survey, false);
-    SurveyMan.add_question(question, block, newSurvey);
+    let newSurvey = SurveyMan.add_question(
+        question,
+        block,
+        SurveyMan.remove_question(question, survey, false),
+        false);
     this.updateSurveyData(newSurvey, true);
     SurveyActions.showAlert("Question moved.", AlertTypes.SUCCESS);
   },
-  /**
-   * Called when an item is dragged to be re-ordered in the treeview.
-   * This works on the assumption that the item is ordered within its parent container.
-   * @param draggedItemId: id of the block being dragged
-   * @param finalIndex: final location where the item needs to be moved to within the container
-   */
-  onReorderItem(draggedItemId, finalIndex, itemType) {
-    // TODO: test this -- what happens when you drag an item into a region not on the appropriate level?
-    var survey = this.data.surveyData;
-
-    if (itemType === ItemTypes.BLOCK) {
-      // TODO: find out where finalIndex is coming from.
-      console.warn('Draggable reordering not yet implemented.');
-    }
-    else if (itemType === ItemTypes.QUESTION) {
-      // TODO: same
-      console.warn('Draggable reordering not yet implemented.');
-    }
-    else {
-      throw 'Invalid item type';
-    }
+  onMoveBlock(draggedBlockId, onBlockId) {
+    console.log('SurveyStore.onMoveBlock');
+    let survey = this.data.surveyData;
+    let draggedBlock = survey.get_block_by_id(draggedBlockId);
+    let onBlock = survey.get_block_by_id(onBlockId);
+    let newSurvey = SurveyMan.add_block(
+        SurveyMan.remove_block(draggedBlock, survey, false),
+        draggedBlock,
+        onBlock,
+        false);
+    this.updateSurveyData(newSurvey, true);
+    SurveyActions.showAlert('Block moved', AlertTypes.SUCCESS);
   }
 });
 
