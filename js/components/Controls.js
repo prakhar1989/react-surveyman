@@ -1,6 +1,7 @@
 var React = require('react');
 var SurveyActions = require('../actions/SurveyActions');
 var SurveyStore = require('../stores/SurveyStore');
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
 
 var Controls = React.createClass({
   handleDownload() {
@@ -29,6 +30,12 @@ var Controls = React.createClass({
       SurveyActions.clearSurvey();
     }
   },
+  handleRandomize() {
+    let survey = SurveyStore.data.surveyData;
+    let newSurvey = SurveyMan.copy_survey(survey);
+    newSurvey.randomize();
+    SurveyStore.updateSurveyData(newSurvey, false);
+  },
   handleStaticAnalysis() {
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = () => console.log(xhttp.responseText);
@@ -48,11 +55,11 @@ var Controls = React.createClass({
   render() {
     return (
         <div className="row controls">
-          <div className="col-xs-6">
-            <span className="help-text">Survey Builder Area</span>
+          <div className="col-xs-2">
+            <span className="help-text">Survey Builder</span>
             <h3>Pallet</h3>
           </div>
-          <div className="col-xs-6 survey-actions">
+          <div className="col-xs-10 survey-actions">
             <p className="help-text">Survey Actions</p>
             <div className="btn-group btn-group-sm" role="group">
               <button type="button" className="btn btn-default" onClick={this.handleClear}>
@@ -67,6 +74,8 @@ var Controls = React.createClass({
               <a ref="link" href='' download="survey.json" type="button" className="btn btn-default" onClick={this.handleDownload}>
                 <span className="ion-archive"></span> Download
               </a>
+              <button className="btn btn-default" onClick={this.handleRandomize}>Randomize Survey
+              </button>
               <button className="btn btn-default" onClick={this.handleStaticAnalysis}>Run Static Analysis</button>
             </div>
           </div>

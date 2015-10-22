@@ -30,6 +30,7 @@ var TreeView = React.createClass({
         <span><i className="ion-close"></i>{label}</span>;
   },
   ellipsize(text) {
+    console.log('TreeView.ellipsize', text);
     return text.substr(0, 20) + (text.length > 20 ? "..." : "");
   },
   focusOnItem(id) {
@@ -112,26 +113,24 @@ var TreeView = React.createClass({
       return (
           <BlockNode key={block.id}
                      id={block.id}
-                     block={block}
                      handleClick={self.focusOnItem.bind(this, block.id)}
                      handleDrop={self.handleDrop}
                      moveBlock={self.moveBlock}>
 
             {self.renderSubblocks(block)}
 
-            {questions.map(ques =>
-                    <QuestionNode id={ques.id}
-                                  key={ques.id}
-                                  question={ques}
-                                  label={self.ellipsize(ques.qtext)}
-                                  handleClick={self.focusOnItem.bind(this, ques.id)}
-                                  handleDrop={self.handleDrop}
-                                  moveQuestion={self.moveQuestion}>
-                      <div className="tree-view_node">{"Options: " + ques.options.length}</div>
-                      <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
-                      <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
-                      <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
-                    </QuestionNode>
+            {questions.map(ques => {console.log(ques);
+                <QuestionNode id={ques.id}
+                              key={ques.id}
+                              label={self.ellipsize(ques.qtext)}
+                              handleClick={self.focusOnItem.bind(this, ques.id)}
+                              handleDrop={self.handleDrop}
+                              moveQuestion={self.moveQuestion}>
+                  <div className="tree-view_node">{"Options: " + ques.options.length}</div>
+                  <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
+                  <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
+                  <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
+                </QuestionNode> }
             )}
           </BlockNode>
       );

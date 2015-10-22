@@ -41,20 +41,16 @@ var SurveyStore = Reflux.createStore({
   },
   // called when the app component is loaded
   init() {
-    let default_options = [
-      ["Yes", "No"],
-      ["True", "False"],
-      ["Strongly Disagree", "Disagree", "Neither agree or disagree", "Agree", "Strongly Agree"]
-    ];
-    var initOptionsData = Immutable.fromJS([
-      { id: 0, optionLabels: default_options[0], option: SurveyMan.new_option(default_options[0], this.getNewId(ItemTypes.OPTION))},
-      { id: 1, optionLabels: default_options[1], option: SurveyMan.new_option(default_options[1], this.getNewId(ItemTypes.OPTION))},
-      { id: 2, optionLabels: default_options[2], option: SurveyMan.new_option(default_options[2], this.getNewId(ItemTypes.OPTION))}
-    ]);
+    console.log('SurveyStore.init');
+    this.onAddOptionGroup(
+        ["Strongly Disagree", "Disagree", "Neither agree or disagree", "Agree", "Strongly Agree"],
+        ["True", "False"],
+        ["Yes", "No"]
+    );
 
     this.listenTo(SurveyActions.load, () => {
+      console.log('asdf');
       window.location.hash = "";   // clear the location hash on app init
-      this.data.optionGroupState = this.data.optionGroupState.set('options', initOptionsData);
       // read the saved survey data
       this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
       // load up survey data
@@ -111,21 +107,6 @@ var SurveyStore = Reflux.createStore({
     return question.block.id;
   },
   /**
-   * Returns a new ID based on the type of object requested
-   * @param type one of ItemTypes.OPTION, ItemTypes.BLOCK, ItemTypes.QUESTION
-   */
-  getNewId(type) {
-    var prefix;
-    if (type === ItemTypes.QUESTION) {
-      prefix = "q";
-    } else if (type === ItemTypes.OPTION) {
-      prefix = "o";
-    } else {
-      prefix = "b";
-    }
-    return `${prefix}_${Math.floor((Math.random() * 99999) + 1)}`;
-  },
-  /**
    * Runs when the blockDropped action is called by the view.
    * Adds a new block to the end of the survey object.
    * @param targetID: targetId of the target on which the block is dropped.
@@ -152,6 +133,7 @@ var SurveyStore = Reflux.createStore({
    * the option group is dropped
    */
   onOptionGroupDropped(questionId) {
+    console.log(this.data.optionGroupState);
     var selectedID = this.data.optionGroupState.get('selectedID');
     var optionLabels = this.data.optionGroupState
         .getIn(['options', selectedID, 'optionLabels']);
@@ -160,13 +142,15 @@ var SurveyStore = Reflux.createStore({
   /**
    * Runs when the questionDropped action is called by the view.
    * Adds a question to the block whose id is provided as param
-   * @param questionObj A POJO containing data the for the new question.
+   * @param questionObj A POJO containing data the for the new question. Defined in QuestionModal.js.
    * with the following keys - parentID, qtext, config
    */
   onQuestionDropped(questionObj) {
+    console.log('questionObj dropped:', questionObj);
     let survey = this.data.surveyData;
-    questionObj.id = this.getNewId(ItemTypes.QUESTION);
+    questionObj['id'] = SurveyMan._gensym('q');
     let question = new Question(questionObj);
+    console.log('new question');
     let block = survey.get_block_by_id(questionObj.parentID);
     try {
       let newSurvey = SurveyMan.add_question(question, block, survey, false);
@@ -308,6 +292,7 @@ var SurveyStore = Reflux.createStore({
    * @param toggleName The string name of property that is toggled.
    */
   onToggleParam(itemType, itemId, toggleName) {
+    console.log('SurveyStore.onToggleParam');
     var survey = this.data.surveyData;
 
     if (itemType === ItemTypes.BLOCK) {
@@ -353,7 +338,7 @@ var SurveyStore = Reflux.createStore({
    * @param question - type of Immutable.Map. The question to be cloned
    */
   cloneQuestion(question) {
-    return SurveyMan.copy_question(question);
+    return SurveyMan.copy_question(question, true);
   },
   /**
    * Returns a clone of Block passed as a parameter.
@@ -376,7 +361,7 @@ var SurveyStore = Reflux.createStore({
     if (itemType === ItemTypes.BLOCK) {
       let oldBlock = survey.get_block_by_id(itemId);
       let newBlock = SurveyMan.copy_block(oldBlock);
-      newBlock.id = this.getNewId(ItemTypes.BLOCK);
+      //newBlock.id = this.getNewId(ItemTypes.BLOCK);
       let newSurvey = SurveyMan.add_block(survey, newBlock, newBlock.parent, false);
       this.updateSurveyData(newSurvey, false);
 
@@ -387,8 +372,7 @@ var SurveyStore = Reflux.createStore({
 
     else if (itemType === ItemTypes.QUESTION) {
       let oldQuestion = survey.get_question_by_id(itemId);
-      let newQuestion = SurveyMan.copy_question(oldQuestion);
-      newQuestion.id = this.getNewId(ItemTypes.QUESTION);
+      let newQuestion = SurveyMan.copy_question(oldQuestion, true);
       let newSurvey = SurveyMan.add_question(newQuestion, oldQuestion.block, survey, false);
       // update and cache
       this.updateSurveyData(newSurvey, false);
@@ -447,7 +431,11 @@ var SurveyStore = Reflux.createStore({
     var oldQuestion = survey.get_question_by_id(questionId);
     var newQuestion = SurveyMan.copy_question(oldQuestion);
     newQuestion.qtext = text;
-    let newSurvey = SurveyMan.replace_question(newQuestion);
+    let newSurvey = SurveyMan.add_question(
+        newQuestion,
+        oldQuestion.block,
+        SurveyMan.remove_question(oldQuestion, survey, false),
+        false);
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -457,11 +445,15 @@ var SurveyStore = Reflux.createStore({
    */
   onSaveFreeText(text, questionId) {
     var survey = this.data.surveyData;
-    let newSurvey = SurveyMan.copy_survey(survey);
-    var newQuestion = SurveyMan.copy_question(survey.get_question_by_id(questionId));
+    var oldQuestion = survey.get_question_by_id(questionId);
+    var newQuestion = SurveyMan.copy_question(oldQuestion);
     // TODO(etosch): test whether this sets default and regex correctly.
     newQuestion.setFreetext(text);
-    newSurvey.replace_question(newQuestion);
+    let newSurvey = SurveyMan.add_question(
+      newQuestion,
+      oldQuestion.block,
+      SurveyMan.remove_question(oldQuestion, survey, false),
+      false);
     this.updateSurveyData(newSurvey, true);
   },
   /**
@@ -489,16 +481,18 @@ var SurveyStore = Reflux.createStore({
     this.trigger(this.data);
   },
   /**
-   * @param options - array of options
+   * @param option_list - array of options
    */
-  onAddOptionGroup(options) {
-    var { optionGroupState } = this.data;
-    var newId = optionGroupState.get('options').count();
-    this.data.optionGroupState = optionGroupState
-        .set('selectedID', newId)
-        .updateIn(['options'], list => list.push(
-            Immutable.Map({id: newId, optionLabels: options})
-        ));
+  onAddOptionGroup(...option_list) {
+    for (let options of option_list) {
+      var { optionGroupState } = this.data;
+      var newId = optionGroupState.get('options').count();
+      this.data.optionGroupState = optionGroupState
+          .set('selectedID', newId)
+          .updateIn(['options'], list => list.push( //eslint-disable-line no-func-loop
+              Immutable.Map({id: newId, optionLabels: options})
+          ));
+    }
     this.trigger(this.data);
   },
   onMoveQuestion(questionID, blockID) {
