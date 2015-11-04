@@ -1,5 +1,4 @@
 var Reflux = require('reflux');
-var initialData = require('../data.js');
 var SurveyActions = require('../actions/SurveyActions');
 var ItemTypes = require('../components/ItemTypes');
 var Immutable = require('immutable');
@@ -54,8 +53,7 @@ var SurveyStore = Reflux.createStore({
       // read the saved survey data
       this.data.savedSurveys = Lockr.get(LOCALSTORAGE_KEY) || [];
       // load up survey data
-      console.assert(initialData !== undefined);
-      var data = new Survey(initialData);
+      var data = SurveyMan.new_survey();
       this.updateSurveyData(data, true);
     });
   },
@@ -148,7 +146,7 @@ var SurveyStore = Reflux.createStore({
   onQuestionDropped(questionObj) {
     console.log('questionObj dropped:', questionObj);
     let survey = this.data.surveyData;
-    questionObj['id'] = SurveyMan._gensym('q');
+    questionObj.id = SurveyMan._gensym('q');
     let question = new Question(questionObj);
     console.log('new question');
     let block = survey.get_block_by_id(questionObj.parentID);
@@ -216,8 +214,7 @@ var SurveyStore = Reflux.createStore({
    * to start afresh.
    */
   onClearSurvey() {
-    console.assert(initialData !== undefined);
-    var data = new Survey(initialData);
+    var data = SurveyMan.new_survey();
     this.updateSurveyData(data, true);
     SurveyActions.showAlert("New survey created", AlertTypes.SUCCESS);
 
@@ -489,25 +486,22 @@ var SurveyStore = Reflux.createStore({
       var newId = optionGroupState.get('options').count();
       this.data.optionGroupState = optionGroupState
           .set('selectedID', newId)
-          .updateIn(['options'], list => list.push( //eslint-disable-line no-func-loop
+          .updateIn(['options'], list => list.push( //eslint-disable-line no-loop-func
               Immutable.Map({id: newId, optionLabels: options})
           ));
     }
     this.trigger(this.data);
   },
   onMoveQuestion(questionID, blockID) {
-    console.log('SurveyStore.onMoveQuestion');
+    console.log('SurveyStore.onMoveQuestion: ', questionID, blockID);
     let survey = this.data.surveyData;
     let question = survey.get_question_by_id(questionID);
-    let block = question.block;
-    // if the question is dropped in the same block then do nothing
-    if (block.id === blockID) {
-      return;
-    }
+    var targetBlock = survey.get_block_by_id(blockID, false);
+    if (!targetBlock) return;
     // update and cache
     let newSurvey = SurveyMan.add_question(
         question,
-        block,
+        targetBlock,
         SurveyMan.remove_question(question, survey, false),
         false);
     this.updateSurveyData(newSurvey, true);
@@ -516,8 +510,9 @@ var SurveyStore = Reflux.createStore({
   onMoveBlock(draggedBlockId, onBlockId) {
     console.log('SurveyStore.onMoveBlock');
     let survey = this.data.surveyData;
-    let draggedBlock = survey.get_block_by_id(draggedBlockId);
-    let onBlock = survey.get_block_by_id(onBlockId);
+    let draggedBlock = survey.get_block_by_id(draggedBlockId, false);
+    let onBlock = survey.get_block_by_id(onBlockId, false);
+    if (!draggedBlock || !onBlock) return;
     let newSurvey = SurveyMan.add_block(
         SurveyMan.remove_block(draggedBlock, survey, false),
         draggedBlock,

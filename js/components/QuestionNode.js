@@ -49,7 +49,8 @@ var QuestionNode = React.createClass({
         id: React.PropTypes.string.isRequired,
         handleDrop: React.PropTypes.func.isRequired,
         handleClick: React.PropTypes.func.isRequired,
-        moveQuestion: React.PropTypes.func.isRequired
+        moveQuestion: React.PropTypes.func.isRequired,
+        question: React.PropTypes.object.isRequired
     },
     getInitialState() {
         return {

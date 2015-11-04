@@ -2,11 +2,8 @@ var React = require('react');
 var BlockNode = require('./BlockNode');
 var QuestionNode = require('./QuestionNode');
 var SurveyActions = require('../actions/SurveyActions');
-var ItemTypes = require('./ItemTypes');
-var SurveyStore = require('../stores/SurveyStore');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
-var {Question, Block} = SurveyMan.survey;
 
 var TreeView = React.createClass({
   mixins: [PureRenderMixin],
@@ -30,49 +27,37 @@ var TreeView = React.createClass({
         <span><i className="ion-close"></i>{label}</span>;
   },
   ellipsize(text) {
-    console.log('TreeView.ellipsize', text);
     return text.substr(0, 20) + (text.length > 20 ? "..." : "");
   },
   focusOnItem(id) {
     SurveyActions.scrollToItem(id);
   },
   handleDrop(sourceObj, targetObj) {
-    console.log('TreeView.handleDrop doesn\'t do anything');
+    let sourceObjQ = sourceObj[0] === 'q';
+    let targetObjQ = targetObj[0] === 'q';
+    if (sourceObjQ) {
+      if (targetObjQ) {
+        SurveyActions.moveQuestion(sourceObj, this.state.survey.get_question_by_id(targetObj).block.id);
+      } else {
+        SurveyActions.moveQuestion(sourceObj, targetObj);
+      }
+    } else {
+      if (targetObj) {
+        SurveyActions.moveBlock(sourceObj, this.state.survey.get_question_by_id(targetObj).block.id);
+      } else {
+        SurveyActions.moveBlock(sourceObj, targetObj);
+      }
+    }
   },
   moveBlock(draggedBlockId, overBlockId) {
     console.log('TreeView.moveBlock');
     SurveyActions.moveBlock(draggedBlockId, overBlockId);
-    // TODO: explicitly allow indices to be reordered.
-    //let survey = this.state.survey;
-    //let draggedBlock = survey.get_block_by_id(draggedBlockId);
-    //let overBlock = survey.get_block_by_id(overBlockId);
-    //let newSurvey = SurveyMan.add_block(
-    //    SurveyMan.remove_block(draggedBlock, survey, false),
-    //    draggedBlock,
-    //    overBlock,
-    //    false);
-    //this.setState({
-    //  survey: newSurvey,
-    //  finalIndex: -1 // get rid of this?
-    //});
   },
   moveQuestion(draggedQuestionId, overBlockId) {
     // questions cannot be reordered within blocks because they
     // are not truly ordered to begin with.
     console.log('TreeView.moveQuestion');
     SurveyActions.moveQuestion(draggedQuestionId, overBlockId);
-    //let survey = this.state.survey;
-    //let draggedQuestion = survey.get_question_by_id(draggedQuestionId);
-    //let overBlock = survey.get_block_by_id(overBlockId);
-    //let newSurvey = SurveyMan.add_question(
-    //    draggedQuestion,
-    //    overBlock,
-    //    SurveyMan.remove_question(draggedQuestion, survey, false),
-    //    false);
-    //this.setState({
-    //  survey: newSurvey,
-    //  finalIndex: -1 // get rid of this?
-    //});
   },
   renderSubblocks(block) {
     var subblocks = block.subblocks;
@@ -84,22 +69,22 @@ var TreeView = React.createClass({
                        handleClick={self.focusOnItem.bind(this, subb.id)}
                        handleDrop={self.handleDrop}
                        moveBlock={self.moveBlock} >
+              {subb.topLevelQuestions.map(ques =>
+                    <QuestionNode id={ques.id}
+                                  key={ques.id}
+                                  question={ques}
+                                  label={self.ellipsize(ques.qtext)}
+                                  handleClick={self.focusOnItem.bind(this, ques.id)}
+                                  handleDrop={self.handleDrop}
+                                  moveQuestion={self.moveQuestion}>
+                      <div className="tree-view_node">{"Options: " + ques.options.length}</div>
+                      <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
+                      <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
+                      <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
+                    </QuestionNode>
+              )}
                {self.renderSubblocks(subb)}
 
-              {subb.topLevelQuestions.map(ques =>
-                      <QuestionNode id={ques.id}
-                                    key={ques.id}
-                                    question={ques}
-                                    label={self.ellipsize(ques.qtext)}
-                                    handleClick={self.focusOnItem.bind(this, ques.id)}
-                                    handleDrop={self.handleDrop}
-                                    moveQuestion={self.moveQuestion}>
-                        <div className="tree-view_node">{"Options: " + ques.options.length}</div>
-                        <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
-                        <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
-                        <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
-                      </QuestionNode>
-              )}
             </BlockNode>
     );
   },
@@ -108,30 +93,30 @@ var TreeView = React.createClass({
     var self = this;
 
     // build the tree
-    var tree = survey.topLevelBlocks.map((block) => {
+    var tree = survey.topLevelBlocks.map(block => {
       var questions = block.topLevelQuestions;
       return (
           <BlockNode key={block.id}
                      id={block.id}
+                     block={block}
                      handleClick={self.focusOnItem.bind(this, block.id)}
                      handleDrop={self.handleDrop}
                      moveBlock={self.moveBlock}>
-
-            {self.renderSubblocks(block)}
-
-            {questions.map(ques => {console.log(ques);
+            {questions.map(ques =>
                 <QuestionNode id={ques.id}
-                              key={ques.id}
-                              label={self.ellipsize(ques.qtext)}
-                              handleClick={self.focusOnItem.bind(this, ques.id)}
-                              handleDrop={self.handleDrop}
-                              moveQuestion={self.moveQuestion}>
-                  <div className="tree-view_node">{"Options: " + ques.options.length}</div>
-                  <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
-                  <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
-                  <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
-                </QuestionNode> }
+                            key={ques.id}
+                            question={ques}
+                            label={self.ellipsize(ques.qtext)}
+                            handleClick={self.focusOnItem.bind(this, ques.id)}
+                            handleDrop={self.handleDrop}
+                            moveQuestion={self.moveQuestion}>
+                <div className="tree-view_node">{"Options: " + ques.options.length}</div>
+                <div className="tree-view_node">{self.renderProp('ordered', ques.ordered)}</div>
+                <div className="tree-view_node">{self.renderProp('exclusive', ques.exclusive)}</div>
+                <div className="tree-view_node">{self.renderProp('freetext', ques.freetext)}</div>
+              </QuestionNode>
             )}
+            {self.renderSubblocks(block)}
           </BlockNode>
       );
     });

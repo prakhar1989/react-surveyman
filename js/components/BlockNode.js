@@ -4,6 +4,8 @@ var { DragSource, DropTarget } = require('react-dnd');
 var ItemTypes = require('./ItemTypes');
 var flow = require('lodash/function/flow');
 var PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+var SurveyMan = require('../sub/surveyman.js/SurveyMan/surveyman');
+var {Block} = SurveyMan.survey;
 
 /* setup for dragging block node */
 var nodeSource = {
@@ -65,7 +67,8 @@ var BlockNode = React.createClass({
     defaultCollapsed: React.PropTypes.bool,
     id: React.PropTypes.string.isRequired,
     handleClick: React.PropTypes.func.isRequired,
-    moveBlock: React.PropTypes.func
+    moveBlock: React.PropTypes.func,
+    block: React.PropTypes.object.isRequired
   },
   getInitialState() {
     return {
