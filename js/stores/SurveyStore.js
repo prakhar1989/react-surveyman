@@ -289,61 +289,37 @@ var SurveyStore = Reflux.createStore({
    * @param toggleName The string name of property that is toggled.
    */
   onToggleParam(itemType, itemId, toggleName) {
-    console.log('SurveyStore.onToggleParam');
+    console.log('SurveyStore.onToggleParam', itemType, itemId, toggleName);
     var survey = this.data.surveyData;
 
     if (itemType === ItemTypes.BLOCK) {
-      let oldBlock = survey.get_block_by_id(itemId);
-      let newBlock = SurveyMan.copy_block(oldBlock);
-      console.log(toggleName);
+      let block = survey.get_block_by_id(itemId);
       switch (toggleName) {
-        case 'randomizable':
-          newBlock.randomizable = !newBlock.randomizable;
+        case 'randomize':
+          block.randomizable = !block.randomizable;
       }
-      let newSurvey = SurveyMan.remove_block(oldBlock, survey, false);
-      newSurvey.add_block(survey, newBlock);
-     this.updateSurveyData(newSurvey);
     }
 
     // handle the case when a param on a question is toggled
     else if (itemType === ItemTypes.QUESTION) {
-      let oldQuestion = survey.get_question_by_id(itemId);
-      let block = oldQuestion.block;
-      let newQuestion = SurveyMan.copy_question(oldQuestion);
+      let question = survey.get_question_by_id(itemId);
       switch(toggleName) {
         case 'exclusive':
-          newQuestion.exclusive = !newQuestion.exclusive;
+          question.exclusive = !question.exclusive;
           break;
         case 'ordered':
-          newQuestion.ordered = !newQuestion.ordered;
+          question.ordered = !question.ordered;
           break;
         case 'freetext':
-          newQuestion.freetext = !newQuestion.freetext;
+            if (question.options.length > 0) {
+              SurveyActions.showAlert("Must delete options before converting this question to freetext.", AlertTypes.WARNING);
+            } else {
+              question.freetext = !question.freetext;
+            }
           break;
       }
-      let newSurvey = SurveyMan.remove_question(oldQuestion, survey, false);
-      SurveyMan.add_question(newQuestion, block, newSurvey);
-      this.updateSurveyData(newSurvey);
     }
-    // throw exception
-    else {
-        throw new Error("Not a valid item type");
-    }
-  },
-  /**
-   * Returns a clone of Question passed as a parameter.
-   * @param question - type of Immutable.Map. The question to be cloned
-   */
-  cloneQuestion(question) {
-    return SurveyMan.copy_question(question, true);
-  },
-  /**
-   * Returns a clone of Block passed as a parameter.
-   * Updates _blockMap and _questionMap with the new subblocks and questions
-   * @param block - type of Immutable.Map. The block to be cloned.
-   */
-  cloneBlock(block) {
-    return SurveyMan.copy_block(block);
+    this.updateSurveyData(SurveyMan.copy_survey(survey));
   },
   /**
    * Method called when the itemCopy action is triggered.
@@ -353,16 +329,14 @@ var SurveyStore = Reflux.createStore({
    * @param itemId id of the item to be cloned
    */
   onItemCopy(itemType, itemId) {
+    console.log("SurveyStore.onItemCopy");
     var survey = this.data.surveyData;
 
     if (itemType === ItemTypes.BLOCK) {
       let oldBlock = survey.get_block_by_id(itemId);
-      let newBlock = SurveyMan.copy_block(oldBlock);
-      //newBlock.id = this.getNewId(ItemTypes.BLOCK);
-      let newSurvey = SurveyMan.add_block(survey, newBlock, newBlock.parent, false);
-      this.updateSurveyData(newSurvey, false);
-
-      // alert and focus
+      let newBlock = SurveyMan.copy_block(oldBlock, true);
+      let newSurvey = SurveyMan.add_block(survey, newBlock, oldBlock.parent, false);
+      this.updateSurveyData(newSurvey, true);
       SurveyActions.showAlert("Block copied.", AlertTypes.INFO);
       SurveyActions.scrollToItem(newBlock.id);
     }
@@ -372,7 +346,7 @@ var SurveyStore = Reflux.createStore({
       let newQuestion = SurveyMan.copy_question(oldQuestion, true);
       let newSurvey = SurveyMan.add_question(newQuestion, oldQuestion.block, survey, false);
       // update and cache
-      this.updateSurveyData(newSurvey, false);
+      this.updateSurveyData(newSurvey, true);
       // alert and focus
       SurveyActions.showAlert("Question copied.", AlertTypes.INFO);
       SurveyActions.scrollToItem(newQuestion.id);
@@ -402,7 +376,7 @@ var SurveyStore = Reflux.createStore({
       let question = survey.get_question_by_id(itemId);
       let newSurvey = SurveyMan.remove_question(question, survey, false);
       // update and cache
-      this.updateSurveyData(newSurvey);
+      this.updateSurveyData(newSurvey, true);
       SurveyActions.showAlert("Question deleted successfully.", AlertTypes.SUCCESS);
     }
 
