@@ -25,7 +25,7 @@ var questionTarget = {
     hover(props, monitor) {
         var draggedId = monitor.getItem().id;
         if (draggedId !== props.id) {
-            props.reorderQuestion(draggedId, props.id);
+            props.moveQuestion(draggedId, props.id);
         }
     },
     // called when the hover ends - used to propagate changes upstream
@@ -49,7 +49,8 @@ var QuestionNode = React.createClass({
         id: React.PropTypes.string.isRequired,
         handleDrop: React.PropTypes.func.isRequired,
         handleClick: React.PropTypes.func.isRequired,
-        reorderQuestion: React.PropTypes.func.isRequired
+        moveQuestion: React.PropTypes.func.isRequired,
+        question: React.PropTypes.object.isRequired
     },
     getInitialState() {
         return {

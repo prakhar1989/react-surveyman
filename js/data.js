@@ -1,7 +1,7 @@
 /* Test data to work with */
 var data = [
     {
-        id: "b_10101",
+        id: "1",
         randomize: true,
         questions: [],
         subblocks: []
