@@ -17,7 +17,9 @@ Currently, it uses
 ### Build and Run
 In order to start the project locally - 
 ```
+$ git clone --recursive http://github.com/prakhar1989/react-surveyman
 $ npm install 
+$ cd js/sub/surveyman.js && npm install && cd ../../../
 $ npm run start 
 # open localhost:8090 in your browser
 ```
